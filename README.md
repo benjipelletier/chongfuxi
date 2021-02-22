@@ -1,4 +1,5 @@
-# fuxi
+# 重复习: chongfuxi
+A SRS-powered Chinese vocab review site
 
 ## Project setup
 ```
