@@ -42,12 +42,17 @@ export default {
 .page {
   background-color: hsl(0, 0%, 95%);
   height: 100%;
-  min-height: 100%;
-  height: auto !important;
+  padding-top: 5rem;
+  padding-bottom: 3rem;
 }
 
 body {
   background-color: #f3f3f3 !important;
+  min-height:100%
+}
+
+html {
+  height: 100%;
 }
 
 </style>

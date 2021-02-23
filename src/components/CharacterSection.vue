@@ -2,19 +2,24 @@
 <div class="rounded">
     <div class="section-header">
         <div class="header-title">
-            <h3 class="title">{{charSet.name}}</h3>
+            <h3 class="title">{{charData.name}}</h3>
         </div>
         <b-progress class="progress mt-2" :max="max" >
             <b-progress-bar class="progress-part" :style="get_lvl_style(4)" :value="get_lvl_count(4)"></b-progress-bar>
-            <b-progress-bar class="progress-part" :style="get_lvl_style(3)" :value="get_lvl_count(3)"></b-progress-bar>
-            <b-progress-bar class="progress-part" :style="get_lvl_style(2)" :value="get_lvl_count(2)"></b-progress-bar>
-            <b-progress-bar class="progress-part" :style="get_lvl_style(1)" :value="get_lvl_count(1)"></b-progress-bar>
-            <b-progress-bar class="progress-part" :style="get_lvl_style(0)" :value="get_lvl_count(0)"></b-progress-bar>
+            <b-progress-bar class="progress-part" striped :style="get_lvl_style(3)" :value="get_lvl_count(3)"></b-progress-bar>
+            <b-progress-bar class="progress-part"  :style="get_lvl_style(2)" :value="get_lvl_count(2)"></b-progress-bar>
+            <b-progress-bar class="progress-part" striped :style="get_lvl_style(1)" :value="get_lvl_count(1)"></b-progress-bar>
+            <b-progress-bar class="progress-part"   :style="get_lvl_style(0)" :value="get_lvl_count(0)"></b-progress-bar>
         </b-progress>
     </div>
     <div class="character-grid">
-            <CharacterCard class="item" v-for="char in charSet.chars" :key="char" v-bind:char="char"/>
-        </div>
+        <CharacterCard 
+            class="item" 
+            v-for="char in charData.chars" 
+            :key="char" 
+            v-bind:char="char"
+            v-bind:hue="charData.color_hue" />
+    </div>
 </div>
 </template>
 
@@ -26,20 +31,23 @@ export default {
         CharacterCard,
     },
     props: [
-        'charSet'
+        'charData'
     ],
     computed: {
         max() {
-            return this.charSet.chars.length;
+            return this.charData.chars.length;
         },
+        get_bg_color() {
+            return `background-color: hsl(${this.charData.color_hue}, 100%, 50%);`
+        }
     },
     methods: {
         get_lvl_count(lvl) {
-            return this.charSet.chars.filter(x => x.lvl == lvl).length;
+            return this.charData.chars.filter(x => x.lvl == lvl).length;
         },
         get_lvl_style(lvl) {
             if (lvl == 0) return 'background-color: white';
-            let hue = 45;
+            let hue = this.charData.color_hue;
             let sat = 100;
             let light = 100 - lvl * 10;
             return `background-color: hsl(${hue}, ${sat}%, ${light}%)`
@@ -53,6 +61,7 @@ export default {
 .section-header {
     height: 3rem;
 }
+
 .header-title {
     position: absolute;
     height: 3rem;
