@@ -1,88 +1,124 @@
 <template>
 <div class="rounded">
     <div class="section-header">
-        <div class="header-title">
-            <h3 class="title">{{charData.name}}</h3>
+        <div class="header-title" @click="visible = !visible">
+            <h3 class="title">{{section.title}}</h3>
+            <div class="header-right">
+                <b-button v-on:click.stop="reviewSection" class="review-button" variant="info"><b-icon icon="archive"></b-icon><b-icon icon="clock"></b-icon></b-button>
+            </div>
         </div>
-        <b-progress class="progress mt-2" :max="max" >
-            <b-progress-bar class="progress-part" :style="get_lvl_style(4)" :value="get_lvl_count(4)"></b-progress-bar>
-            <b-progress-bar class="progress-part" striped :style="get_lvl_style(3)" :value="get_lvl_count(3)"></b-progress-bar>
-            <b-progress-bar class="progress-part"  :style="get_lvl_style(2)" :value="get_lvl_count(2)"></b-progress-bar>
-            <b-progress-bar class="progress-part" striped :style="get_lvl_style(1)" :value="get_lvl_count(1)"></b-progress-bar>
-            <b-progress-bar class="progress-part"   :style="get_lvl_style(0)" :value="get_lvl_count(0)"></b-progress-bar>
+        <b-progress class="progress mt-2" :max="max" :class="{noBottomBorderRadius: visible}">
+            <b-progress-bar class="progress-part" :style="getLvlStyle(4)" :value="getLvlCount"></b-progress-bar>
+            <b-progress-bar class="progress-part" :style="getLvlStyle(3)" :value="getLvlCount"></b-progress-bar>
+            <b-progress-bar class="progress-part" :style="getLvlStyle(2)" :value="getLvlCount"></b-progress-bar>
+            <b-progress-bar class="progress-part" :style="getLvlStyle(1)" :value="getLvlCount"></b-progress-bar>
+            <b-progress-bar class="progress-part" :style="getLvlStyle(0)" :value="getLvlCount"></b-progress-bar>
         </b-progress>
     </div>
-    <div class="character-grid">
-        <CharacterCard 
-            class="item" 
-            v-for="char in charData.chars" 
-            :key="char" 
-            v-bind:char="char"
-            v-bind:hue="charData.color_hue" />
+    <b-collapse id="section-collapse" v-model="visible">
+        <div class="character-grid">
+            <CharacterCard 
+                class="item" 
+                v-for="char in section.characters" 
+              :key="getCharId(char)" 
+            v-bind:character="char"
+            v-bind:charData="getCharData(char)"
+            v-bind:color="section.color" />
     </div>
+    </b-collapse>
 </div>
 </template>
 
 <script>
 import CharacterCard from '@/components/CharacterCard'
+import { mapGetters } from 'vuex'
+import { StyleCalc } from '@/util/helpers.js'
+
 export default {
     name: "CharacterSection",
     components: {
         CharacterCard,
     },
-    props: [
-        'charData'
-    ],
-    computed: {
-        max() {
-            return this.charData.chars.length;
-        },
-        get_bg_color() {
-            return `background-color: hsl(${this.charData.color_hue}, 100%, 50%);`
+    data() {
+        return {
+            visible: true
         }
     },
-    methods: {
-        get_lvl_count(lvl) {
-            return this.charData.chars.filter(x => x.lvl == lvl).length;
+    props: [
+        'section',
+    ],
+    computed: {
+        max() { return this.section.characters.length; },
+        getLvlCount() {
+            return this.section.characters.length/5;
         },
-        get_lvl_style(lvl) {
-            if (lvl == 0) return 'background-color: white';
-            let hue = this.charData.color_hue;
-            let sat = 100;
-            let light = 100 - lvl * 10;
-            return `background-color: hsl(${hue}, ${sat}%, ${light}%)`
-        }
-    }
-
+        ...mapGetters(['getCharData'])
+    },
+    methods: {
+        getLvlStyle(lvl) {
+            return StyleCalc.cardBgColor(this.section.color, lvl);
+        },
+        getCharId(char) {
+            return `${this.section.title}-${char}`
+        },
+        reviewSection() {
+        },
+    },
 }
 </script>
 
 <style scoped>
 .section-header {
     height: 3rem;
+    color: white;
+    position: relative;
 }
 
 .header-title {
     position: absolute;
+    left: 0;
+    right: 0;
     height: 3rem;
     display: flex;
     padding-left: 0.5rem;
+    justify-content: space-between;
+    cursor: pointer;
 }
+
 .title {
     font-weight: 900;
-    margin: auto;
+    margin: auto 0;
 }
+
+.header-right {
+    width: 7rem;
+    margin: auto 0;
+    padding: 0.5rem;
+}
+
+.review-button {
+    width: 100%;
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.collapse-button:focus {
+    border: none;
+    outline: none;
+    background-color: rgba(255,255,255,0);
+}
+
 .progress {
     /* border: 1px solid #ced4da; */
     height: 100%;
     margin: 0 !important;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-    box-shadow: 0 0.1rem 0 rgb(212, 212, 212);
+    transition: border-bottom-left-radius, border-bottom-right-radius;
+    transition-duration: 0.3s;
 }
 
-.progress-part {
-    /* box-shadow: 0.1rem 0 4px rgba(0, 0, 0, 0.2) inset; */
+.noBottomBorderRadius {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
 .character-grid {

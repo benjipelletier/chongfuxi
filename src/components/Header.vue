@@ -16,13 +16,11 @@ export default {
 
 <style scoped>
 .title-container {
-    margin-top: 0;
-    margin-bottom: 0;
+    margin: auto;
 }
 .nav-container {
-    background-color: rgba(255, 255, 255, 0.6);
+    background-color: rgba(255, 255, 255, 0.3);
     backdrop-filter: blur(5px);
-    box-shadow: 0 1px 0 rgb(212, 212, 212);
     display: flex;
     align-items: center;
     justify-content: center;

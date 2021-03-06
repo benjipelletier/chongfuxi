@@ -1,12 +1,29 @@
 <template>
     <div class="page section">
-        <div class="bg" :class="{'correct-answer': answer_correct, 'incorrect-answer': answer_incorrect}">
-            <div class="char-card"> 
-                <span :style="get_text_size">{{currentText}}</span>
+        <div>
+            <div class="char-list-container">
+                <div class="rounded display-card-wrapper" 
+                    v-for="(char, i) in characters" 
+                    :key="i">
+                    <div class="display-card rounded" 
+                        :class="{'current-display-card': i == currentIndex,
+                                 'disabled-display-card': i != currentIndex}">
+                        {{char}} 
+                    </div>
+                </div>
             </div>
-                <form @submit="onSubmit" class="input-container">
-                    <input v-model="input_text" class="input" placeholder="pinyin" spellcheck="false">
-                </form>
+        </div>
+        <transition-group tag="div" class="cards-wrapper" name="slide">
+            <div class="card-background" v-for="i in [currentIndex]" :key="i">
+                    <div class="char-card" :class="{'correct-answer': answerCorrect, 'incorrect-answer': answerIncorrect}">
+                        <span :style="get_text_size">{{characters[i]}}</span>
+                    </div>
+                    <form @submit="onSubmit" class="input-container">
+                        <input ref="input" v-model="inputText" class="input" placeholder="pinyin" spellcheck="false">
+                    </form>
+            </div>
+        </transition-group>
+        <div>
         </div>
     </div>
 </template>
@@ -15,12 +32,16 @@
 <script>
 export default {
     name: "Review",
+    props: [
+    ],
     data() {
         return {
             currentText: "但是",
-            input_text: "",
-            answer_correct: false,
-            answer_incorrect: false,
+            inputText: "",
+            answerCorrect: false,
+            answerIncorrect: false,
+            characters: ["你", "好", "吗", "你", "好", "吗", "你", "好", "吗", "你", "好", "吗", "你", "好", "吗"],
+            currentIndex: 0
         }
     },
     computed: {
@@ -37,24 +58,100 @@ export default {
     methods: {
         onSubmit(e) {
             e.preventDefault();
-            this.answer_correct = Math.floor(Math.random() * 2) === 1 ? true : false;
-            this.answer_incorrect = !this.answer_correct;
-            console.log(this.input_text)
+            if (this.inputText.trim() == "") return;
+            this.answerCorrect = Math.floor(Math.random() * 2) === 1 ? true : false;
+            this.answerIncorrect = !this.answerCorrect;
+            this.currentIndex++;
+            this.inputText = "";
+            this.$nextTick(() => this.$refs.input[0].focus())
         }
+    },
+    mounted() {
+        this.$refs.input[0].focus()
     }
 }
 </script>
 
 <style scoped>
-.bg {background-color: hsl(45, 100%, 50%); 
+
+.section {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    background-color: #4158D0;
+    background-image: linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%);
+}
+
+.section > div {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.char-list-container {
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0px 3px 0 rgb(0, 0, 0, 0.1);
+}
+
+.display-card-wrapper {
+    position: relative; 
+    margin: 0.5rem;
+    width: 50px;
+    height: 60px;
+}
+
+.display-card {
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.8rem;
+    font-weight: 500;
+    /* box-shadow: 2px 2px 0 rgb(204 197 185 / 50%); */
+    color: rgb(0,0,0,0.2);
+    background-color: rgb(0,0,0,0.1);
+    transition: all 0.2s;
+    position: absolute;
+    bottom: 0;
+}
+
+
+.current-display-card, .display-card:hover {
+    /* position: absolute; */
+    /* background-color: red; */
+    background-color: white;
+    color: black;
+    bottom: 5px;
+    box-shadow: 0 0px 0 5px rgb(0,0,0,0.2);
+}
+
+.cards-wrapper {
+    position: relative;
+    overflow: hidden;
+    height: 70%;
+}
+
+.behind {
+    position: absolute;
+}
+
+.card-background {
+    background-color: rgb(0,0,0,0.2);
     height: 500px;
     width: 400px;
     display: flex;
     align-items: center;
     flex-direction: column;
     border-radius: 2rem;
-    box-shadow: 0 2px 2px rgb(204 197 185 / 50%);
+    box-shadow: inset 0 -5px 0 rgb(0,0,0,0.2);
+    position: absolute;
 }
+
 .char-card {
     background-color: white;
     border-radius: 2rem;
@@ -67,36 +164,29 @@ export default {
     justify-content: center;
     align-items: center;
     font-weight: 500;
-    box-shadow: 0 5px 0 rgb(184, 184, 184);
-}
-
-
-@keyframes shake {
-  10%, 90% {
-    transform: translate3d(-1px, 0, 0);
-  }
-  20%, 80% {
-    transform: translate3d(2px, 0, 0);
-  }
-  30%, 50%, 70% {
-    transform: translate3d(-4px, 0, 0);
-  }
-  40%, 60% {
-    transform: translate3d(4px, 0, 0);
-  }
-}
-
-
-.correct-answer {
-    background-color: hsl(100, 80%, 50%);
+    box-shadow: inset 0 -5px 0 rgb(0,0,0,0.2);
     transition: 0.2s background-color;
 }
+
+.slide-leave-active,
+.slide-enter-active {
+  transition: all 0.3s ease;
+}
+
+.slide-enter-active {
+    transition-delay: 0.1s;
+}
+
+.slide-enter {
+    opacity: 0;
+}
+.slide-leave-to {
+    opacity: 0;
+}
+
 
 .incorrect-answer {
-    background-color: hsl(0, 80%, 50%);
-    transition: 0.2s background-color;
-    animation: shake 0.7s cubic-bezier(.36,.07,.19,.97) both;
-    transform: translate3d(0, 0, 0);
+    background-color: rgba(255, 0, 0 0.4);
 }
 .form {
     margin: 0;
@@ -118,8 +208,8 @@ export default {
     background-color: transparent; 
     border: none;
     text-align: center;
-    text-shadow: 0 2px 0 rgb(184, 184, 184);
-    border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+    text-shadow: 0 2px 0 rgba(0,0,0,0.2);
+    border-bottom: 2px solid rgba(0, 0, 0, 0.3);
     transition: 0.2s border-bottom;
     padding: 10px;
     box-sizing: border-box;
@@ -137,14 +227,13 @@ export default {
 }
 
 input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(0,0,0,0.3);
   text-shadow: none;
 }
 
 .page {
     height: 100vh;
 }
-
 
 .section {
     display: flex;

@@ -1,25 +1,24 @@
 <template>
-   <div class="char-container rounded" :style="card_bg_style"> 
-        <span class="char" > {{char.char}} </span>
+   <div class="char-container rounded" :style="getCardBgColor"> 
+        <span class="char" :style="getCharTextColor"> {{character}} </span>
     </div> 
 </template>
 
 <script>
+import { StyleCalc } from '@/util/helpers.js'
+
 export default {
     name: "CharacterCard",
     props: [
-        'char',
-        'hue'
+        'character',
+        'charData',
+        'color',
     ],
     computed: {
-        card_bg_style() {
-            if (this.char.lvl == 0) return 'background-color: #f0f0f1; color: rgba(0, 0, 0, 0.5); text-shadow: none';
-            let hue = this.hue;
-            let sat = 100;
-            let light = 100 - this.char.lvl * 10;
-            return `background-color: hsl(${hue}, ${sat}%, ${light}%)`
-        }
-    }
+        getCardBgColor() { return StyleCalc.cardBgColor(this.color, this.charData?.review_level); },
+        getCharTextColor() { return StyleCalc.charTextColor(this.color, this.charData?.review_level); }
+
+    },
 }
 </script>
 
@@ -33,13 +32,10 @@ export default {
     justify-content: center;
     font-weight: 400;
     /* text-shadow: 0 0.04rem 0.04rem #333; */
-    box-shadow: 0 0.15rem 0 rgb(184, 184, 184);
+    box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 25%);
     padding: 0;
-    cursor: pointer;
-}
-
-
-.char {
+    cursor: pointer; 
+    /* text-shadow: 0 1px 0 rgba(0, 0, 0, 10%); */
 }
 
 </style>

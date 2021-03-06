@@ -1,8 +1,8 @@
 <template>
     <section class="page section">
       <div class="container">
-        <div class="character-section rounded" v-for="section in getAllVocab" :key="section.name">
-          <CharacterSection v-bind:charData="section" />
+        <div class="character-section rounded" v-for="section in getSections" :key="section.title">
+          <CharacterSection v-bind:section="section" />
         </div>
       </div>
     </section>
@@ -17,7 +17,7 @@ export default {
   components: {
     CharacterSection,
   },
-  computed: mapGetters(['getAllVocab'])
+  computed: mapGetters(['getSections']),
 }
 </script>
 
