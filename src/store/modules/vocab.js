@@ -26,12 +26,18 @@ const URL_BASE = 'http://localhost:3000'
 
 const state = {
     sections: {},
-    user: {}
+    user: {},
+    showVocab: true,
+    reviewSession: {
+        cards: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    },
 }
 
 const getters = {
     getSections: state => state.sections,
-    getCharData: state => (char) => state.user[char]
+    getCharData: state => (char) => state.user[char],
+    getShowVocab: state => state.showVocab,
+    getReviewSession: state => state.reviewSession
 }
 
 const actions = {
@@ -40,14 +46,22 @@ const actions = {
         commit('setSections', response.data);
     },
     async fetchUserData({ commit }) {
-        const response = await axios.get(URL_BASE + '/user');
-        commit('setUser', response.data);
+        const response = await axios.get(URL_BASE + '/user')
+        commit('setUser', response.data)
     },
+    setShowVocab({ commit }, showVocab) {
+        commit('setShowVocab', showVocab)
+    },
+    setReviewDeck({ commit }, newCards) {
+        commit('setReviewDeck', newCards)
+    }
 }
 
 const mutations = {
     setSections(state, sections) { state.sections = sections },
-    setUser(state, user) { state.user = user; },
+    setUser(state, user) { state.user = user },
+    setShowVocab(state, showVocab) { state.showVocab = showVocab},
+    setReviewDeck(state, cards) { state.reviewSession.cards = cards},
 }
 
 export default {

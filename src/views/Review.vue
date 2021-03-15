@@ -3,7 +3,7 @@
         <div>
             <div class="char-list-container">
                 <div class="rounded display-card-wrapper" 
-                    v-for="(char, i) in characters" 
+                    v-for="(char, i) in reviewSession.cards" 
                     :key="i">
                     <div class="display-card rounded" 
                         :class="{'current-display-card': i == currentIndex,
@@ -16,7 +16,7 @@
         <transition-group tag="div" class="cards-wrapper" name="slide">
             <div class="card-background" v-for="i in [currentIndex]" :key="i">
                     <div class="char-card" :class="{'correct-answer': answerCorrect, 'incorrect-answer': answerIncorrect}">
-                        <span :style="get_text_size">{{characters[i]}}</span>
+                        <span :style="get_text_size">{{reviewSession.cards[i]}}</span>
                     </div>
                     <form @submit="onSubmit" class="input-container">
                         <input ref="input" v-model="inputText" class="input" placeholder="pinyin" spellcheck="false">
@@ -30,13 +30,18 @@
 
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
     name: "Review",
     props: [
     ],
     data() {
         return {
-            currentText: "但是",
+            reviewSession: {
+                cards: []
+            },
+            currentText: "",
             inputText: "",
             answerCorrect: false,
             answerIncorrect: false,
@@ -54,6 +59,7 @@ export default {
 
             return `font-size: ${size}rem;`
         },
+        ...mapGetters(['getReviewSession'])
     },
     methods: {
         onSubmit(e) {
@@ -67,9 +73,12 @@ export default {
         }
     },
     mounted() {
+        this.reviewSession = this.getReviewSession;
+        console.log(this.reviewSession)
         this.$refs.input[0].focus()
-    }
+    },
 }
+
 </script>
 
 <style scoped>
@@ -91,6 +100,8 @@ export default {
 .char-list-container {
     padding: 0;
     display: flex;
+    overflow: scroll;
+    flex-wrap: wrap;
     justify-content: center;
     align-items: center;
     box-shadow: 0px 3px 0 rgb(0, 0, 0, 0.1);
@@ -148,7 +159,7 @@ export default {
     align-items: center;
     flex-direction: column;
     border-radius: 2rem;
-    box-shadow: inset 0 -5px 0 rgb(0,0,0,0.2);
+    box-shadow: var(--big-card-shadow-inset);
     position: absolute;
 }
 
@@ -164,7 +175,7 @@ export default {
     justify-content: center;
     align-items: center;
     font-weight: 500;
-    box-shadow: inset 0 -5px 0 rgb(0,0,0,0.2);
+    box-shadow: var(--big-card-shadow-inset);
     transition: 0.2s background-color;
 }
 
@@ -218,12 +229,10 @@ export default {
 
 .input:focus {
     outline: none;
-    border-bottom: 5px solid white;
 }
 
 .input:hover {
     outline: none;
-    border-bottom: 5px solid white;
 }
 
 input::placeholder {

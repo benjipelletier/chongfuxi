@@ -1,6 +1,6 @@
 let StyleCalc = {
     cardBgColor(color, lvl) {
-        if (lvl == 0) return 'background-color: rgba(0, 0, 0, 0.1)';
+        if (lvl == undefined || lvl == 0) return 'background-color: rgba(0, 0, 0, 0.1)';
         let hue = color[0];
         let sat = color[1];
         let light = color[2];
@@ -17,6 +17,10 @@ let StyleCalc = {
 
 }
 
+let CharacterCalc = {
+}
+
 export {
-    StyleCalc
+    StyleCalc,
+    CharacterCalc
 }

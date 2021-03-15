@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <Header />
+    <Header :showVocab="showVocab" v-on:switchVocabWords="switchVocabWords" />
     <router-view/>
   </div>
 </template>
@@ -12,8 +12,19 @@ import { mapActions } from 'vuex'
 export default {
   components: {
     Header
+  }, 
+  data() {
+    return {
+      showVocab: true
+    }
   },
-  methods: mapActions([ 'fetchSections', 'fetchUserData']),
+  methods: {
+    switchVocabWords() {
+      this.showVocab = !this.showVocab;
+      this.setShowVocab(this.showVocab);
+    },
+    ...mapActions([ 'fetchSections', 'fetchUserData', 'setShowVocab'])
+  },
   created() {
     this.fetchSections();
     this.fetchUserData();
@@ -22,6 +33,12 @@ export default {
 </script>
 
 <style>
+:root {
+  --main-shadow: 0 2px 0 rgba(0, 0, 0, 25%);
+  --main-shadow-inset: inset 0 -2px 0 rgba(0, 0, 0, 25%);
+  --big-card-shadow-inset: inset 0 -5px 0 rgb(0,0,0,0.2);
+}
+
 #app {
   font-family:  Roboto, "Helvetica Neue", Avenir, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;

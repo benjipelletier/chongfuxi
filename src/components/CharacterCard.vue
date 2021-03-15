@@ -1,5 +1,5 @@
 <template>
-   <div class="char-container rounded" :style="getCardBgColor"> 
+   <div class="char-container rounded" :class="getVocabClass" :style="getCardBgColor"> 
         <span class="char" :style="getCharTextColor"> {{character}} </span>
     </div> 
 </template>
@@ -13,10 +13,14 @@ export default {
         'character',
         'charData',
         'color',
+        'showVocab'
     ],
     computed: {
         getCardBgColor() { return StyleCalc.cardBgColor(this.color, this.charData?.review_level); },
-        getCharTextColor() { return StyleCalc.charTextColor(this.color, this.charData?.review_level); }
+        getCharTextColor() { return StyleCalc.charTextColor(this.color, this.charData?.review_level); },
+        getVocabClass() {
+            return (this.showVocab && this.character.length > 1) ? 'vocabCard' : '';
+        }
 
     },
 }
@@ -24,18 +28,27 @@ export default {
 
 <style scoped>
 .char-container {
-    width: 40px;
+    min-width: 40px;
     height: 40px;
     font-size: 20px;
     display: flex;
+    padding: 10px;
     align-items: center;
     justify-content: center;
+    flex-direction: row;
     font-weight: 400;
     /* text-shadow: 0 0.04rem 0.04rem #333; */
-    box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 25%);
-    padding: 0;
+    box-shadow: var(--main-shadow-inset);
     cursor: pointer; 
     /* text-shadow: 0 1px 0 rgba(0, 0, 0, 10%); */
+    /* grid-column: span 2; */
+    flex-grow: 1;
+}
+
+.vocabCard {
+    /* display: inline-block; */
+    /* width: 60px; */
+
 }
 
 </style>

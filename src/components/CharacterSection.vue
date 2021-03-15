@@ -18,14 +18,16 @@
     <b-collapse id="section-collapse" v-model="visible">
         <div class="character-grid">
             <CharacterCard 
-                class="item" 
-                v-for="char in section.characters" 
-              :key="getCharId(char)" 
-            v-bind:character="char"
-            v-bind:charData="getCharData(char)"
-            v-bind:color="section.color" />
+            class="item" 
+            v-for="(char, i) in (getShowVocab ? section.vocabulary : section.characters)" 
+            :key="i" 
+            :character="char"
+            :charData="getCharData(char)"
+            :showVocab="getShowVocab"
+            :color="section.color" />
     </div>
     </b-collapse>
+
 </div>
 </template>
 
@@ -41,29 +43,29 @@ export default {
     },
     data() {
         return {
-            visible: true
+            visible: true,
         }
     },
     props: [
         'section',
+        'sectionIndex'
     ],
     computed: {
         max() { return this.section.characters.length; },
         getLvlCount() {
             return this.section.characters.length/5;
         },
-        ...mapGetters(['getCharData'])
+        ...mapGetters(['getCharData', 'getShowVocab']),
     },
     methods: {
         getLvlStyle(lvl) {
             return StyleCalc.cardBgColor(this.section.color, lvl);
         },
-        getCharId(char) {
-            return `${this.section.title}-${char}`
-        },
         reviewSection() {
+            console.log()
+            this.$emit('review-section', this.sectionIndex)
         },
-    },
+    }
 }
 </script>
 
@@ -123,9 +125,16 @@ export default {
 
 .character-grid {
     padding: 0.5rem;
-    display: grid;
-    gap: 0.5rem 0.5rem;
-    grid-template-columns: repeat(auto-fill, minmax(39px, auto));
+    display: flex;
+    flex-wrap:wrap;
+    gap: 0.5rem;
+    /* gap: 0.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); */
+}
+
+.character-grid::after {
+  content: '';
+  flex-grow: 1000000000;
 }
 
 </style>
