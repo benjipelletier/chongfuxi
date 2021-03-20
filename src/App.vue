@@ -23,11 +23,11 @@ export default {
       this.showVocab = !this.showVocab;
       this.setShowVocab(this.showVocab);
     },
-    ...mapActions([ 'fetchSections', 'fetchUserData', 'setShowVocab'])
+    ...mapActions([ 'fetchSections', 'fetchProgress', 'setShowVocab'])
   },
   created() {
     this.fetchSections();
-    this.fetchUserData();
+    this.fetchProgress();
   }
 }
 </script>

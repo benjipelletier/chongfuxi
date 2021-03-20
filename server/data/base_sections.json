@@ -1,5 +1,6 @@
 [
   {
+    "id": "radicals",
     "title": "Radicals",
     "characters": [
       "人",
@@ -210,6 +211,7 @@
     ]
   },
   {
+    "id": "hsk_1",
     "title": "HSK 1",
     "characters": [
       "上",
@@ -546,6 +548,7 @@
     ]
   },
   {
+    "id": "hsk_2",
     "title": "HSK 2",
     "characters": [
       "两",
@@ -916,6 +919,7 @@
     ]
   },
   {
+    "id": "hsk_3",
     "title": "HSK 3",
     "characters": [
       "万",
@@ -1627,6 +1631,7 @@
     ]
   },
   {
+    "id": "hsk_4",
     "title": "HSK 4",
     "characters": [
       "使",
@@ -2691,6 +2696,7 @@
     ]
   },
   {
+    "id": "hsk_5",
     "title": "HSK 5",
     "characters": [
       "乖",
@@ -5210,6 +5216,7 @@
     ]
   },
   {
+    "id": "hsk_6",
     "title": "HSK 6",
     "characters": [
       "丁",

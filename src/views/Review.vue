@@ -1,6 +1,19 @@
 <template>
     <div class="page section">
         <div>
+            <!-- <swiper ref="mySwiper" class="char-list-container" :options="swiperOptions"
+                :allowTouchMove="false">
+                <swiper-slide class="swiper-slide"  v-for="(char, i) in reviewSession.cards" :key="i">
+                    <div class="rounded display-card-wrapper">
+                        <div class="display-card rounded" 
+                            :class="{'current-display-card': i == currentIndex,
+                                    'disabled-display-card': i != currentIndex}">
+                            {{char}} 
+                        </div>
+                    </div>
+                </swiper-slide>
+                <div class="swiper-pagination" slot="pagination"></div>
+            </swiper> -->
             <div class="char-list-container">
                 <div class="rounded display-card-wrapper" 
                     v-for="(char, i) in reviewSession.cards" 
@@ -34,10 +47,17 @@ import { mapGetters } from 'vuex'
 
 export default {
     name: "Review",
+    components: {
+    },
     props: [
     ],
     data() {
         return {
+            swiperOptions: {
+                slidesPerView: 10,
+                // centeredSlides: true,
+
+            },
             reviewSession: {
                 cards: []
             },
@@ -98,20 +118,27 @@ export default {
     justify-content: center;
 }
 .char-list-container {
+    width: 100%;
     padding: 0;
     display: flex;
-    overflow: scroll;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    box-shadow: 0px 3px 0 rgb(0, 0, 0, 0.1);
+    /* box-shadow: 0px 3px 0 rgb(0, 0, 0, 0.1); */
+}
+
+.swiper-slide {
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .display-card-wrapper {
     position: relative; 
-    margin: 0.5rem;
     width: 50px;
     height: 60px;
+    margin: 0.5rem;
 }
 
 .display-card {

@@ -5,39 +5,25 @@ import axios from 'axios'
 
 const URL_BASE = 'http://localhost:3000'
 
-// const genVocab = (lst) => lst.map(x => { 
-//     return { 
-//         char: x, 
-//         lvl: Math.floor(Math.random() * 5)
-//     }
-// })
-
-// let hsk1_flat = hsk1.reduce((x, y) => {
-//   let chars = y.split("");
-//   return [...x, ...chars];
-// }, [])
-
-// const sections_mod = sections.map(x => {
-//     return {
-//         settings: settings.sections[x.title],
-//         ...x, 
-//     };
-// })
-
 const state = {
     sections: {},
-    user: {},
+    progress: {},
     showVocab: true,
     reviewSession: {
         cards: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
     },
+    user: {
+        loggedIn: false,
+        data: null
+    }
 }
 
 const getters = {
     getSections: state => state.sections,
-    getCharData: state => (char) => state.user[char],
+    getCharData: state => (char) => state.progress[char],
     getShowVocab: state => state.showVocab,
-    getReviewSession: state => state.reviewSession
+    getReviewSession: state => state.reviewSession,
+    getUser: state => state.user
 }
 
 const actions = {
@@ -45,23 +31,36 @@ const actions = {
         const response = await axios.get(URL_BASE + '/sections');
         commit('setSections', response.data);
     },
-    async fetchUserData({ commit }) {
+    async fetchProgress({ commit }) {
         const response = await axios.get(URL_BASE + '/user')
-        commit('setUser', response.data)
+        commit('setProgress', response.data)
     },
-    setShowVocab({ commit }, showVocab) {
+    async setShowVocab({ commit }, showVocab) {
         commit('setShowVocab', showVocab)
     },
-    setReviewDeck({ commit }, newCards) {
+    async setReviewDeck({ commit }, newCards) {
         commit('setReviewDeck', newCards)
+    },
+    async fetchUser({ commit }, user) {
+        commit('setUserLoggedIn', user !== null)
+        if (user) {
+            commit('setUserData', {
+                displayName: user.displayName,
+                email: user.email
+            })
+        } else {
+            commit('setUserData', null)
+        }
     }
 }
 
 const mutations = {
     setSections(state, sections) { state.sections = sections },
-    setUser(state, user) { state.user = user },
     setShowVocab(state, showVocab) { state.showVocab = showVocab},
     setReviewDeck(state, cards) { state.reviewSession.cards = cards},
+    setProgress(state, data) { state.progress = data },
+    setUserLoggedIn(state, value) { state.user.loggedIn = value },
+    setUserData(state, data) { state.user.data = data }
 }
 
 export default {
