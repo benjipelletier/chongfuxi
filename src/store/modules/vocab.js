@@ -3,10 +3,10 @@
 
 import axios from 'axios'
 
-const URL_BASE = 'http://localhost:3000'
+const URL_BASE = 'http://localhost:5000'
 
 const state = {
-    sections: {},
+    sections: [],
     progress: {},
     showVocab: true,
     reviewSession: {
@@ -28,8 +28,14 @@ const getters = {
 
 const actions = {
     async fetchSections({ commit }) {
-        const response = await axios.get(URL_BASE + '/sections');
-        commit('setSections', response.data);
+        const response = await axios.get(URL_BASE + '/sections', {
+            params: {
+                user_id: 1
+            }
+        });
+        console.log("section " + JSON.stringify(response.data))
+        payload = response.data
+        commit('setSections', payload)
     },
     async fetchProgress({ commit }) {
         const response = await axios.get(URL_BASE + '/user')

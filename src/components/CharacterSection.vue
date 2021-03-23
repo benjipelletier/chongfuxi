@@ -16,7 +16,7 @@
         </b-progress>
     </div>
     <b-collapse id="section-collapse" v-model="visible">
-        <div class="character-grid">
+        <div :class="getShowVocab ? 'character-grid-flex' : 'character-grid'">
             <CharacterCard 
             class="item" 
             v-for="(char, i) in (getShowVocab ? section.vocabulary : section.characters)" 
@@ -125,6 +125,14 @@ export default {
 
 .character-grid {
     padding: 0.5rem;
+    display: grid;
+    flex-wrap:wrap;
+    gap: 0.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+}
+
+.character-grid-flex {
+    padding: 0.5rem;
     display: flex;
     flex-wrap:wrap;
     gap: 0.5rem;
@@ -132,7 +140,7 @@ export default {
     grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); */
 }
 
-.character-grid::after {
+.character-grid-flex::after {
   content: '';
   flex-grow: 1000000000;
 }

@@ -2,13 +2,21 @@
   <b-navbar class="nav" fixed="top">
     <div class="nav-container">
         <div class="left">
-            <b-button class="button" @click="$emit('switchVocabWords')" :disabled="showVocab">Words</b-button>
-            <b-button class="button" @click="$emit('switchVocabWords')" :disabled="!showVocab">Vocab</b-button>
+            <b-button class="button" @click="$emit('switchVocabWords')" :disabled="!showVocab">Chars</b-button>
+            <b-button class="button" @click="$emit('switchVocabWords')" :disabled="showVocab">Vocab</b-button>
         </div>
         <b-navbar-brand class="my-auto order-0 title-container" href="#"><span id="title">重复习</span><p id="subtitle">ChongFuXi</p></b-navbar-brand>
         <div class="right">
             <b-button class="button" v-b-modal.sign-in v-if="!user.loggedIn">Sign in</b-button>
-            <b-avatar variant="secondary" v-if="user.loggedIn"></b-avatar>
+            <b-dropdown  v-if="user.loggedIn">
+                <template #button-content>
+                <b-avatar variant="secondary"></b-avatar>
+                </template>
+                <b-dropdown-item href="#">An item</b-dropdown-item>
+                <b-dropdown-item href="#">Another item</b-dropdown-item>
+                <b-dropdown-divider></b-dropdown-divider>
+                <b-dropdown-item @click="clickGoogleSignOut">Log Out</b-dropdown-item>
+            </b-dropdown>
         </div>
     </div>
       <b-modal id="sign-in" centered title="BootstrapVue">
@@ -16,7 +24,7 @@
             <div class="google-sign-in"> 
                 <a class="btn btn-outline-dark" @click="clickGoogleSignIn" role="button" style="text-transform:none">
                 <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google sign-in" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" />
-                Login with Google
+                    Login with Google
                 </a>
             </div>
         </div>
@@ -25,7 +33,7 @@
 </template>
 
 <script>
-import { googleSignIn } from '@/util/google-signin.js';
+import { googleSignIn, googleSignOut } from '@/util/google-signin.js';
 import { mapGetters } from 'vuex';
 
 export default {
@@ -51,6 +59,7 @@ export default {
     }, 
     methods: {
         clickGoogleSignIn() { googleSignIn() },
+        clickGoogleSignOut() { googleSignOut() },
     }
 }
 </script>

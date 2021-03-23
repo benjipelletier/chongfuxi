@@ -31,12 +31,30 @@ def post_definitions():
         
     return jsonify({"success": True}), 200
 
-@app.route('/user_progress', methods=['POST'])
+@app.route('/progress', methods=['POST'])
 def post_user_progress():
     try:
         user = request.json['user_id']
         char = request.json['char']
-        # progress_ref.document(user).collection('data').document
+    except Exception as e:
+        return f"Error: {e}"
+    return jsonify({"success": True}), 200
+
+@app.route('/sections', methods=['GET'])
+def get_sections():
+    try:
+        user_id = request.args.get('user_id')
+
+        base_docs = sections_ref.where('base_section', '==', True).stream()
+        user_docs = sections_ref.where('user', '==', user_id).stream()
+
+        sections = []
+        for doc in base_docs:
+            sections.append(doc.to_dict())
+        for doc in user_docs:
+            sections.append(doc.to_dict())
+        
+        return jsonify(sections)
     except Exception as e:
         return f"Error: {e}"
     return jsonify({"success": True}), 200
@@ -46,15 +64,22 @@ def post_sections():
     try:
         title = request.json['title']
         content = request.json['content']
+        user = request.json['user']
         sections_ref.add({
             'base_section': False,
             'title': title,
-            'content': content
+            'content': content,
+            'user': user
         })
     except Exception as e:
         return f"Error: {e}"
     return jsonify({"success": True}), 200
 
+@app.after_request
+def after_request(response):
+    header = response.headers
+    header['Access-Control-Allow-Origin'] = '*'
+    return response
 
 if __name__ == '__main__':
     app.run(debug=True)

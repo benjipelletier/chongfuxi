@@ -17,10 +17,10 @@ let StyleCalc = {
 
 }
 
-let CharacterCalc = {
+let CharCalc = {
 }
 
 export {
     StyleCalc,
-    CharacterCalc
+    CharCalc
 }
