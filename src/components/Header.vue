@@ -1,17 +1,20 @@
 <template>
-  <b-navbar class="nav" fixed="top">
-    <div class="nav-container">
-        <div class="left">
-            <b-button class="button" @click="$emit('switchVocabWords')" :disabled="showVocab">Words</b-button>
-            <b-button class="button" @click="$emit('switchVocabWords')" :disabled="!showVocab">Vocab</b-button>
+  <header id="header" class="h-18 fixed top-0 left-0 w-full overflow-hidden z-50 bg-white">
+    <div class="w-full h-full flex justify-between items-center max-w-container m-auto px-4">
+        <div id="header-left" class="left">
+            <button class="button" @click="$emit('switchVocabWords')" :disabled="showVocab">Words</button>
+            <button class="button" @click="$emit('switchVocabWords')" :disabled="!showVocab">Vocab</button>
         </div>
-        <b-navbar-brand class="my-auto order-0 title-container" href="#"><span id="title">重复习</span><p id="subtitle">ChongFuXi</p></b-navbar-brand>
-        <div class="right">
-            <b-button class="button" v-b-modal.sign-in v-if="!user.loggedIn">Sign in</b-button>
-            <b-avatar variant="secondary" v-if="user.loggedIn"></b-avatar>
+        <div id="header-center" class="" href="#">
+            <span id="title">重复习</span>
+            <p id="subtitle">ChongFuXi</p>
+        </div>
+        <div id="header-right" class="right">
+            <button class="button" v-b-modal.sign-in v-if="!user.loggedIn">Sign in</button>
+            <!-- <avatar variant="secondary" v-if="user.loggedIn"></avatar> -->
         </div>
     </div>
-      <b-modal id="sign-in" centered title="BootstrapVue">
+      <!-- <b-modal id="sign-in" centered title="BootstrapVue">
         <div class="row">
             <div class="google-sign-in"> 
                 <a class="btn btn-outline-dark" @click="clickGoogleSignIn" role="button" style="text-transform:none">
@@ -20,8 +23,8 @@
                 </a>
             </div>
         </div>
-    </b-modal>
-  </b-navbar>
+    </b-modal> -->
+  </header>
 </template>
 
 <script>
@@ -56,71 +59,9 @@ export default {
 </script>
 
 <style scoped>
-.nav {
-    background-color: rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(5px);
-    display: flex;
-    justify-content: center;
-    align-content: center;
-}
-
-.nav-container {
-    width: 100%;
-    max-width: 1110px;
-    display: flex;
-    justify-content: space-between;
-    align-content: center;
-
-}
-
-.title-container {
-    margin: 0;
-    width: 100%;
-}
-
-.left, .right {
-    width: 20%;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
-.left {
-    justify-content:flex-start;
-}
-
-.right {
-    justify-content: flex-end;
-}
-
-.button {
-    margin-right: 0.5rem;
-}
-
-.switch-label {
-    width: 70px;
-    height: 40px;
-    margin: auto;
-    background-color: white;
-    cursor: pointer;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-}
-
-#title {
-    font-weight: bold;
-}
-
-#subtitle {
-    font-size: 0.8rem;
-    font-weight: 300;
-    margin: 0;
-}
-
-.google-sign-in {
-    width: 200px;
-    margin: 0.5rem;
+#header {
+    backdrop-filter: blur(15px);
+    background-color: rgba(255,255,255,0.3);
+ 
 }
 </style>

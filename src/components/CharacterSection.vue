@@ -1,8 +1,8 @@
 <template>
-<div class="rounded">
+<div class="rounded bg-white shadow-md mb-5 mx-2">
     <div class="section-header">
         <div class="header-title" @click="visible = !visible">
-            <h3 class="title">{{section.title}}</h3>
+            <h3 class="title text-black">{{section.title}}</h3>
             <div class="header-right">
                 <b-button v-on:click.stop="reviewSection" class="review-button" variant="info"><b-icon icon="archive"></b-icon><b-icon icon="clock"></b-icon></b-button>
             </div>

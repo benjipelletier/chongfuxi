@@ -1,14 +1,30 @@
 <template>
-    <section class="page section">
-      <div class="container">
-        <div class="character-section rounded"
-             v-for="(section, i) in getSections" 
-             :key="i"
-             >
-          <CharacterSection :section="section" :sectionIndex="i" v-on:review-section="reviewSection(i)" />
+    <main class="pt-16 flex-1  bg-gray-100">
+      <div class="flex items-start max-w-screen-xl m-auto">
+        <div id="sidebar" class="w-1/5 hidden md:block overflow-auto sticky top-4">
+          <div class="px-2 pb-5 h-full overflow-x-hidden overflow-y-auto">
+            <div id="sidebar-card" class="relative p-4 bg-white shadow-lg rounded">
+              <h1 class="lg:mb-3 uppercase tracking-wide font-bold text-m lg:text-xs text-gray-900">
+                Sections
+              </h1>
+              <ul>
+                <li>
+                  sdf{{i}}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div id="main-content" class="relative md:w-4/5 w-full mb-4 flex flex-col">
+            <CharacterSection 
+              v-for="(section, i) in getSections" 
+              :key="i"
+              :section="section" 
+              :sectionIndex="i" 
+              v-on:review-section="reviewSection(i)" />
         </div>
       </div>
-      <b-modal @ok="handleGoReview" id="review-modal" centered title="Review">
+      <!-- <b-modal @ok="handleGoReview" id="review-modal" centered title="Review">
           <div class="modal-container">
             <div class="modal-main">
               <CharacterCard 
@@ -24,20 +40,20 @@
             <b-form-spinbutton id="sb-vertical" size="lg" min="0" v-model="newCharsCount" vertical></b-form-spinbutton>
             </div>
           </div>
-      </b-modal>
-    </section>
+      </b-modal> -->
+    </main>
 </template>
 
 <script>
 import CharacterSection from '@/components/CharacterSection'
-import CharacterCard from '@/components/CharacterCard'
+// import CharacterCard from '@/components/CharacterCard'
 import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'Home',
   components: {
     CharacterSection,
-    CharacterCard,
+    // CharacterCard,
   },
   data() {
     return {
@@ -78,7 +94,7 @@ export default {
 
 <style scoped>
 
-.character-section {
+/* .character-section {
   margin: 10px 0;
   background-color: white;
   padding: 0;
@@ -90,7 +106,6 @@ export default {
 }
 
 .modal-main {
-  /* background-color: red; */
   width: 80%;
   display: flex;
   flex-wrap: wrap;
@@ -105,6 +120,6 @@ export default {
   width: 20%;
   display: flex;
   justify-content: center;
-}
+} */
 
 </style>

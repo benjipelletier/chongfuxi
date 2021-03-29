@@ -1,4 +1,4 @@
-let section_data = require('./data/sections.json')
+let section_data = require('./data/base_sections.json')
 let settings_data = require('./data/settings.json')
 let user_data = require('./data/user_progress.json')
 let definitions = require('./data/definitions.json')
