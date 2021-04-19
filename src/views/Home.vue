@@ -1,15 +1,21 @@
 <template>
-    <main class="pt-16 flex-1  bg-gray-100">
-      <div class="flex items-start max-w-screen-xl m-auto">
-        <div id="sidebar" class="w-1/5 hidden md:block overflow-auto sticky top-4">
+    <main class="pt-20 flex-1 bg-gray-100">
+      <div class="flex px-2 items-start max-w-screen-xl m-auto">
+        <div id="sidebar" class="w-1/5 hidden md:block overflow-auto sticky top-20">
           <div class="px-2 pb-5 h-full overflow-x-hidden overflow-y-auto">
             <div id="sidebar-card" class="relative p-4 bg-white shadow-lg rounded">
+              <div class="w-full flex justify-center">
+                <button class="bg-gray-100 hover:bg-gray-200 w-1/3 p-2 m-2 rounded disabled:opacity-50" @click="$emit('switchVocabWords')" :disabled="!showVocab">Words</button>
+                <button class="bg-gray-100 hover:bg-gray-200 w-1/3 p-2 m-2 rounded disabled:opacity-50" @click="$emit('switchVocabWords')" :disabled="showVocab">Vocab</button>
+              </div>
               <h1 class="lg:mb-3 uppercase tracking-wide font-bold text-m lg:text-xs text-gray-900">
                 Sections
               </h1>
               <ul>
-                <li>
-                  sdf{{i}}
+                <li v-for="(section, i) in getSections" :key="i">
+                  <a class="block px-4 py-2 mt-2 text-sm font-semibold rounded focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none" :href="`#${section.id}`">
+                    {{section.title}}
+                  </a>
                 </li>
               </ul>
             </div>

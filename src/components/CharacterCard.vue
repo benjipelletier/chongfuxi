@@ -13,11 +13,12 @@ export default {
         'character',
         'charData',
         'color',
+        'sectionId',
         'showVocab'
     ],
     computed: {
-        getCardBgColor() { return StyleCalc.cardBgColor(this.color, this.charData?.review_level); },
-        getCharTextColor() { return StyleCalc.charTextColor(this.color, this.charData?.review_level); },
+        getCardBgColor() { return StyleCalc.cardBgColor(this.sectionId, this.charData?.review_level); },
+        getCharTextColor() { return StyleCalc.charTextColor(this.sectionId, this.charData?.review_level); },
         getVocabClass() {
             return (this.showVocab && this.character.length > 1) ? 'vocabCard' : '';
         }

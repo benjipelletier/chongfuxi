@@ -1,6 +1,6 @@
 <template>
-<div class="rounded bg-white shadow-md mb-5 mx-2">
-    <div class="section-header">
+<div class="rounded bg-white shadow-md mb-5 mx-4">
+    <div class="bg-white w-full h-10 rounded">
         <div class="header-title" @click="visible = !visible">
             <h3 class="title text-black">{{section.title}}</h3>
             <div class="header-right">
@@ -24,7 +24,8 @@
             :character="char"
             :charData="getCharData(char)"
             :showVocab="getShowVocab"
-            :color="section.color" />
+            :color="section.color"
+            :sectionId="section.id" />
     </div>
     </b-collapse>
 
@@ -59,7 +60,7 @@ export default {
     },
     methods: {
         getLvlStyle(lvl) {
-            return StyleCalc.cardBgColor(this.section.color, lvl);
+            return StyleCalc.cardBgColor(this.section.id, lvl);
         },
         reviewSection() {
             console.log()

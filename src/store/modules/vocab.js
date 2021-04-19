@@ -44,9 +44,11 @@ const actions = {
     async fetchUser({ commit }, user) {
         commit('setUserLoggedIn', user !== null)
         if (user) {
+            console.log("HERE ", user)
             commit('setUserData', {
                 displayName: user.displayName,
-                email: user.email
+                email: user.email,
+                photo: user.photoURL,
             })
         } else {
             commit('setUserData', null)
@@ -60,7 +62,7 @@ const mutations = {
     setReviewDeck(state, cards) { state.reviewSession.cards = cards},
     setProgress(state, data) { state.progress = data },
     setUserLoggedIn(state, value) { state.user.loggedIn = value },
-    setUserData(state, data) { state.user.data = data }
+    setUserData(state, data) { state.user.data = data; }
 }
 
 export default {
