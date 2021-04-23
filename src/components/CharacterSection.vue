@@ -1,12 +1,11 @@
 <template>
 <div class="mt-2 mb-5 flex flex-col">
-    <div class="w-full h-15 sticky top-0">
-            <span class="text-white font-thin text-5xl">{{section.title}}</span>
+    <span class="block relative -top-20 invisible" :id="section.id"></span>
+    <div class="w-full h-16 sticky top-0 flex items-center" >
+        <span class="text-white font-thin text-5xl">{{section.title}}</span>
     </div>
-    <b-collapse id="section-collapse" v-model="visible">
-        <div class="character-grid">
+        <div class="character-grid my-2" id="panel-2">
             <CharacterCard 
-            class="item" 
             v-for="(char, i) in (getShowVocab ? section.vocabulary : section.characters)" 
             :key="i" 
             :character="char"
@@ -15,7 +14,6 @@
             :color="section.color"
             :sectionId="section.id" />
     </div>
-    </b-collapse>
 
 </div>
 </template>
@@ -28,7 +26,7 @@ import { StyleCalc } from '@/util/helpers.js'
 export default {
     name: "CharacterSection",
     components: {
-        CharacterCard,
+        CharacterCard
     },
     data() {
         return {
@@ -93,36 +91,10 @@ export default {
     justify-content: space-evenly;
 }
 
-.collapse-button:focus {
-    border: none;
-    outline: none;
-    background-color: rgba(255,255,255,0);
-}
-
-.progress {
-    height: 100%;
-    margin: 0 !important;
-    transition: border-bottom-left-radius, border-bottom-right-radius;
-    transition-duration: 0.3s;
-}
-
-.noBottomBorderRadius {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-}
-
 .character-grid {
-    padding: 0.5rem;
-    display: flex;
-    flex-wrap:wrap;
+    display: grid;
     gap: 0.5rem;
-    /* gap: 0.5rem;
-    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); */
-}
-
-.character-grid::after {
-  content: '';
-  flex-grow: 1000000000;
+    grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
 }
 
 </style>

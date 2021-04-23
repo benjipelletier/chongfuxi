@@ -4,15 +4,17 @@
         <div id="sidebar" class="w-72 pt-16 h-screen fixed hidden md:block dark:bg-gray-800">
           <div class="w-auto h-auto p-2">
             <div class="m-2 my-4 flex flex-col" v-for="(section, i) in getSections" :key="i">
-              <div class="dark:bg-white dark:bg-opacity-10 dark:hover:bg-opacity-20 cursor-pointer h-12 rounded-t flex items-center px-2">
-                <span class="text-white font-light text-2xl">{{section.title}}</span>
+              <div class="dark:bg-white dark:bg-opacity-10 dark:hover:bg-opacity-20 cursor-pointer h-12 rounded-t flex items-center">
+                <a :href="'#' + section.id" class="text-white font-light text-2xl w-full h-full px-2 flex items-center">
+                  <span>{{section.title}}</span>
+                </a>
               </div>
               <div class="bg-gray-900 h-3 rounded-b">
               </div>
             </div>
           </div>
         </div>
-        <div id="main-content" class="flex flex-col mt-16 p-4 ml-0 md:ml-72">
+        <div id="main-content" class="flex flex-col mt-16 p-4 ml-0 w-full md:ml-72">
             <CharacterSection 
               v-for="(section, i) in getSections" 
               :key="i"
