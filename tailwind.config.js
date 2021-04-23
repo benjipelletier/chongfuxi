@@ -1,18 +1,17 @@
 const colors = require('tailwindcss/colors')
+const { colors: defaultColors } = require('tailwindcss/defaultTheme')
+
 
 module.exports = {
   purge: { content: ['./public/**/*.html', './src/**/*.vue'] },
   darkMode: 'class', // or 'media' or 'class'
   theme: {
     colors: {
+      ...defaultColors,
       transparent: 'transparent',
       current: 'currentColor',
-      black: colors.black,
-      white: colors.white,
       gray: colors.gray,
-      indigo: colors.indigo,
-      red: colors.rose,
-      yellow: colors.amber,
+      orange: colors.orange,
     },
     extend: {},
   },

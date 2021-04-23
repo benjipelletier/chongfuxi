@@ -1,8 +1,8 @@
 <template>
     <nav class="dark:bg-gray-700 fixed w-full z-10">
-        <div class="mx-auto px-2 sm:px-6 lg:px-8">
+        <div class="mx-auto px-2 md:px-6 lg:px-8">
             <div class="relative flex items-center justify-between h-16">
-                <div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
+                <div class="absolute inset-y-0 left-0 flex items-center md:hidden">
                     <!-- menu button -->
                     <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white" aria-controls="movile-menu" aria-expanded="false">
                         <span class="sr-only">Open main menu</span>
@@ -14,11 +14,9 @@
                         </svg>
                     </button>
                 </div>
-                <div class="flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">
+                <div class="flex-1 flex items-center justify-center md:items-stretch">
                     <div class="flex-shrink-0 flex items-center">
-                        <!-- <span class="text-2xl text-white font-semibold">重复习</span> -->
-                        <img class="block lg:hidden h-8 w-auto" src="https://tailwindui.com/img/logos/workflow-mark-indigo-500.svg" alt="Workflow">
-                        <img class="hidden lg:block h-8 w-auto" src="https://tailwindui.com/img/logos/workflow-logo-indigo-500-mark-white-text.svg" alt="Workflow">
+                        <span id="title" class="text-4xl text-white">重复习</span>
                     </div>
                 </div>
                         <div class="ml-3 relative">
@@ -104,6 +102,10 @@ export default {
 #header {
     backdrop-filter: blur(15px);
     background-color: rgba(255,255,255,0.3);
- 
 }
+#title {
+    font-family: 'ZCOOL QingKe HuangYou', cursive;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=ZCOOL+QingKe+HuangYou&display=swap');
 </style>

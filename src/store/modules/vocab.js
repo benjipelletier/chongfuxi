@@ -44,7 +44,6 @@ const actions = {
     async fetchUser({ commit }, user) {
         commit('setUserLoggedIn', user !== null)
         if (user) {
-            console.log("HERE ", user)
             commit('setUserData', {
                 displayName: user.displayName,
                 email: user.email,

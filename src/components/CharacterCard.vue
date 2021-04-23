@@ -1,6 +1,6 @@
 <template>
-   <div class="char-container bg-white flex justify-center items-center rounded" :style="dynamicGridColumn" > 
-        <span class="font-normal text-6xl" :key="char"> {{character}} </span>
+   <div class="char-container bg-white flex justify-center items-center rounded" :class="[cardBgStyle, cardStyle]" :style="dynamicGridColumn" > 
+        <span class="font-thin text-6xl"> {{character}} </span>
     </div> 
 </template>
 
@@ -20,8 +20,11 @@ export default {
         dynamicGridColumn() {
             return `grid-column: span ${this.character.length > 2 ? 3 : this.character.length};`;
         },
-        getCardBgColor() { 
-            return StyleCalc.cardBgColor(this.sectionId, this.charData?.review_level);
+        cardBgStyle() { 
+            return StyleCalc.cardBgStyle(this.sectionId, this.charData?.review_level);
+        },
+        cardStyle() { 
+            return StyleCalc.cardStyle(this.sectionId, this.charData?.review_level);
         },
         getCharTextColor() { return StyleCalc.charTextColor(this.sectionId, this.charData?.review_level); },
         getVocabClass() {
@@ -35,18 +38,20 @@ export default {
 <style scoped>
 .char-container {
     height: 100px;
-    font-size: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: row;
     cursor: pointer; 
     text-align: center;
+    /* background-color: rgba(255,255,255,0.2); */
     /* display: grid;
     gap: 0.5rem;
     grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr)) */
 }
-
+.textShadow {
+    text-shadow: 0 2px rgba(20,20,20,0.3)
+}
 .vocabCard {
     /* display: inline-block; */
     /* width: 60px; */

@@ -1,55 +1,29 @@
 class StyleCalc {
     static colors = {
-        unreviewed: "black",
-        radicals: [
-            null,
-            "#F9FAFB", // 2
-            "E5E7EB", // 3
-            "#9CA3AF", // 4
-            "#4B5563" // 5
-        ],
-        hsk_1: [
-            null,
-            "#FFFBEB",
-            "#FEF3C7",
-            "#FDE68A",
-            "#FCD34D"
-        ],
-        hsk_2: [
-            null,
-            "#EFF6FF",
-            "#C7D2FE",
-            "#818CF8",
-            "#4F46E5"
-        ],
-        hsk_3: [
-            null,
-            "#FEF3C7",
-            "#FCD34D",
-            "#F59E0B",
-            "#FBBF24",
-        ],
-        hsk_4: [
-            null,
-            "#FEF2F2",
-            "#FECACA",
-            "#F87171",
-            "#DC2626"
-        ],
-        hsk_5: [
-            null,
-            "#EEF2FF",
-            "#C7D2FE",
-            "#818CF8",
-            "#4F46E5"
-        ],
-        hsk_6: [
-            null,
-            "#F5F3FF",
-            "#DDD6FE",
-            "#A78BFA",
-            "#7C3AED"
-        ]
+        default: ["gray", 900],
+        radicals: ["gray", 500],
+        hsk_1: ["yellow", 400],
+        hsk_2: ["blue", 400],
+        hsk_3: ["orange", 500],
+        hsk_4: ["red", 500],
+        hsk_5: ["indigo", 500],
+        hsk_6: ["purple", 600],
+    }
+    static cardStyle(sectionIdx, level) {
+        if (level == undefined || level == 0) {
+            return "text-white border-white border-4 bg-opacity-0 opacity-30"
+        }
+        return "text-white textShadow"
+    }
+    static cardBgStyle(sectionIdx, level) {
+        if (level == undefined || level == 0) {
+            return ""
+        }
+        let percent = level*25
+        let color = this.colors[sectionIdx][0]
+        let weight = this.colors[sectionIdx][1]
+        console.log(sectionIdx)
+        return `bg-${color}-${weight} bg-opacity-${percent}`
     }
     static cardBgColor(section_id, lvl) {
         if (lvl == undefined) return 'background-color: rgba(0, 0, 0, 0.1)'
