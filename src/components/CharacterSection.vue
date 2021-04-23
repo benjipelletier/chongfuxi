@@ -1,7 +1,7 @@
 <template>
-<div class="mt-2 mb-5 flex flex-col">
+<div class="mb-5 flex flex-col">
     <span class="block relative -top-20 invisible" :id="section.id"></span>
-    <div class="w-full h-16 sticky top-0 flex items-center" >
+    <div class="w-full h-14 sticky top-0 flex" >
         <span class="text-white font-thin text-5xl">{{section.title}}</span>
     </div>
         <div class="character-grid my-2" id="panel-2">
