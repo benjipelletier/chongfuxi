@@ -1,6 +1,6 @@
 <template>
-   <div class="w-20 h-24 border-2 bg-white flex justify-center items-center rounded" :class="getVocabClass" :style="getCardBgColor"> 
-        <span class="font-light text-6xl" :style="getCharTextColor"> {{character}} </span>
+   <div class="char-container rounded" :class="getVocabClass" :style="getCardBgColor"> 
+        <span class="char" :style="getCharTextColor"> {{character}} </span>
     </div> 
 </template>
 
@@ -29,7 +29,7 @@ export default {
 
 <style scoped>
 .char-container {
-    min-width: 400px;
+    min-width: 40px;
     height: 40px;
     font-size: 20px;
     display: flex;

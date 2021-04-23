@@ -1,27 +1,18 @@
 <template>
-    <main class="pt-20 flex-1 bg-gray-100">
-      <div class="flex px-2 items-start max-w-screen-xl m-auto">
-        <div id="sidebar" class="w-1/5 hidden md:block overflow-auto sticky top-20">
-          <div class="px-2 pb-5 h-full overflow-x-hidden overflow-y-auto">
-            <div id="sidebar-card" class="relative p-4 bg-white shadow-lg rounded">
-              <div class="w-full flex justify-center">
-                <button class="bg-gray-100 hover:bg-gray-200 w-1/3 p-2 m-2 rounded disabled:opacity-50" @click="$emit('switchVocabWords')" :disabled="!showVocab">Words</button>
-                <button class="bg-gray-100 hover:bg-gray-200 w-1/3 p-2 m-2 rounded disabled:opacity-50" @click="$emit('switchVocabWords')" :disabled="showVocab">Vocab</button>
+    <main class="dark:bg-gray-900 min-h-screen">
+      <div class="flex items-start">
+        <div id="sidebar" class="w-72 pt-16 h-screen fixed hidden md:block dark:bg-gray-800">
+          <div class="w-auto h-auto p-2">
+            <div class="m-2 my-4 flex flex-col" v-for="(section, i) in getSections" :key="i">
+              <div class="dark:bg-white dark:bg-opacity-10 dark:hover:bg-opacity-20 cursor-pointer h-12 rounded-t flex items-center px-2">
+                <span class="text-white font-light text-2xl">{{section.title}}</span>
               </div>
-              <h1 class="lg:mb-3 uppercase tracking-wide font-bold text-m lg:text-xs text-gray-900">
-                Sections
-              </h1>
-              <ul>
-                <li v-for="(section, i) in getSections" :key="i">
-                  <a class="block px-4 py-2 mt-2 text-sm font-semibold rounded focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none" :href="`#${section.id}`">
-                    {{section.title}}
-                  </a>
-                </li>
-              </ul>
+              <div class="bg-gray-900 h-3 rounded-b">
+              </div>
             </div>
           </div>
         </div>
-        <div id="main-content" class="relative md:w-4/5 w-full mb-4 flex flex-col">
+        <div id="main-content" class="flex flex-col mt-16 p-4 ml-0 md:ml-72">
             <CharacterSection 
               v-for="(section, i) in getSections" 
               :key="i"
@@ -97,35 +88,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-
-/* .character-section {
-  margin: 10px 0;
-  background-color: white;
-  padding: 0;
-  box-shadow: var(--main-shadow-inset);
-}
-
-.modal-container {
-  display: flex;
-}
-
-.modal-main {
-  width: 80%;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-.modal-main::after {
-  content: '';
-  flex-grow: 1000000000;
-}
-
-.add-chars {
-  width: 20%;
-  display: flex;
-  justify-content: center;
-} */
-
-</style>

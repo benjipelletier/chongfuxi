@@ -1,19 +1,7 @@
 <template>
-<div class="rounded bg-white shadow-md mb-5 mx-4">
-    <div class="bg-white w-full h-10 rounded">
-        <div class="header-title" @click="visible = !visible">
-            <h3 class="title text-black">{{section.title}}</h3>
-            <div class="header-right">
-                <b-button v-on:click.stop="reviewSection" class="review-button" variant="info"><b-icon icon="archive"></b-icon><b-icon icon="clock"></b-icon></b-button>
-            </div>
-        </div>
-        <b-progress class="progress mt-2" :max="max" :class="{noBottomBorderRadius: visible}">
-            <b-progress-bar class="progress-part" :style="getLvlStyle(4)" :value="getLvlCount"></b-progress-bar>
-            <b-progress-bar class="progress-part" :style="getLvlStyle(3)" :value="getLvlCount"></b-progress-bar>
-            <b-progress-bar class="progress-part" :style="getLvlStyle(2)" :value="getLvlCount"></b-progress-bar>
-            <b-progress-bar class="progress-part" :style="getLvlStyle(1)" :value="getLvlCount"></b-progress-bar>
-            <b-progress-bar class="progress-part" :style="getLvlStyle(0)" :value="getLvlCount"></b-progress-bar>
-        </b-progress>
+<div class="mt-2 mb-5 flex flex-col">
+    <div class="w-full h-15 sticky top-0">
+            <span class="text-white font-thin text-5xl">{{section.title}}</span>
     </div>
     <b-collapse id="section-collapse" v-model="visible">
         <div class="character-grid">
@@ -112,7 +100,6 @@ export default {
 }
 
 .progress {
-    /* border: 1px solid #ced4da; */
     height: 100%;
     margin: 0 !important;
     transition: border-bottom-left-radius, border-bottom-right-radius;
