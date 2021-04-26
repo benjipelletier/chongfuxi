@@ -1,6 +1,6 @@
 class StyleCalc {
     static colors = {
-        default: ["gray", 900],
+        default: ["gray", 500],
         radicals: ["gray", 500],
         hsk_1: ["yellow", 400],
         hsk_2: ["blue", 400],
@@ -17,12 +17,15 @@ class StyleCalc {
     }
     static cardBgStyle(sectionIdx, level) {
         if (level == undefined || level == 0) {
-            return ""
+            return "not-reviewed"
         }
         let percent = level*25
-        let color = this.colors[sectionIdx][0]
-        let weight = this.colors[sectionIdx][1]
-        console.log(sectionIdx)
+        let color = this.colors["default"][0]
+        let weight = this.colors["default"][1]
+        if (this.colors[sectionIdx]) {
+            color = this.colors[sectionIdx][0]
+            weight = this.colors[sectionIdx][1]
+        }
         return `bg-${color}-${weight} bg-opacity-${percent}`
     }
     static cardBgColor(section_id, lvl) {

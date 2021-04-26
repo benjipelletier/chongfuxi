@@ -1,5 +1,5 @@
 <template>
-    <nav class="dark:bg-gray-700 fixed w-full z-10">
+    <nav id="header" class="bg-gray-700 border-b-2 border-gray-500 fixed w-full z-10">
         <div class="mx-auto px-2 md:px-6 lg:px-8">
             <div class="relative flex items-center justify-between h-16">
                 <div class="absolute inset-y-0 left-0 flex items-center md:hidden">
@@ -83,8 +83,8 @@ export default {
 
 <style scoped>
 #header {
-    backdrop-filter: blur(15px);
-    background-color: rgba(255,255,255,0.3);
+    /* backdrop-filter: blur(20px); */
+    
 }
 #title {
     font-family: 'ZCOOL QingKe HuangYou', cursive;

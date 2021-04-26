@@ -18,7 +18,11 @@ module.exports = {
   variants: {
     extend: {
       backgroundColor: ['disabled'],
-      opacity: ['active']
+      backgroundOpacity: ['active'],
+      borderRadius: ['first', 'last'],
+      opacity: ['active'],
+      ringWidth: ['hover', 'active'],
+      outline: ['hover', 'active'],
     },
   },
   plugins: [],

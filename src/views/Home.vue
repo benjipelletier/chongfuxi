@@ -3,17 +3,22 @@
       <div class="flex items-start">
         <div id="sidebar" class="w-72 pt-16 h-screen fixed hidden md:block dark:bg-gray-800">
           <div class="w-auto h-auto flex flex-col space-y-4 p-4">
-            <!-- <div class="flex flex-row h-14 rounded">
-              <button class="flex justify-center items-center w-1/3 bg-white bg-opacity-10 hover:bg-opacity-20 active:bg-white rounded-l">
-                <span>小</span>
+
+            <!-- Sizes -->
+            <div class="flex flex-row h-14 rounded">
+              <button class="flex justify-center items-center w-1/3 bg-white hover:bg-opacity-20 focus:outline-none first:rounded-l last:rounded-r"
+                v-for="(size, i) in sizes"
+                :class="{ 'bg-opacity-20 text-white hover:bg-opacity-20ring-inset text-3xl': i == sizeIdx, 'bg-opacity-10 text-gray-400 text-2xl': i != sizeIdx }"
+                @click="sizeIdx = i"
+                :key="i">
+                <span class="font-light">{{size}}</span>
               </button>
-              <div class="w-1/3 bg-white bg-opacity-20">sdf</div>
-              <div class="w-1/3 bg-white bg-opacity-20 rounded-r"></div>
-            </div> -->
+            </div>
+
             <div class="flex flex-col" v-for="(section, i) in getSections" :key="i">
-              <div class="dark:bg-white dark:bg-opacity-10 dark:hover:bg-opacity-20 cursor-pointer h-12 rounded-t flex items-center">
-                <a :href="'#' + section.id" class="text-white font-light text-2xl w-full h-full px-2 flex items-center">
-                  <span>{{section.title}}</span>
+              <div class="dark:bg-white dark:bg-opacity-10 dark:hover:bg-opacity-20 active:bg-opacity-30 cursor-pointer h-12 rounded-t flex items-center">
+                <a :href="'#' + section.id" class="w-full text-white font-light text-2xl w-full h-full px-2 flex items-center">
+                  <span class="w-2/3">{{section.title}}</span>
                 </a>
               </div>
               <!-- <div class="bg-gray-900 h-3 rounded-b"> </div> -->
@@ -26,6 +31,13 @@
                 </div>
               </div>
             </div>
+
+            <div class="flex flex-row h-14 rounded">
+              <button @click="showNewSecModal" class="flex justify-center items-center w-full bg-opacity-10 bg-white hover:bg-opacity-20 focus:outline-none active:bg-opacity-30 first:rounded-l last:rounded-r">
+                <span class="font-bold text-white text-opacity-20 text-5xl">+</span>
+              </button>
+            </div>
+
           </div>
         </div>
         <div id="main-content" class="flex flex-col mt-16 p-4 ml-0 w-full md:ml-72">
@@ -33,32 +45,32 @@
               v-for="(section, i) in getSections" 
               :key="i"
               :section="section" 
-              :sectionIndex="i" 
-              v-on:review-section="reviewSection(i)" />
+              :sectionIdx="i" 
+              :size="sizeIdx"
+              v-on:review-section="reviewSection(i)"
+              @editSection="showEditSecModal" />
         </div>
       </div>
-      <!-- <b-modal @ok="handleGoReview" id="review-modal" centered title="Review">
-          <div class="modal-container">
-            <div class="modal-main">
-              <CharacterCard 
-                class="item" 
-                v-for="(char, i) in newCards"
-                :key="i" 
-                :character="char"
-                :charData="getCharData(char)"
-                :showVocab="getShowVocab"
-                :color="getSections[currSectionIndex].color" />
-            </div>
-            <div class="add-chars">
-            <b-form-spinbutton id="sb-vertical" size="lg" min="0" v-model="newCharsCount" vertical></b-form-spinbutton>
-            </div>
-          </div>
-      </b-modal> -->
+      <Modal
+        header="New Section"
+        v-show="newSecModal"
+        @close="closeNewSecModal"
+        @confirm="confirmNewSecModal" />
+      <Modal
+        header="Edit Section"
+        :title="editSecData.title"
+        :idx="editSecData.idx"
+        :isEditSection="true"
+        v-show="editSecModal"
+        @close="closeEditSecModal"
+        @confirm="confirmEditSecModal"
+        @delete="deleteEditSecModal" />
     </main>
 </template>
 
 <script>
 import CharacterSection from '@/components/CharacterSection'
+import Modal from '@/components/Modal.vue'
 // import CharacterCard from '@/components/CharacterCard'
 import { mapGetters, mapActions } from 'vuex'
 import { StyleCalc } from '@/util/helpers.js'
@@ -67,6 +79,7 @@ export default {
   name: 'Home',
   components: {
     CharacterSection,
+    Modal
     // CharacterCard,
   },
   data() {
@@ -74,13 +87,21 @@ export default {
       currSectionIndex: -1,
       newCharsCount: 0,
       newCards: [],
+      sizes: ["小","中","大"],
+      sizeIdx: 2, // lg
+      newSecModal: false,
+      editSecModal: false,
+      editSecData: {
+        title: null,
+        idx: null
+      }
     }
   },
   computed: {
-    ...mapGetters(['getSections', 'getCharData', 'getShowVocab'])
+    ...mapGetters(['getSections', 'getCharData', 'getShowVocab']),
   },
   methods: {
-    ...mapActions(['setReviewDeck']),
+    ...mapActions(['setReviewDeck', 'addSection', 'removeSection', 'editSection']),
     reviewSection(i) {
       this.currSectionIndex = i
       this.$bvModal.show('review-modal')
@@ -102,7 +123,33 @@ export default {
       let chars_len = section.characters.filter(char => this.getCharData(char).review_level == level).length
       let percent = Math.floor(chars_len*100/sec_len)
       return `width: ${percent}%`
-
+    },
+    // new section
+    showNewSecModal() {
+      this.newSecModal = true;
+    },
+    closeNewSecModal() {
+      this.newSecModal = false;
+    },
+    confirmNewSecModal(title) {
+      this.addSection(title)
+    },
+    // edit section
+    showEditSecModal(title, idx) {
+      this.editSecData = {
+        title,
+        idx
+      }
+      this.editSecModal = true;
+    },
+    closeEditSecModal() {
+      this.editSecModal = false;
+    },
+    confirmEditSecModal(data) {
+      this.editSection(data)
+    },
+    deleteEditSecModal(idx) {
+      this.removeSection(idx)
     }
   },
   watch: {
@@ -115,3 +162,7 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+
+</style>

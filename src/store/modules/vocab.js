@@ -52,6 +52,20 @@ const actions = {
         } else {
             commit('setUserData', null)
         }
+    },
+    async addSection({ commit }, title) {
+        commit('addSection', {
+            characters: [],
+            vocabulary: [],
+            title: title,
+            id: title.trim().replaceAll(" ", "_").toLowerCase()
+        })
+    },
+    async removeSection({ commit }, idx) {
+        commit('removeSection', idx)
+    },
+    async editSection({ commit }, data) {
+        commit('editSection', data)
     }
 }
 
@@ -61,7 +75,10 @@ const mutations = {
     setReviewDeck(state, cards) { state.reviewSession.cards = cards},
     setProgress(state, data) { state.progress = data },
     setUserLoggedIn(state, value) { state.user.loggedIn = value },
-    setUserData(state, data) { state.user.data = data; }
+    setUserData(state, data) { state.user.data = data; },
+    addSection(state, data) { state.sections.push(data) },
+    removeSection(state, idx) { state.sections.splice(idx, 1) },
+    editSection(state, data) { console.log(data); state.sections[data.idx].title = data.title}
 }
 
 export default {

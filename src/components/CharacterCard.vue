@@ -1,6 +1,12 @@
 <template>
-   <div class="char-container bg-white flex justify-center items-center rounded" :class="[cardBgStyle, cardStyle]" :style="dynamicGridColumn" > 
-        <span class="font-thin text-6xl"> {{character}} </span>
+   <div 
+    class="char-container bg-white flex justify-center items-center rounded " 
+    :class="
+        [cardBgStyle, cardStyle, cardSizeStyle]
+        
+        " :style="dynamicGridColumn"
+     > 
+        <span class="font-thin"> {{character}} </span>
     </div> 
 </template>
 
@@ -14,10 +20,17 @@ export default {
         'charData',
         'color',
         'sectionId',
-        'showVocab'
+        'showVocab',
+        'size'
     ],
     computed: {
         dynamicGridColumn() {
+            if (this.size == 0 || this.size == 1) {
+                let span = this.character.length
+                if (this.character.length > 3) span = 3
+                else if (this.character.length > 1) span = 2
+                return `grid-column: span ${span};`;
+            }
             return `grid-column: span ${this.character.length > 2 ? 3 : this.character.length};`;
         },
         cardBgStyle() { 
@@ -25,6 +38,13 @@ export default {
         },
         cardStyle() { 
             return StyleCalc.cardStyle(this.sectionId, this.charData?.review_level);
+        },
+        cardSizeStyle() {
+            return {
+                'sm-char': this.size == 0,
+                'md-char': this.size == 1,
+                'lg-char': this.size == 2,
+            }
         },
         getCharTextColor() { return StyleCalc.charTextColor(this.sectionId, this.charData?.review_level); },
         getVocabClass() {
@@ -36,8 +56,25 @@ export default {
 </script>
 
 <style scoped>
-.char-container {
+.not-reviewed.sm-char {
+    border: none;
+}
+.sm-char {
+    @apply text-xl;
+    height: 2rem;
+}
+
+.md-char {
+    @apply text-3xl;
+    height: 4rem;
+}
+
+
+.lg-char {
+    @apply text-6xl;
     height: 100px;
+}
+.char-container {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -49,7 +86,13 @@ export default {
     gap: 0.5rem;
     grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr)) */
 }
-.textShadow {
+.sm-char.textShadow {
+    text-shadow: 0 1px rgba(20,20,20,0.3)
+}
+.md-char.textShadow {
+    text-shadow: 0 2px rgba(20,20,20,0.3)
+}
+.lg-char.textShadow {
     text-shadow: 0 2px rgba(20,20,20,0.3)
 }
 .vocabCard {
