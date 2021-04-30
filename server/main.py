@@ -68,8 +68,7 @@ def post_sections():
         sections_ref.add({
             'base_section': False,
             'title': title,
-            'content': content,
-            'user': user
+            'words': content
         })
     except Exception as e:
         return f"Error: {e}"
@@ -80,6 +79,27 @@ def after_request(response):
     header = response.headers
     header['Access-Control-Allow-Origin'] = '*'
     return response
+
+@app.route('/sections', methods=['GET'])
+def get_sections():
+    try:
+        user_id = request.args.get('user_id')
+        print(user_id)
+        return jsonify({ 'lol': 3})
+        base_docs = sections_ref.where('base_section', '==', True).stream()
+        user_docs = sections_ref.where('user', '==', user_id).stream()
+
+        sections = []
+        for doc in base_docs:
+            sections.append(doc.to_dict())
+        for doc in user_docs:
+            sections.append(doc.to_dict())
+
+        return jsonify(sections)
+    except Exception as e:
+        return f"Error: {e}"
+    return jsonify({"success": True}), 200
+
 
 if __name__ == '__main__':
     app.run(debug=True)

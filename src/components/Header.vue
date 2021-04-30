@@ -1,45 +1,68 @@
 <template>
-  <b-navbar class="nav" fixed="top">
-    <div class="nav-container">
-        <div class="left">
-            <b-button class="button" @click="$emit('switchVocabWords')" :disabled="!showVocab">Chars</b-button>
-            <b-button class="button" @click="$emit('switchVocabWords')" :disabled="showVocab">Vocab</b-button>
-        </div>
-        <b-navbar-brand class="my-auto order-0 title-container" href="#"><span id="title">重复习</span><p id="subtitle">ChongFuXi</p></b-navbar-brand>
-        <div class="right">
-            <b-button class="button" v-b-modal.sign-in v-if="!user.loggedIn">Sign in</b-button>
-            <b-dropdown  v-if="user.loggedIn">
-                <template #button-content>
-                <b-avatar variant="secondary"></b-avatar>
-                </template>
-                <b-dropdown-item href="#">An item</b-dropdown-item>
-                <b-dropdown-item href="#">Another item</b-dropdown-item>
-                <b-dropdown-divider></b-dropdown-divider>
-                <b-dropdown-item @click="clickGoogleSignOut">Log Out</b-dropdown-item>
-            </b-dropdown>
-        </div>
-    </div>
-      <b-modal id="sign-in" centered title="BootstrapVue">
-        <div class="row">
-            <div class="google-sign-in"> 
-                <a class="btn btn-outline-dark" @click="clickGoogleSignIn" role="button" style="text-transform:none">
-                <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google sign-in" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" />
-                    Login with Google
-                </a>
+    <nav id="header" class="bg-gray-700 border-b-2 border-gray-500 fixed w-full z-10">
+        <div class="mx-auto px-2 md:px-6 lg:px-8">
+            <div class="relative flex items-center justify-between h-16">
+                <div class="absolute inset-y-0 left-0 flex items-center md:hidden">
+                    <!-- menu button -->
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white" aria-controls="movile-menu" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        <svg class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="flex-1 flex items-center justify-center md:items-stretch">
+                    <div class="flex-shrink-0 flex items-center">
+                        <span id="title" class="text-4xl text-white">重复习</span>
+                    </div>
+                </div>
+                <div class="ml-3 relative">
+                    <div>
+                        <button type="button" class="dark:bg-gray-800 flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
+                        <span class="sr-only">Open user menu</span>
+                        <img class="h-8 w-8 rounded-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
-    </b-modal>
-  </b-navbar>
+        <!-- <LoginModal /> -->
+    </nav>
+    <!-- <header id="header" class="h-16 fixed top-0 left-0 w-full overflow-hidden z-50 bg-gray-100 shadow-lg">
+        sdf
+        <div class="w-full h-full flex justify-between items-center max-w-container m-auto px-4">
+            <div id="header-left" class="left w-1/5 flex justify-start">
+            </div>
+            <div id="header-center" class="w-3/5 flex flex-col items-center" href="#">
+                <span id="title" class="font-bold text-2xl leading-5 pt-2">重复习</span>
+                <p id="subtitle" class="font-light text-m">ChongFuXi</p>
+            </div>
+            <div id="header-right" class="right w-1/5 flex justify-end">
+                <button class="button" v-b-modal.sign-in v-if="!user.loggedIn">Sign in</button>
+                <avatar variant="secondary" v-if="user.loggedIn"></avatar>
+                <div id="avatar">
+                    <img class="inline-block h-10 w-10 rounded-full ring-2 ring-indigo-500" :src="user.data.photo" alt="">
+                </div>
+            </div>
+        </div>
+    </header> -->
+
 </template>
 
 <script>
-import { googleSignIn, googleSignOut } from '@/util/google-signin.js';
-import { mapGetters } from 'vuex';
+import { googleSignIn, googleSignOut } from '@/util/google-signin.js'
+// import LoginModal from  '@/components/LoginModal'
+import { mapGetters } from 'vuex'
 
 export default {
     name: "Header",
+    components: {
+        // LoginModal,
+    },
     props: [
-        'showVocab'
     ],
     data() {
         return {
@@ -65,71 +88,13 @@ export default {
 </script>
 
 <style scoped>
-.nav {
-    background-color: rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(5px);
-    display: flex;
-    justify-content: center;
-    align-content: center;
+#header {
+    /* backdrop-filter: blur(20px); */
+    
 }
-
-.nav-container {
-    width: 100%;
-    max-width: 1110px;
-    display: flex;
-    justify-content: space-between;
-    align-content: center;
-
-}
-
-.title-container {
-    margin: 0;
-    width: 100%;
-}
-
-.left, .right {
-    width: 20%;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
-.left {
-    justify-content:flex-start;
-}
-
-.right {
-    justify-content: flex-end;
-}
-
-.button {
-    margin-right: 0.5rem;
-}
-
-.switch-label {
-    width: 70px;
-    height: 40px;
-    margin: auto;
-    background-color: white;
-    cursor: pointer;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-}
-
 #title {
-    font-weight: bold;
+    font-family: 'ZCOOL QingKe HuangYou', cursive;
 }
 
-#subtitle {
-    font-size: 0.8rem;
-    font-weight: 300;
-    margin: 0;
-}
-
-.google-sign-in {
-    width: 200px;
-    margin: 0.5rem;
-}
+@import url('https://fonts.googleapis.com/css2?family=ZCOOL+QingKe+HuangYou&display=swap');
 </style>

@@ -1,6 +1,12 @@
 <template>
-   <div class="char-container rounded" :class="getVocabClass" :style="getCardBgColor"> 
-        <span class="char" :style="getCharTextColor"> {{character}} </span>
+   <div 
+    class="char-container bg-white flex justify-center items-center rounded " 
+    :class="
+        [cardBgStyle, cardStyle, cardSizeStyle]
+        
+        " :style="dynamicGridColumn"
+     > 
+        <span class="font-thin"> {{character}} </span>
     </div> 
 </template>
 
@@ -11,13 +17,36 @@ export default {
     name: "CharacterCard",
     props: [
         'character',
-        'charData',
+        'reviewLevel',
         'color',
-        'showVocab'
+        'sectionId',
+        'showVocab',
+        'size'
     ],
     computed: {
-        getCardBgColor() { return StyleCalc.cardBgColor(this.color, this.charData?.review_level); },
-        getCharTextColor() { return StyleCalc.charTextColor(this.color, this.charData?.review_level); },
+        dynamicGridColumn() {
+            if (this.size == 0 || this.size == 1) {
+                let span = this.character.length
+                if (this.character.length > 3) span = 3
+                else if (this.character.length > 1) span = 2
+                return `grid-column: span ${span};`;
+            }
+            return `grid-column: span ${this.character.length > 2 ? 3 : this.character.length};`;
+        },
+        cardBgStyle() { 
+            return StyleCalc.cardBgStyle(this.sectionId, this.reviewLevel);
+        },
+        cardStyle() { 
+            return StyleCalc.cardStyle(this.sectionId, this.reviewLevel);
+        },
+        cardSizeStyle() {
+            return {
+                'sm-char': this.size == 0,
+                'md-char': this.size == 1,
+                'lg-char': this.size == 2,
+            }
+        },
+        getCharTextColor() { return StyleCalc.charTextColor(this.sectionId, this.reviewLevel); },
         getVocabClass() {
             return (this.showVocab && this.character.length > 1) ? 'vocabCard' : '';
         }
@@ -27,21 +56,45 @@ export default {
 </script>
 
 <style scoped>
+.not-reviewed.sm-char {
+    border: none;
+}
+.sm-char {
+    @apply text-xl;
+    height: 2rem;
+}
+
+.md-char {
+    @apply text-3xl;
+    height: 4rem;
+}
+
+
+.lg-char {
+    @apply text-6xl;
+    height: 100px;
+}
 .char-container {
-    min-width: 40px;
-    height: 40px;
-    font-size: 20px;
     display: flex;
-    padding: 10px;
     align-items: center;
     justify-content: center;
     flex-direction: row;
-    font-weight: 400;
-    box-shadow: var(--main-shadow-inset);
     cursor: pointer; 
-    flex-grow: 1;
+    text-align: center;
+    /* background-color: rgba(255,255,255,0.2); */
+    /* display: grid;
+    gap: 0.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr)) */
 }
-
+.sm-char.textShadow {
+    text-shadow: 0 1px rgba(20,20,20,0.3)
+}
+.md-char.textShadow {
+    text-shadow: 0 2px rgba(20,20,20,0.3)
+}
+.lg-char.textShadow {
+    text-shadow: 0 2px rgba(20,20,20,0.3)
+}
 .vocabCard {
     
 

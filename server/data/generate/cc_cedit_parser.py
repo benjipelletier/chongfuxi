@@ -12,7 +12,11 @@
 
 import json
 
-with open('cedict_ts.u8') as file:
+DICT_FILE = 'cedict_ts.u8' 
+OUT_JSON_FILE = '../dictionary.json'
+
+
+with open(DICT_FILE) as file:
     text = file.read()
     lines = text.split('\n')
     dict_lines = list(lines)
@@ -76,25 +80,35 @@ list_of_dicts = []
 parsed_dict = main()
 print([obj for obj in list_of_dicts if obj['simplified'] == '得'])
 
+def make_def_block(py, meaning):
+    return {
+        'pinyin': py,
+        'meaning': meaning
+    }
+
 defs = {}
+
 
 for item in list_of_dicts:
     simp = item['simplified']
     trad = item['traditional']
     py = item['pinyin']
     engl = item['english']
+    def_block_candidate = make_def_block(py, engl)
     if simp in defs:
-        if py in defs[simp]['pinyin']:
-            defs[simp]['pinyin'][py] += engl
+        if def_block_candidate in defs[simp]['definitions']:
+            # traditional differs
+            pass
         else:
-            defs[simp]['pinyin'][py] = engl
+            defs[simp]['definitions'].append(def_block_candidate)
     else:
         defs[simp] = {
             'traditional': trad,
-            'pinyin': {
-                py: engl
-            }
+            'definitions': [
+                def_block_candidate
+            ]
         }
+
     
-with open('../definitions.json', 'w') as outfile:
+with open(OUT_JSON_FILE, 'w') as outfile:
     json.dump(defs, outfile,  indent=2, ensure_ascii=False)

@@ -9,7 +9,7 @@ var _ = require('lodash');
 function genCharData() {
     let data = {}
     _.each(section_data.reduce((acc, item) => {
-        return [ ...item.characters, ...acc]
+        return [ ...item.characters, ...item.vocabulary, ...acc]
     }, []), (x => {
         data[x] = { "review_level":Math.floor(Math.random()*5)}
     }))

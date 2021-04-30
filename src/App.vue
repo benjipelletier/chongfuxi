@@ -1,6 +1,6 @@
 <template>
-  <div id="app">
-    <Header :showVocab="showVocab" v-on:switchVocabWords="switchVocabWords" />
+  <div id="app" class="dark">
+    <Header />
     <router-view/>
   </div>
 </template>
@@ -43,40 +43,5 @@ export default {
   font-family:  Roboto, "Helvetica Neue", Avenir, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-weight: 300;
-  text-align: center;
-  color: #2c3e50;
-  height: 100%;
-  background-color: #f3f3f3
 }
-
-#nav {
-  padding: 30px;
-}
-
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-#nav a.router-link-exact-active {
-  color: #42b983;
-}
-
-.page {
-  background-color: hsl(0, 0%, 95%);
-  height: 100%;
-  padding-top: 5rem;
-  padding-bottom: 3rem;
-}
-
-body {
-  background-color: #f3f3f3 !important;
-  min-height:100%
-}
-
-html {
-  height: 100%;
-}
-
 </style>

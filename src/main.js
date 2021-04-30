@@ -2,15 +2,15 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
-import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
-import VueAwesomeSwiper from 'vue-awesome-swiper'
+// import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 import firebase from "firebase/app";
 
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
+// import 'bootstrap/dist/css/bootstrap.css'
+// import 'bootstrap-vue/dist/bootstrap-vue.css'
 import 'typeface-roboto/index.css';
-import 'swiper/swiper-bundle.css'
+// import 'swiper/swiper-bundle.css'
 import "firebase/auth";
+import './assets/tailwind.css'
 
 Vue.config.productionTip = false
 
@@ -31,9 +31,8 @@ firebase.auth().onAuthStateChanged(user => {
   store.dispatch("fetchUser", user);
 });
 
-Vue.use(BootstrapVue)
-Vue.use(BootstrapVueIcons)
-Vue.use(VueAwesomeSwiper)
+// Vue.use(BootstrapVue)
+// Vue.use(BootstrapVueIcons)
 
 new Vue({
   router,

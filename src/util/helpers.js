@@ -1,18 +1,41 @@
-let StyleCalc = {
-    cardBgColor(color, lvl) {
-        if (lvl == undefined || lvl == 0) return 'background-color: rgba(0, 0, 0, 0.1)';
-        let hue = color[0];
-        let sat = color[1];
-        let light = color[2];
-        light = 100 - ((100 - light) / 5)*lvl;
-        return `background-color: hsl(${hue}, ${sat}%, ${light}%)`
-    },
-    charTextColor(color, lvl) {
-        if (lvl > 2) return 'color: #fff;'
-        let hue = color[0];
-        let sat = color[1];
-        let light = color[2];
-        return `color: hsl(${hue}, ${sat}%, ${light}%)`
+class StyleCalc {
+    static colors = {
+        default: ["gray", 500],
+        radicals: ["gray", 500],
+        hsk_1: ["yellow", 400],
+        hsk_2: ["blue", 400],
+        hsk_3: ["orange", 500],
+        hsk_4: ["red", 500],
+        hsk_5: ["indigo", 500],
+        hsk_6: ["purple", 600],
+    }
+    static cardStyle(sectionIdx, level) {
+        if (level == undefined || level == 0) {
+            return "text-white border-white border-4 bg-opacity-0 opacity-30"
+        }
+        return "text-white textShadow"
+    }
+    static cardBgStyle(sectionIdx, level) {
+        if (level == undefined || level == 0) {
+            return "not-reviewed"
+        }
+        let percent = level*25
+        let color = this.colors["default"][0]
+        let weight = this.colors["default"][1]
+        if (this.colors[sectionIdx]) {
+            color = this.colors[sectionIdx][0]
+            weight = this.colors[sectionIdx][1]
+        }
+        return `bg-${color}-${weight} bg-opacity-${percent}`
+    }
+    static cardBgColor(section_id, lvl) {
+        if (lvl == undefined) return 'background-color: rgba(0, 0, 0, 0.1)'
+        return `background-color: ${this.colors[section_id][lvl]}`
+    }
+    static charTextColor(section_id, lvl) {
+        lvl = lvl == undefined ? 0 : lvl
+        if (lvl >= 3) return 'color: #fff';
+        return `color: ${this.colors[section_id][4]}`
     }
 
 }
