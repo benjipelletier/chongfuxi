@@ -98,7 +98,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['getSections', 'getCharData', 'getShowVocab']),
+    ...mapGetters(['getSections', 'getReviewLevel', 'getShowVocab']),
   },
   methods: {
     ...mapActions(['setReviewDeck', 'addSection', 'removeSection', 'editSection']),
@@ -112,15 +112,15 @@ export default {
     },
     setNewCards() {
       let section = this.getSections[this.currSectionIndex];
-      let charSet = this.getShowVocab ? section.vocabulary : section.characters
-      this.newCards = charSet.filter(char => this.getCharData(char)?.review_level || -1 == 0).slice(0, this.newCharsCount)
+      let charSet = this.getShowVocab ? section.words : section.characters
+      this.newCards = charSet.filter(char => this.getReviewLevel(char) || -1 == 0).slice(0, this.newCharsCount)
     },
     progressClass(section, level) {
       return StyleCalc.cardBgStyle(section.id, level)
     },
     progressWidth(section, level) {
       let sec_len = section.characters.length;
-      let chars_len = section.characters.filter(char => this.getCharData(char).review_level == level).length
+      let chars_len = section.characters.filter(char => this.getReviewLevel(char) == level).length
       let percent = Math.floor(chars_len*100/sec_len)
       return `width: ${percent}%`
     },

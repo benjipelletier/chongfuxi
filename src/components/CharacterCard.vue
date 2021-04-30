@@ -17,7 +17,7 @@ export default {
     name: "CharacterCard",
     props: [
         'character',
-        'charData',
+        'reviewLevel',
         'color',
         'sectionId',
         'showVocab',
@@ -34,10 +34,10 @@ export default {
             return `grid-column: span ${this.character.length > 2 ? 3 : this.character.length};`;
         },
         cardBgStyle() { 
-            return StyleCalc.cardBgStyle(this.sectionId, this.charData?.review_level);
+            return StyleCalc.cardBgStyle(this.sectionId, this.reviewLevel);
         },
         cardStyle() { 
-            return StyleCalc.cardStyle(this.sectionId, this.charData?.review_level);
+            return StyleCalc.cardStyle(this.sectionId, this.reviewLevel);
         },
         cardSizeStyle() {
             return {
@@ -46,7 +46,7 @@ export default {
                 'lg-char': this.size == 2,
             }
         },
-        getCharTextColor() { return StyleCalc.charTextColor(this.sectionId, this.charData?.review_level); },
+        getCharTextColor() { return StyleCalc.charTextColor(this.sectionId, this.reviewLevel); },
         getVocabClass() {
             return (this.showVocab && this.character.length > 1) ? 'vocabCard' : '';
         }

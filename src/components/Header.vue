@@ -29,6 +29,7 @@
                 </div>
             </div>
         </div>
+        <!-- <LoginModal /> -->
     </nav>
     <!-- <header id="header" class="h-16 fixed top-0 left-0 w-full overflow-hidden z-50 bg-gray-100 shadow-lg">
         sdf
@@ -52,11 +53,15 @@
 </template>
 
 <script>
-import { googleSignIn } from '@/util/google-signin.js';
-import { mapGetters } from 'vuex';
+import { googleSignIn } from '@/util/google-signin.js'
+// import LoginModal from  '@/components/LoginModal'
+import { mapGetters } from 'vuex'
 
 export default {
     name: "Header",
+    components: {
+        // LoginModal,
+    },
     props: [
     ],
     data() {

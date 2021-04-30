@@ -1,5 +1,5 @@
 <template>
-   <div class="char-container rounded" :class="getVocabClass" :style="getCardBgColor"> 
+   <div class="char-container rounded" > 
         <span class="char" :style="getCharTextColor"> {{character}} </span>
     </div> 
 </template>
@@ -17,8 +17,8 @@ export default {
         'showVocab'
     ],
     computed: {
-        getCardBgColor() { return StyleCalc.cardBgColor(this.sectionId, this.charData?.review_level); },
-        getCharTextColor() { return StyleCalc.charTextColor(this.sectionId, this.charData?.review_level); },
+        // getCardBgColor() { return StyleCalc.cardBgColor(this.sectionId, this.charData?.review_level); },
+        // getCharTextColor() { return StyleCalc.charTextColor(this.sectionId, this.charData?.review_level); },
         getVocabClass() {
             return (this.showVocab && this.character.length > 1) ? 'vocabCard' : '';
         }
