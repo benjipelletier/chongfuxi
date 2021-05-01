@@ -14,14 +14,10 @@ export default {
         'charData',
         'color',
         'sectionId',
-        'showVocab'
     ],
     computed: {
         // getCardBgColor() { return StyleCalc.cardBgColor(this.sectionId, this.charData?.review_level); },
         // getCharTextColor() { return StyleCalc.charTextColor(this.sectionId, this.charData?.review_level); },
-        getVocabClass() {
-            return (this.showVocab && this.character.length > 1) ? 'vocabCard' : '';
-        }
 
     },
 }

@@ -4,12 +4,34 @@
         <div id="sidebar" class="w-72 pt-16 h-screen fixed hidden md:block dark:bg-gray-800">
           <div class="w-auto h-auto flex flex-col space-y-4 p-4">
 
+            
+            <!-- Words/Chars -->
+            <div class="flex flex-row h-14 rounded">
+              <button class="flex justify-center items-center w-2/5 bg-white hover:bg-opacity-20 focus:outline-none first:rounded-l last:rounded-r"
+                :class="{ 'bg-opacity-20 text-white hover:bg-opacity-20ring-inset text-2xl': 0 == getShowType.idx, 'bg-opacity-10 text-gray-400 text-2xl': 0 != getShowType.idx }"
+                @click="setShowType(0)">
+                <span class="font-light">{{getShowType.labels[0]}}</span>
+              </button>
+              <div class="flex w-3/5 flex-col">
+                <button class="flex justify-center items-center w-full h-1/2 bg-white hover:bg-opacity-20 focus:outline-none rounded-tr"
+                  :class="{ 'bg-opacity-20 text-white hover:bg-opacity-20ring-inset text-1xl': 1 == getShowType.idx, 'bg-opacity-10 text-gray-400 text-1xl': 1 != getShowType.idx }"
+                  @click="setShowType(1)">
+                  <span class="font-light">{{getShowType.labels[1]}}</span>
+                </button>
+                <button class="flex justify-center items-center w-full h-1/2 bg-white hover:bg-opacity-20 focus:outline-none first:rounded-l rounded-br"
+                  :class="{ 'bg-opacity-20 text-white hover:bg-opacity-20ring-inset text-1xl': 2 == getShowType.idx, 'bg-opacity-10 text-gray-400 text-1xl': 2 != getShowType.idx }"
+                  @click="setShowType(2)">
+                  <span class="font-light">{{getShowType.labels[2]}}</span>
+                </button>
+              </div>
+            </div>
+
             <!-- Sizes -->
             <div class="flex flex-row h-14 rounded">
               <button class="flex justify-center items-center w-1/3 bg-white hover:bg-opacity-20 focus:outline-none first:rounded-l last:rounded-r"
-                v-for="(size, i) in sizes"
-                :class="{ 'bg-opacity-20 text-white hover:bg-opacity-20ring-inset text-3xl': i == sizeIdx, 'bg-opacity-10 text-gray-400 text-2xl': i != sizeIdx }"
-                @click="sizeIdx = i"
+                v-for="(size, i) in getSize.labels"
+                :class="{ 'bg-opacity-20 text-white hover:bg-opacity-20ring-inset text-2xl': i == getSize.idx, 'bg-opacity-10 text-gray-400 text-2xl': i != getSize.idx }"
+                @click="setSize(i)"
                 :key="i">
                 <span class="font-light">{{size}}</span>
               </button>
@@ -46,7 +68,6 @@
               :key="i"
               :section="section" 
               :sectionIdx="i" 
-              :size="sizeIdx"
               v-on:review-section="reviewSection(i)"
               @editSection="showEditSecModal" />
         </div>
@@ -87,8 +108,7 @@ export default {
       currSectionIndex: -1,
       newCharsCount: 0,
       newCards: [],
-      sizes: ["小","中","大"],
-      sizeIdx: 2, // lg
+      showTypeIdx: 0,
       newSecModal: false,
       editSecModal: false,
       editSecData: {
@@ -98,10 +118,10 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['getSections', 'getReviewLevel', 'getShowVocab']),
+    ...mapGetters(['getSections', 'getReviewLevel', 'getSize', 'getShowType']),
   },
   methods: {
-    ...mapActions(['setReviewDeck', 'addSection', 'removeSection', 'editSection']),
+    ...mapActions(['setReviewDeck', 'addSection', 'removeSection', 'editSection', 'setSize', 'setShowType']),
     reviewSection(i) {
       this.currSectionIndex = i
       this.$bvModal.show('review-modal')
@@ -111,9 +131,9 @@ export default {
       this.$router.push("review")
     },
     setNewCards() {
-      let section = this.getSections[this.currSectionIndex];
-      let charSet = this.getShowVocab ? section.words : section.characters
-      this.newCards = charSet.filter(char => this.getReviewLevel(char) || -1 == 0).slice(0, this.newCharsCount)
+      // let section = this.getSections[this.currSectionIndex];
+      // let charSet = this.getShowVocab ? section.words : section.characters
+      // this.newCards = charSet.filter(char => this.getReviewLevel(char) || -1 == 0).slice(0, this.newCharsCount)
     },
     progressClass(section, level) {
       return StyleCalc.cardBgStyle(section.id, level)

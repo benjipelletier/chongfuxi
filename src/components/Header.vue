@@ -1,10 +1,10 @@
 <template>
     <nav id="header" class="bg-gray-700 border-b-2 border-gray-500 fixed w-full z-10">
-        <div class="mx-auto px-2 md:px-6 lg:px-8">
+        <div class="mx-auto px-4">
             <div class="relative flex items-center justify-between h-16">
-                <div class="absolute inset-y-0 left-0 flex items-center md:hidden">
+                <div class="w-1/5 inset-y-0 left-0 flex items-center">
                     <!-- menu button -->
-                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white" aria-controls="movile-menu" aria-expanded="false">
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white md:hidden" aria-controls="movile-menu" aria-expanded="false">
                         <span class="sr-only">Open main menu</span>
                         <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -14,42 +14,26 @@
                         </svg>
                     </button>
                 </div>
-                <div class="flex-1 flex items-center justify-center md:items-stretch">
+                <div class="flex-1 w-3/5 flex items-center justify-center md:items-stretch">
                     <div class="flex-shrink-0 flex items-center">
                         <span id="title" class="text-4xl text-white">重复习</span>
                     </div>
                 </div>
-                <div class="ml-3 relative">
-                    <div>
-                        <button type="button" class="dark:bg-gray-800 flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
-                        <span class="sr-only">Open user menu</span>
-                        <img class="h-8 w-8 rounded-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
-                        </button>
-                    </div>
+                <!-- Login -->
+                <div class="flex w-1/5 justify-end items-center h-14 space-x-4">
+                    <button v-if="user.loggedIn" type="button" class="dark:bg-gray-800 flex text-sm rounded-full focus:outline-none ring-2 ring-offset-2 ring-offset-gray-800 ring-gray-200">
+                        <img class="h-8 w-8 rounded-full" :src="user.data.photo" alt="">
+                    </button>
+                    <button v-if="user.loggedIn" @click="clickGoogleSignOut" class="flex justify-center rounded items-center w-16 h-10 text-white bg-indigo-500 hover:bg-opacity-80 focus:outline-none">
+                        Logout
+                    </button>
+                    <button v-if="!user.loggedIn" @click="clickGoogleSignIn" class="flex justify-center rounded items-center w-16 h-10 text-white bg-indigo-500 hover:bg-opacity-80 focus:outline-none">
+                        Login
+                    </button>
                 </div>
             </div>
         </div>
-        <!-- <LoginModal /> -->
     </nav>
-    <!-- <header id="header" class="h-16 fixed top-0 left-0 w-full overflow-hidden z-50 bg-gray-100 shadow-lg">
-        sdf
-        <div class="w-full h-full flex justify-between items-center max-w-container m-auto px-4">
-            <div id="header-left" class="left w-1/5 flex justify-start">
-            </div>
-            <div id="header-center" class="w-3/5 flex flex-col items-center" href="#">
-                <span id="title" class="font-bold text-2xl leading-5 pt-2">重复习</span>
-                <p id="subtitle" class="font-light text-m">ChongFuXi</p>
-            </div>
-            <div id="header-right" class="right w-1/5 flex justify-end">
-                <button class="button" v-b-modal.sign-in v-if="!user.loggedIn">Sign in</button>
-                <avatar variant="secondary" v-if="user.loggedIn"></avatar>
-                <div id="avatar">
-                    <img class="inline-block h-10 w-10 rounded-full ring-2 ring-indigo-500" :src="user.data.photo" alt="">
-                </div>
-            </div>
-        </div>
-    </header> -->
-
 </template>
 
 <script>
@@ -73,9 +57,6 @@ export default {
         }
     },
     computed: {
-        getVocabWords() {
-            return this.showVocab ? "Vocab" : "Words"
-        },
         ...mapGetters({
             user: 'getUser'
         })

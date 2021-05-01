@@ -15,15 +15,10 @@ export default {
   }, 
   data() {
     return {
-      showVocab: true
     }
   },
   methods: {
-    switchVocabWords() {
-      this.showVocab = !this.showVocab;
-      this.setShowVocab(this.showVocab);
-    },
-    ...mapActions([ 'fetchSections', 'fetchProgress', 'setShowVocab'])
+    ...mapActions([ 'fetchSections', 'fetchProgress'])
   },
   created() {
     this.fetchSections();

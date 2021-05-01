@@ -12,6 +12,7 @@
 
 <script>
 import { StyleCalc } from '@/util/helpers.js'
+import { mapGetters } from 'vuex'
 
 export default {
     name: "CharacterCard",
@@ -20,12 +21,11 @@ export default {
         'reviewLevel',
         'color',
         'sectionId',
-        'showVocab',
-        'size'
     ],
     computed: {
+        ...mapGetters(['getSize']),
         dynamicGridColumn() {
-            if (this.size == 0 || this.size == 1) {
+            if (this.getSize.idx == 0 || this.getSize.idx == 1) {
                 let span = this.character.length
                 if (this.character.length > 3) span = 3
                 else if (this.character.length > 1) span = 2
@@ -41,16 +41,12 @@ export default {
         },
         cardSizeStyle() {
             return {
-                'sm-char': this.size == 0,
-                'md-char': this.size == 1,
-                'lg-char': this.size == 2,
+                'sm-char': this.getSize.idx == 0,
+                'md-char': this.getSize.idx == 1,
+                'lg-char': this.getSize.idx == 2,
             }
         },
         getCharTextColor() { return StyleCalc.charTextColor(this.sectionId, this.reviewLevel); },
-        getVocabClass() {
-            return (this.showVocab && this.character.length > 1) ? 'vocabCard' : '';
-        }
-
     },
 }
 </script>
@@ -58,6 +54,9 @@ export default {
 <style scoped>
 .not-reviewed.sm-char {
     border: none;
+}
+.not-reviewed.md-char {
+    border-width: 2px;
 }
 .sm-char {
     @apply text-xl;
