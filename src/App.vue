@@ -21,8 +21,6 @@ export default {
     ...mapActions([ 'fetchSections', 'fetchProgress'])
   },
   created() {
-    this.fetchSections();
-    this.fetchProgress();
   }
 }
 </script>

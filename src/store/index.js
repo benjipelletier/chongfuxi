@@ -49,16 +49,17 @@ const actions = {
         commit('setReviewDeck', newCards)
     },
     async fetchUser({ commit }, user) {
-        commit('setUserLoggedIn', user !== null)
         if (user) {
-            console.log(user)
+            let idToken = await user.getIdToken(true);
+            commit('setUserLoggedIn', true)
             commit('setUserData', {
                 displayName: user.displayName,
                 email: user.email,
                 photo: user.photoURL,
-                uuid: user.uid
+                idToken: idToken
             })
         } else {
+            commit('setUserLoggedIn', false)
             commit('setUserData', null)
         }
     },

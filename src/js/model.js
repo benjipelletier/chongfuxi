@@ -1,4 +1,5 @@
 import axios from 'axios'
+import store from '../store/index.js'
 
 const URL_BASE = 'http://localhost:3000'
 
@@ -6,7 +7,12 @@ const Sections = {
     data: [],
 
     async load() {
-        const response = await axios.get(URL_BASE + '/sections');
+        const idToken = store.getters.getUser.data?.idToken 
+        const response = await axios.get(URL_BASE + '/sections', {
+            params: {
+                idToken
+            }
+        });
         this.data = response.data
 
         // split characters

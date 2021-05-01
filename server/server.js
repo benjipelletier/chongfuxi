@@ -41,6 +41,20 @@ app.get('/sections', async (req, res) => {
         payload.splice(rIdx, rIdx+1)
         payload.unshift(radicals)
     }
+
+    // get 
+    if (req.query.idToken) {
+        console.log("IdToken found")
+        let decodedToken = await admin.auth().verifyIdToken(req.query.idToken)
+            const uid = decodedToken.uid;
+            const user_sections = await sections_ref.where('user', '==', uid).get()
+            base_sections.forEach(doc => {
+            payload.push({
+                id: doc.id,
+                ...doc.data()
+            })
+    })
+    }
     res.send(payload)
 })
 
