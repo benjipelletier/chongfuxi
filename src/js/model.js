@@ -4,19 +4,18 @@ import store from '../store/index.js'
 const URL_BASE = 'http://localhost:3000'
 
 const Sections = {
-    data: [],
-
     async load() {
+        let data = [];
         const idToken = store.getters.getUser.data?.idToken 
         const response = await axios.get(URL_BASE + '/sections', {
             params: {
                 idToken
             }
         });
-        this.data = response.data
+        data = response.data
 
         // split characters
-        this.data = this.data.map(
+        data = data.map(
             section => { 
                 return {
                     ...section,
@@ -27,7 +26,7 @@ const Sections = {
 
         // split characters no duplicates
         let accSet = new Set()
-        this.data = this.data.map(
+        data = data.map(
             section => { 
                 return {
                     ...section,
@@ -37,9 +36,31 @@ const Sections = {
         )
 
         // sort words
-        this.data.forEach(section => {
+        data.forEach(section => {
             section.words = this.sortByLen(section.words)
         })
+        return data
+    },
+    async post(title) {
+        const idToken = store.getters.getUser.data?.idToken 
+        const response = await axios.post(URL_BASE + '/section', {
+            title: title,
+            idToken: idToken
+        })
+        return this.normalize(response.data)
+    },
+    normalize(section) {
+        return {
+            base_section: section.base_section || false,
+            words: section.words || [],
+            characters: section.characters || [],
+            charactersNoDup: section.charactersNoDup || [],
+            title: section.title,
+            id: section.id || this.canonicalId(section.title),
+        }
+    },
+    canonicalId(title) {
+        return title.trim().replaceAll(" ", "_").toLowerCase()
     },
     sortByLen(lst) {
         return lst.sort((e1, e2) => {
@@ -70,7 +91,7 @@ const User = {
     async load() {
         // const response = await axios.get(URL_BASE + '/sections');
 
-        // this.data = response
+        // data = response
     }
 }
 

@@ -16,7 +16,7 @@ const state = {
     },
     size: {
       labels: ["小","中","大"],
-      idx: 0
+      idx: 1
     },
     showType: {
       labels: ['词汇', '字', '字（不重复）'],
@@ -37,8 +37,8 @@ const getters = {
 
 const actions = {
     async fetchSections({ commit }) {
-        await Sections.load()
-        commit('setSections', Sections.data);
+        let sections = await Sections.load()
+        commit('setSections', sections);
     },
     async fetchProgress({ commit }) {
         // const response = await axios.get(URL_BASE + '/user')
@@ -64,12 +64,14 @@ const actions = {
         }
     },
     async addSection({ commit }, title) {
-        commit('addSection', {
-            characters: [],
-            vocabulary: [],
-            title: title,
-            id: title.trim().replaceAll(" ", "_").toLowerCase()
-        })
+        try {
+            let section = await Sections.post(title)
+            if (!section) return
+            console.log("nice " + JSON.stringify(section))
+            commit('addSection', section)
+        } catch(e) {
+            console.log("Could not add section " + JSON.stringify(e.response.data))
+        }
     },
     async removeSection({ commit }, idx) {
         commit('removeSection', idx)

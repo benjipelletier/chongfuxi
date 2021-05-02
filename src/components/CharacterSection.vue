@@ -24,6 +24,10 @@
             :reviewLevel="getReviewLevel(char)"
             :color="section.color"
             :sectionId="section.id" />
+            <CharacterCard 
+            v-if="!section.base_section"
+            character="+"
+            :addCharType="true" />
     </div>
 
 </div>
@@ -49,10 +53,6 @@ export default {
         'sectionIdx',
     ],
     computed: {
-        max() { return this.section.characters.length; },
-        getLvlCount() {
-            return this.section.characters.length/5;
-        },
         ...mapGetters(['getReviewLevel', 'getSize', 'getShowType']),
         cardSizeStyle() {
             return {
@@ -79,7 +79,6 @@ export default {
         },
         chooseShowType() {
             if (this.getShowType.idx == 1) {
-                console.log(this.section.characters)
                 return this.section.characters
             } else if (this.getShowType.idx == 2) {
                 return this.section.charactersNoDup

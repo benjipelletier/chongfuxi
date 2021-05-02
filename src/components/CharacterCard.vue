@@ -2,7 +2,7 @@
    <div 
     class="char-container bg-white flex justify-center items-center rounded " 
     :class="
-        [cardBgStyle, cardStyle, cardSizeStyle]
+        [cardBgStyle, cardStyle, cardSizeStyle, {'addCharType': addCharType}]
         
         " :style="dynamicGridColumn"
      > 
@@ -16,22 +16,29 @@ import { mapGetters } from 'vuex'
 
 export default {
     name: "CharacterCard",
-    props: [
-        'character',
-        'reviewLevel',
-        'color',
-        'sectionId',
-    ],
+    props: {
+        character: null,
+        reviewLevel: null,
+        color: null,
+        sectionId: null,
+        addCharType: {
+            type: Boolean,
+            default: false
+        }
+    },
     computed: {
         ...mapGetters(['getSize']),
         dynamicGridColumn() {
-            if (this.getSize.idx == 0 || this.getSize.idx == 1) {
-                let span = this.character.length
+            let span = this.character.length
+            if (this.getSize.idx == 0) { // small
+                if (this.character.length > 2) span = 3
+            } else if (this.getSize.idx == 1) { // medium
                 if (this.character.length > 3) span = 3
                 else if (this.character.length > 1) span = 2
-                return `grid-column: span ${span};`;
+            } else { // large
+                if (this.character.length > 2) span = 3
             }
-            return `grid-column: span ${this.character.length > 2 ? 3 : this.character.length};`;
+            return `grid-column: span ${span};`;
         },
         cardBgStyle() { 
             return StyleCalc.cardBgStyle(this.sectionId, this.reviewLevel);
@@ -52,6 +59,13 @@ export default {
 </script>
 
 <style scoped>
+.addCharType { 
+    @apply bg-white text-gray-900 hover:opacity-100;
+}
+.addCharType span {
+    font-weight: bold !important;
+
+}
 .not-reviewed.sm-char {
     border: none;
 }
