@@ -73,11 +73,24 @@ const actions = {
             console.log("Could not add section " + JSON.stringify(e.response.data))
         }
     },
-    async removeSection({ commit }, idx) {
-        commit('removeSection', idx)
+    async removeSection({ commit }, sectionId) {
+        try {
+            await Sections.delete(sectionId)
+            commit('removeSection', sectionId)
+        } catch(e) {
+            console.log("Could not delete section " + JSON.stringify(e.response))
+        }
     },
     async editSection({ commit }, data) {
-        commit('editSection', data)
+        try {
+            await Sections.put(data.idx, data.title)
+            commit('editSection', {
+                ...data,
+                canonicalId: Sections.canonicalId(data.title)
+            })
+        } catch(e) {
+            console.log("Could not edit section " + JSON.stringify(e.response))
+        }
     },
     async setSize({ commit }, idx) {
         commit('setSize', idx)
@@ -94,8 +107,14 @@ const mutations = {
     setUserLoggedIn(state, value) { state.user.loggedIn = value },
     setUserData(state, data) { state.user.data = data; },
     addSection(state, data) { state.sections.push(data) },
-    removeSection(state, idx) { state.sections.splice(idx, 0) },
-    editSection(state, data) { console.log(data); state.sections[data.idx].title = data.title},
+    removeSection(state, sectionId) { 
+        state.sections = state.sections.filter(e => e.id !== sectionId)
+    },
+    editSection(state, data) { 
+        const section = state.sections.find(e => e.id === data.idx)
+        section.title = data.title
+        section.canonicalId = data.canonicalId
+    },
     setSize(state, idx) { state.size.idx = idx },
     setShowType(state, idx) { state.showType.idx = idx }
 }

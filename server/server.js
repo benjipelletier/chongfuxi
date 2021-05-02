@@ -83,12 +83,79 @@ app.post('/section', async (req, res) => {
                 base_sections: false,
                 title: title,
                 user: uid,
-                words: []
+                words: [],
             }
             const response = await sections_ref.add(section)
-            console.log("Sending response...")
+            section.id = response.id
             res.send(section)
         } catch(e) {
+            res.status(400).send({
+                message: e.response
+            })
+        }
+    } else {
+        res.status(400).send({
+            message: 'No idToken found'
+        })
+    }
+})
+
+app.put('/section/:sectionId', async (req, res) => {
+    console.log("PUT /section/:sectionId")
+    const sectionId = req.params.sectionId
+    const { newTitle, idToken } = req.body
+    if (idToken) {
+        try {
+            console.log("getting user uuid from token...")
+            const uid = await verifyAuth(idToken);
+            console.log("Editing section data...")
+            const doc = await sections_ref.doc(sectionId)
+            const section = await doc.get()
+            if (section.data().user !== uid) {
+                res.status(401).send({
+                    message: "Unauthorized to PUT section "
+                })
+            }
+            await doc.update({
+                title: newTitle
+            })
+            console.log("Sending response...")
+            res.sendStatus(200)
+        } catch(e) {
+            console.log("Error: " + e)
+            res.status(400).send({
+                message: e.response
+            })
+        }
+    } else {
+        res.status(400).send({
+            message: 'No idToken found'
+        })
+    }
+})
+
+app.delete('/section/:sectionId', async (req, res) => {
+    console.log("DELETE /section/:sectionId")
+    const sectionId = req.params.sectionId
+    const { idToken } = req.query
+    console.log(idToken)
+    if (idToken) {
+        try {
+            console.log("getting user uuid from token...")
+            const uid = await verifyAuth(idToken);
+            console.log("Deleting section data to firestore...")
+            const doc = await sections_ref.doc(sectionId)
+            const section = await doc.get()
+            if (section.data().user !== uid) {
+                res.status(401).send({
+                    message: "Unauthorized to DELETE section "
+                })
+            }
+            await doc.delete()
+            console.log("Sending response...")
+            res.sendStatus(200)
+        } catch(e) {
+            console.log("Error: " + e)
             res.status(400).send({
                 message: e.response
             })

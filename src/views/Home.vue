@@ -1,7 +1,7 @@
 <template>
     <main class="dark:bg-gray-900 min-h-screen">
       <div class="flex items-start">
-        <div id="sidebar" class="w-72 pt-16 h-screen fixed hidden md:block dark:bg-gray-800">
+        <div id="sidebar" class="w-72 pt-16 h-screen fixed hidden md:block dark:bg-gray-800 overflow-y-scroll">
           <div class="w-auto h-auto flex flex-col space-y-4 p-4">
 
             
@@ -37,10 +37,10 @@
               </button>
             </div>
 
-            <div class="flex flex-col" v-for="(section, i) in getSections" :key="i">
+            <div class="flex flex-col overflow-ellipsis overflow-hidden" v-for="(section, i) in getSections" :key="i">
               <div class="dark:bg-white dark:bg-opacity-10 dark:hover:bg-opacity-20 active:bg-opacity-30 cursor-pointer h-12 rounded-t flex items-center">
-                <a :href="'#' + section.id" class="w-full text-white font-light text-2xl w-full h-full px-2 flex items-center">
-                  <span class="w-2/3">{{section.title}}</span>
+                <a :href="'#' + section.canonicalId" class="w-full text-white font-light text-2xl w-full h-full px-2 flex items-center">
+                  {{section.title}}
                 </a>
               </div>
               <!-- <div class="bg-gray-900 h-3 rounded-b"> </div> -->

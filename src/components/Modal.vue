@@ -64,6 +64,8 @@
 
 <script>
 // import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
+import { Sections } from '@/js/model.js'
 
 export default {
   name: 'Modal',
@@ -87,6 +89,9 @@ export default {
           default: null
       }
   },
+  computed: {
+        ...mapGetters(['getSections']),
+  },
   methods: {
       close() {
           this.$emit('close')
@@ -100,6 +105,13 @@ export default {
               this.errors.push("Title required")
               return
           }
+          const sectionTitles = this.getSections.map(sec => sec.canonicalId)
+          console.log(this.titleInput)
+          if (sectionTitles.includes(Sections.canonicalId(this.titleInput))) {
+                this.errors.push("Title already exists")
+                return
+          }
+
           if (this.isEditSection) {
             this.$emit('confirm', {title: this.titleInput, idx: this.idx})
           } else {

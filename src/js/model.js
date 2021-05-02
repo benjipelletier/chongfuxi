@@ -13,32 +13,18 @@ const Sections = {
             }
         });
         data = response.data
+        data = response.data.map(section => this.normalize(section))
 
         // split characters
-        data = data.map(
-            section => { 
-                return {
-                    ...section,
-                    characters: this.wordsToChars(section.words)
-                }
-            }
-        )
+        data.forEach(section => section.characters = this.wordsToChars(section.words))
 
         // split characters no duplicates
         let accSet = new Set()
-        data = data.map(
-            section => { 
-                return {
-                    ...section,
-                    charactersNoDup: this.wordsToCharsNoDup(section.characters, accSet)
-                }
-            }
-        )
+        data.forEach(section => section.charactersNoDup = this.wordsToCharsNoDup(section.characters, accSet))
 
         // sort words
-        data.forEach(section => {
-            section.words = this.sortByLen(section.words)
-        })
+        data.forEach(section => section.words = this.sortByLen(section.words))
+
         return data
     },
     async post(title) {
@@ -49,6 +35,23 @@ const Sections = {
         })
         return this.normalize(response.data)
     },
+    async put(sectionId, newTitle) {
+        const idToken = store.getters.getUser.data?.idToken 
+        console.log(sectionId, idToken)
+        await axios.put(URL_BASE + `/section/${sectionId}`, {
+            idToken,
+            newTitle,
+        })
+    },
+    async delete(sectionId) {
+        const idToken = store.getters.getUser.data?.idToken 
+        console.log(sectionId)
+        await axios.delete(URL_BASE + `/section/${sectionId}`, {
+            params: {
+                idToken
+            }
+        })
+    },
     normalize(section) {
         return {
             base_section: section.base_section || false,
@@ -56,11 +59,12 @@ const Sections = {
             characters: section.characters || [],
             charactersNoDup: section.charactersNoDup || [],
             title: section.title,
-            id: section.id || this.canonicalId(section.title),
+            canonicalId: section.canonicalId || this.canonicalId(section.title),
+            id: section.id || null
         }
     },
     canonicalId(title) {
-        return title.trim().replaceAll(" ", "_").toLowerCase()
+        return title.replace(/\s\s+/g, ' ').trim().replaceAll(" ", "_").toLowerCase()
     },
     sortByLen(lst) {
         return lst.sort((e1, e2) => {
