@@ -27,6 +27,7 @@
             <CharacterCard 
             v-if="!section.base_section"
             character="+"
+            :sectionId="section.id"
             :addCharType="true" />
     </div>
 

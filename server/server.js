@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const admin = require('firebase-admin')
 const serviceAccount = require('./certs/key.json')
+const dictionary = require('./data/dictionary.json')
 const port = 3000
 const app = express()
 
@@ -152,6 +153,56 @@ app.delete('/section/:sectionId', async (req, res) => {
                 })
             }
             await doc.delete()
+            console.log("Sending response...")
+            res.sendStatus(200)
+        } catch(e) {
+            console.log("Error: " + e)
+            res.status(400).send({
+                message: e.response
+            })
+        }
+    } else {
+        res.status(400).send({
+            message: 'No idToken found'
+        })
+    }
+})
+
+
+app.get('/definitions/:id', async (req, res) => {
+    const phrase = req.params.id
+    console.log(`GET /definitions/${phrase}`)
+    if (dictionary[phrase] == undefined) {
+        res.sendStatus(404)
+    }
+
+    res.send({
+        simplified: phrase,
+        ...dictionary[phrase]
+    })
+})
+
+app.put('/section/:sectionId/words', async (req, res) => {
+    console.log("PUT /section/:sectionId/words")
+    const sectionId = req.params.sectionId
+    const { wordsToAdd, idToken } = req.body
+    console.log(wordsToAdd)
+    if (idToken) {
+        try {
+            console.log("getting user uuid from token...")
+            const uid = await verifyAuth(idToken);
+            const doc = await sections_ref.doc(sectionId)
+            const section = await doc.get()
+            if (section.data().user !== uid) {
+                res.status(401).send({
+                    message: "Unauthorized to PUT section "
+                })
+            }
+            wordsToAdd.forEach(async word => {
+                await doc.update({
+                    words: admin.firestore.FieldValue.arrayUnion(word)
+                })
+            })
             console.log("Sending response...")
             res.sendStatus(200)
         } catch(e) {

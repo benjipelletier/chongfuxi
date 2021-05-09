@@ -86,12 +86,14 @@
         @close="closeEditSecModal"
         @confirm="confirmEditSecModal"
         @delete="deleteEditSecModal" />
+      <AddCharacterModal v-show="getModals.addCharacter.open"/>
     </main>
 </template>
 
 <script>
 import CharacterSection from '@/components/CharacterSection'
 import Modal from '@/components/Modal.vue'
+import AddCharacterModal from '@/components/AddCharacterModal.vue'
 // import CharacterCard from '@/components/CharacterCard'
 import { mapGetters, mapActions } from 'vuex'
 import { StyleCalc } from '@/util/helpers.js'
@@ -100,8 +102,8 @@ export default {
   name: 'Home',
   components: {
     CharacterSection,
-    Modal
-    // CharacterCard,
+    Modal,
+    AddCharacterModal
   },
   data() {
     return {
@@ -114,14 +116,15 @@ export default {
       editSecData: {
         title: null,
         idx: null
-      }
+      },
     }
   },
   computed: {
-    ...mapGetters(['getSections', 'getReviewLevel', 'getSize', 'getShowType']),
+    ...mapGetters(['getSections', 'getReviewLevel', 'getSize', 'getShowType', 'getModals']),
   },
   methods: {
-    ...mapActions(['setReviewDeck', 'addSection', 'removeSection', 'editSection', 'setSize', 'setShowType']),
+    ...mapActions(['setReviewDeck', 'addSection', 'removeSection', 'editSection', 'setSize', 'setShowType', 
+    ]),
     reviewSection(i) {
       this.currSectionIndex = i
       this.$bvModal.show('review-modal')
@@ -170,7 +173,7 @@ export default {
     },
     deleteEditSecModal(idx) {
       this.removeSection(idx)
-    }
+    },
   },
   watch: {
     newCharsCount() {

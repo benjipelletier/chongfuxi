@@ -13,7 +13,8 @@
 import json
 
 DICT_FILE = 'cedict_ts.u8' 
-OUT_JSON_FILE = '../dictionary.json'
+OUT_JSON_FILE = '../dictionary-lst.json'
+OUT_JSON_FILE_LST = '../words-lst.json'
 
 
 with open(DICT_FILE) as file:
@@ -78,7 +79,7 @@ with open(DICT_FILE) as file:
 
 list_of_dicts = []
 parsed_dict = main()
-print([obj for obj in list_of_dicts if obj['simplified'] == '得'])
+# print([obj for obj in list_of_dicts if obj['simplified'] == '得'])
 
 def make_def_block(py, meaning):
     return {
@@ -109,6 +110,26 @@ for item in list_of_dicts:
             ]
         }
 
-    
-with open(OUT_JSON_FILE, 'w') as outfile:
-    json.dump(defs, outfile,  indent=2, ensure_ascii=False)
+def make_toneless(py):
+    return " ".join([syl[:-1] if syl[-1].isdigit() else syl for syl in py.split(" ")])
+
+
+lst = [{
+    'simplified': key.lower(),
+    'traditional': defs[key]['traditional'].lower(),
+    'pronunciations': [
+        {
+            'pinyin': defn['pinyin'].lower(),
+            'toneless': make_toneless(defn['pinyin'].lower())
+        }
+        for defn in defs[key]['definitions']
+    ]
+ } for key in defs.keys()]
+
+# with open(OUT_JSON_FILE, 'w') as outfile:
+#     # json.dump(defs, outfile,  indent=2, ensure_ascii=False)
+#     json.dump(lst, outfile,  indent=2, ensure_ascii=False)
+
+with open(OUT_JSON_FILE_LST, 'w') as outfile_lst:
+    # json.dump(defs, outfile,  indent=2, ensure_ascii=False)
+    json.dump(lst, outfile_lst,  indent=2, ensure_ascii=False)

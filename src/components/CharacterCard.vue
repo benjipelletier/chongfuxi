@@ -1,10 +1,9 @@
 <template>
    <div 
     class="char-container bg-white flex justify-center items-center rounded " 
-    :class="
-        [cardBgStyle, cardStyle, cardSizeStyle, {'addCharType': addCharType}]
-        
-        " :style="dynamicGridColumn"
+    :class="[cardBgStyle, cardStyle, cardSizeStyle, {'addCharType': addCharType}]"
+    :style="dynamicGridColumn"
+    @click="clickHandler"
      > 
         <span class="font-thin"> {{character}} </span>
     </div> 
@@ -12,7 +11,7 @@
 
 <script>
 import { StyleCalc } from '@/util/helpers.js'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
     name: "CharacterCard",
@@ -53,7 +52,15 @@ export default {
                 'lg-char': this.getSize.idx == 2,
             }
         },
-        getCharTextColor() { return StyleCalc.charTextColor(this.sectionId, this.reviewLevel); },
+        getCharTextColor() { return StyleCalc.charTextColor(this.sectionId, this.reviewLevel); }
+    },
+    methods: {
+        ...mapActions(['openAddCharacterModal']),
+        clickHandler() {
+            if (this.addCharType) {
+                this.openAddCharacterModal(this.sectionId)
+            }
+        }
     },
 }
 </script>

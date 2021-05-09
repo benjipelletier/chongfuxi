@@ -21,6 +21,12 @@ const state = {
     showType: {
       labels: ['词汇', '字', '字（不重复）'],
       idx: 0
+    },
+    modals: {
+        addCharacter: {
+            open: false,
+            sectionId: null
+        }
     }
 }
 
@@ -32,7 +38,8 @@ const getters = {
     getReviewSession: state => state.reviewSession,
     getUser: state => state.user,
     getSize: state => state.size,
-    getShowType: state => state.showType
+    getShowType: state => state.showType,
+    getModals: state => state.modals
 }
 
 const actions = {
@@ -97,7 +104,29 @@ const actions = {
     },
     async setShowType({ commit }, idx) {
         commit('setShowType', idx)
-    }
+    },
+    async addWordsToSection({ commit }, { section, newWords }) {
+        let updatedSection = await Sections.putWords(section, newWords)
+        commit('updateSection', updatedSection)
+    },
+    async openAddCharacterModal({ commit }, sectionId) { 
+        commit('updateModal', {
+            modalId: 'addCharacter',
+            data: {
+                open: true,
+                sectionId
+            }
+        })
+    },
+    async closeAddCharacterModal({ commit }) { 
+        commit('updateModal', {
+            modalId: 'addCharacter',
+            data: {
+                open: false,
+                sectionId: null
+            }
+        })
+     }
 }
 
 const mutations = {
@@ -113,10 +142,15 @@ const mutations = {
     editSection(state, data) { 
         const section = state.sections.find(e => e.id === data.idx)
         section.title = data.title
-        section.canonicalId = data.canonicalId
+        section.canonicalid = data.canonicalid
     },
     setSize(state, idx) { state.size.idx = idx },
-    setShowType(state, idx) { state.showType.idx = idx }
+    setShowType(state, idx) { state.showType.idx = idx },
+    updateModal(state, payload) { state.modals[payload.modalId] = payload.data },
+    updateSection(state, updatedSection) { 
+        const idx = state.sections.map(e => e.id).indexOf(updatedSection.id)
+        state.sections[idx] = updatedSection
+    }
 }
 
 Vue.use(Vuex)
