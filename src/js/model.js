@@ -5,7 +5,6 @@ const URL_BASE = 'http://localhost:3000'
 
 function getIdToken() {
     return store.getters.getUser.data?.idToken 
-
 }
 
 const Sections = {
@@ -92,9 +91,9 @@ const Sections = {
         })
         return ret
     },
-    async putWords(section, wordsToAdd) {
+    async addWords(section, wordsToAdd) {
         const idToken = getIdToken()
-        const response = await axios.put(URL_BASE + `/section/${section.id}/words`, {
+        const response = await axios.patch(URL_BASE + `/section/${section.id}/words`, {
             idToken,
             wordsToAdd,
         })
@@ -107,6 +106,24 @@ const Sections = {
         })
         const updatedChars = this.wordsToChars(section.words)
         const updatedCharsNoDup = this.wordsToCharsNoDup(section.characters, this.charactersSet)
+        return {
+            ...section,
+            words: updatedWords,
+            characters: updatedChars,
+            charactersNoDup: updatedCharsNoDup
+        }
+    },
+    async removeWords(section, wordsToRemove) {
+        const idToken = getIdToken()
+        await axios.patch(URL_BASE + `/section/${section.id}/words`, {
+            idToken,
+            wordsToRemove,
+        })
+        console.log("nice" +  wordsToRemove)
+        const updatedWords = section.words.filter(word => !wordsToRemove.includes(word))
+        const updatedChars = this.wordsToChars(section.words)
+        const updatedCharsNoDup = this.wordsToCharsNoDup(section.characters, this.charactersSet)
+        // console.log(updatedWords)
         return {
             ...section,
             words: updatedWords,

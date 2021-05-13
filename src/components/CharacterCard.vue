@@ -1,8 +1,8 @@
 <template>
    <div 
     class="char-container bg-white flex justify-center items-center rounded " 
-    :class="[cardBgStyle, cardStyle, cardSizeStyle, {'addCharType': addCharType}]"
     :style="dynamicGridColumn"
+    :class="[ selectCharStyle, cardBgStyle, cardStyle, cardSizeStyle, {'addCharType': addCharType}]"
     @click="clickHandler"
      > 
         <span class="font-thin"> {{character}} </span>
@@ -23,10 +23,14 @@ export default {
         addCharType: {
             type: Boolean,
             default: false
+        },
+        selected: {
+            type: Boolean,
+            default: false
         }
     },
     computed: {
-        ...mapGetters(['getSize']),
+        ...mapGetters(['getSize', 'getEditSectionId']),
         dynamicGridColumn() {
             let span = this.character.length
             if (this.getSize.idx == 0) { // small
@@ -52,13 +56,26 @@ export default {
                 'lg-char': this.getSize.idx == 2,
             }
         },
-        getCharTextColor() { return StyleCalc.charTextColor(this.sectionId, this.reviewLevel); }
+        getCharTextColor() { return StyleCalc.charTextColor(this.sectionId, this.reviewLevel); },
+        selectCharStyle() {
+            if (!this.addCharType) {
+                if (this.getEditSectionId === this.sectionId) {
+                    return { 
+                        'ring-offset-gray-900 ring-offset-2 ring-gray-100 ring-inset hover:ring-2 hover:bg-gray-100 hover:text-black': !this.selected,
+                        'selectedCard': this.selected
+                    }
+                }
+            }
+            return {}
+        }
     },
     methods: {
         ...mapActions(['openAddCharacterModal']),
         clickHandler() {
             if (this.addCharType) {
                 this.openAddCharacterModal(this.sectionId)
+            } else if (this.getEditSectionId === this.sectionId) {
+                this.$emit('select', this.character)
             }
         }
     },
@@ -115,9 +132,9 @@ export default {
 .lg-char.textShadow {
     text-shadow: 0 2px rgba(20,20,20,0.3)
 }
-.vocabCard {
-    
 
+.selectedCard {
+    @apply opacity-100 ring-offset-gray-900 ring-inset ring-2 ring-gray-900 bg-white text-black !important
 }
 
 </style>

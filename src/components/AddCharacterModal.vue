@@ -91,13 +91,14 @@ export default {
   methods: {
         ...mapActions(['closeAddCharacterModal', 'addWordsToSection']),
       close() {
+          this.wordsToAdd = []
         this.closeAddCharacterModal()
       },
       confirm(e) {
           e.preventDefault()
           this.addWordsToSection({
               section: this.getSections.find(e => e.id == this.getModals['addCharacter'].sectionId),
-              newWords: this.wordsToAdd
+              words: this.wordsToAdd
           })
           this.close()
       },

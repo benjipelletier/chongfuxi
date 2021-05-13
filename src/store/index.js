@@ -2,10 +2,11 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 // import sections from './server/data/sections.json'
 // import settings from './server/data/settings.json'
-import { Sections } from '@/js/model.js'
+import { Section } from '@/js/models/section.js';
+
 
 const state = {
-    sections: {},
+    sections: [],
     progress: {},
     reviewSession: {
         cards: [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
@@ -22,12 +23,13 @@ const state = {
       labels: ['词汇', '字', '字（不重复）'],
       idx: 0
     },
+    editSectionId: null,
     modals: {
         addCharacter: {
             open: false,
             sectionId: null
         }
-    }
+    },
 }
 
 const getters = {
@@ -39,22 +41,23 @@ const getters = {
     getUser: state => state.user,
     getSize: state => state.size,
     getShowType: state => state.showType,
-    getModals: state => state.modals
+    getModals: state => state.modals,
+    getEditSectionId: state => state.editSectionId
 }
 
 const actions = {
     async fetchSections({ commit }) {
-        let sections = await Sections.load()
+        let sections = await Section.load()
         commit('setSections', sections);
     },
-    async fetchProgress({ commit }) {
-        // const response = await axios.get(URL_BASE + '/user')
-        console.log(commit)
-        // commit('setProgress', response.data)
-    },
-    async setReviewDeck({ commit }, newCards) {
-        commit('setReviewDeck', newCards)
-    },
+    // async fetchProgress({ commit }) {
+    //     // const response = await axios.get(URL_BASE + '/user')
+    //     console.log(commit)
+    //     // commit('setProgress', response.data)
+    // },
+    // async setReviewDeck({ commit }, newCards) {
+    //     commit('setReviewDeck', newCards)
+    // },
     async fetchUser({ commit }, user) {
         if (user) {
             let idToken = await user.getIdToken(true);
@@ -71,33 +74,23 @@ const actions = {
         }
     },
     async addSection({ commit }, title) {
-        try {
-            let section = await Sections.post(title)
-            if (!section) return
-            console.log("nice " + JSON.stringify(section))
-            commit('addSection', section)
-        } catch(e) {
-            console.log("Could not add section " + JSON.stringify(e.response.data))
-        }
+        let section = await Section.post(title)
+        if (!section) return
+        commit('addSection', section)
+    },
+    async setEditSectionId({ commit }, sectionId) {
+        commit('setEditSectionId', sectionId)
     },
     async removeSection({ commit }, sectionId) {
-        try {
-            await Sections.delete(sectionId)
-            commit('removeSection', sectionId)
-        } catch(e) {
-            console.log("Could not delete section " + JSON.stringify(e.response))
-        }
+        await Section.delete(sectionId)
+        commit('removeSection', sectionId)
     },
     async editSection({ commit }, data) {
-        try {
-            await Sections.put(data.idx, data.title)
-            commit('editSection', {
-                ...data,
-                canonicalId: Sections.canonicalId(data.title)
-            })
-        } catch(e) {
-            console.log("Could not edit section " + JSON.stringify(e.response))
-        }
+        await Section.put(data.idx, data.title)
+        commit('editSection', {
+            idx: data.idx,
+            title: data.title
+        })
     },
     async setSize({ commit }, idx) {
         commit('setSize', idx)
@@ -105,9 +98,19 @@ const actions = {
     async setShowType({ commit }, idx) {
         commit('setShowType', idx)
     },
-    async addWordsToSection({ commit }, { section, newWords }) {
-        let updatedSection = await Sections.putWords(section, newWords)
-        commit('updateSection', updatedSection)
+    async addWordsToSection({ commit }, { section, words }) {
+        await section.patchWords({wordsToAdd: words})
+        commit('editSectionWords', {
+            section,
+            wordsToAdd: words
+        })
+    },
+    async removeWordsFromSection({ commit }, { section, words }) {
+        await section.patchWords({wordsToRemove: words})
+        commit('editSectionWords', {
+            section,
+            wordsToRemove: words
+        })
     },
     async openAddCharacterModal({ commit }, sectionId) { 
         commit('updateModal', {
@@ -141,16 +144,23 @@ const mutations = {
     },
     editSection(state, data) { 
         const section = state.sections.find(e => e.id === data.idx)
-        section.title = data.title
-        section.canonicalid = data.canonicalid
+        section.edit(data)
     },
     setSize(state, idx) { state.size.idx = idx },
-    setShowType(state, idx) { state.showType.idx = idx },
+    setShowType(state, idx) { 
+        if (idx === 2) {
+            Section.updateCharactersUnique(state.sections)
+        }
+        state.showType.idx = idx 
+    },
     updateModal(state, payload) { state.modals[payload.modalId] = payload.data },
-    updateSection(state, updatedSection) { 
-        const idx = state.sections.map(e => e.id).indexOf(updatedSection.id)
-        state.sections[idx] = updatedSection
-    }
+    editSectionWords(state, { section, wordsToAdd, wordsToRemove }) {
+        section.editWords({wordsToAdd, wordsToRemove})
+        if (state.showType.idx === 2) {
+            Section.updateCharactersUnique(state.sections)
+        }
+    },
+    setEditSectionId(state, sectionId) { state.editSectionId = sectionId }
 }
 
 Vue.use(Vuex)

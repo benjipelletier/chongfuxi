@@ -182,11 +182,10 @@ app.get('/definitions/:id', async (req, res) => {
     })
 })
 
-app.put('/section/:sectionId/words', async (req, res) => {
-    console.log("PUT /section/:sectionId/words")
+app.patch('/section/:sectionId/words', async (req, res) => {
+    console.log("PATCH /section/:sectionId/words")
     const sectionId = req.params.sectionId
-    const { wordsToAdd, idToken } = req.body
-    console.log(wordsToAdd)
+    const { wordsToAdd, wordsToRemove, idToken } = req.body
     if (idToken) {
         try {
             console.log("getting user uuid from token...")
@@ -195,14 +194,27 @@ app.put('/section/:sectionId/words', async (req, res) => {
             const section = await doc.get()
             if (section.data().user !== uid) {
                 res.status(401).send({
-                    message: "Unauthorized to PUT section "
+                    message: "Unauthorized to PUT section/words "
                 })
             }
-            wordsToAdd.forEach(async word => {
-                await doc.update({
-                    words: admin.firestore.FieldValue.arrayUnion(word)
+            if (wordsToAdd) {
+                console.log("Adding words...")
+                console.log(wordsToAdd)
+                wordsToAdd.forEach(async word => {
+                    await doc.update({
+                        words: admin.firestore.FieldValue.arrayUnion(word)
+                    })
                 })
-            })
+            }
+            if (wordsToRemove) {
+                console.log("Removing words...")
+                console.log(wordsToRemove)
+                wordsToRemove.forEach(async word => {
+                    await doc.update({
+                        words: admin.firestore.FieldValue.arrayRemove(word)
+                    })
+                })
+            }
             console.log("Sending response...")
             res.sendStatus(200)
         } catch(e) {

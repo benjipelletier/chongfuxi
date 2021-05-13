@@ -1,10 +1,8 @@
 <template>
     <main class="dark:bg-gray-900 min-h-screen">
       <div class="flex items-start">
-        <div id="sidebar" class="w-72 pt-16 h-screen fixed hidden md:block dark:bg-gray-800 overflow-y-scroll">
+        <div id="sidebar" class="w-72 pt-16 h-screen fixed hidden md:block dark:bg-gray-800">
           <div class="w-auto h-auto flex flex-col space-y-4 p-4">
-
-            
             <!-- Words/Chars -->
             <div class="flex flex-row h-14 rounded">
               <button class="flex justify-center items-center w-2/5 bg-white hover:bg-opacity-20 focus:outline-none first:rounded-l last:rounded-r"
