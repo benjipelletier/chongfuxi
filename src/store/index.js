@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 // import sections from './server/data/sections.json'
 // import settings from './server/data/settings.json'
 import { Section } from '@/js/models/section.js';
+import { User } from '../js/models/user.js';
 
 
 const state = {
@@ -68,6 +69,7 @@ const actions = {
                 photo: user.photoURL,
                 idToken: idToken
             })
+            User.load(user.uid)
         } else {
             commit('setUserLoggedIn', false)
             commit('setUserData', null)

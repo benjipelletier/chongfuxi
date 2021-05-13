@@ -54,7 +54,7 @@ app.get('/sections', async (req, res) => {
     // get user sections
     if (req.query.idToken) {
         try {
-            console.log("getting user uuid from token: " + req.query.idToken)
+            console.log("getting user uuid from token")
             const uid = await verifyAuth(req.query.idToken);
             const user_sections = await sections_ref.where('user', '==', uid).get()
             user_sections.forEach(doc => {
@@ -139,7 +139,6 @@ app.delete('/section/:sectionId', async (req, res) => {
     console.log("DELETE /section/:sectionId")
     const sectionId = req.params.sectionId
     const { idToken } = req.query
-    console.log(idToken)
     if (idToken) {
         try {
             console.log("getting user uuid from token...")
@@ -220,6 +219,56 @@ app.patch('/section/:sectionId/words', async (req, res) => {
         } catch(e) {
             console.log("Error: " + e)
             res.status(400).send({
+                message: e.response
+            })
+        }
+    } else {
+        res.status(400).send({
+            message: 'No idToken found'
+        })
+    }
+})
+app.get('/users/:uid', async (req, res) => {
+    console.log("GET /users/:uid")
+    const uid = req.params.uid
+    const { idToken } = req.query
+    if (idToken) {
+        try {
+            const doc = await users_ref.doc(uid)
+            const user = await doc.get()
+            if (user && user.exists) {
+                res.status(200).send({
+                    user
+                })
+            } else {
+                res.sendStatus(404)
+            }
+        } catch (e) {
+            res.status(404).send({
+                message: e.response
+            })
+        }
+    } else {
+        res.status(400).send({
+            message: 'No idToken found'
+        })
+    }
+})
+
+app.put('/users/:uid', async (req, res) => {
+    console.log("PUT /users/:uid")
+    const uid = req.params.uid
+    const { idToken } = req.body
+    console.log(idToken)
+    if (idToken) {
+        try {
+            const doc = await users_ref.doc(uid)
+            await doc.set({test: 3}, {merge: true})
+            const user = await users_ref.doc(uid).get()
+            res.status(200).send(user)
+        } catch(e) {
+            console.log("Error: ", e)
+            res.status(404).send({
                 message: e.response
             })
         }
