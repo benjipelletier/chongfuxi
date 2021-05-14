@@ -20,7 +20,7 @@ module.exports = {
       backgroundColor: ['disabled'],
       backgroundOpacity: ['active'],
       borderRadius: ['first', 'last'],
-      opacity: ['active'],
+      opacity: ['active', 'disabled'],
       ringWidth: ['hover', 'active'],
       outline: ['hover', 'active'],
     },

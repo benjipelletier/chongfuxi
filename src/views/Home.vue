@@ -66,7 +66,6 @@
               :key="i"
               :section="section" 
               :sectionIdx="i" 
-              v-on:review-section="reviewSection(i)"
               @editSection="showEditSecModal" />
         </div>
       </div>
@@ -105,10 +104,6 @@ export default {
   },
   data() {
     return {
-      currSectionIndex: -1,
-      newCharsCount: 0,
-      newCards: [],
-      showTypeIdx: 0,
       newSecModal: false,
       editSecModal: false,
       editSecData: {
@@ -121,21 +116,7 @@ export default {
     ...mapGetters(['getSections', 'getReviewLevel', 'getSize', 'getShowType', 'getModals']),
   },
   methods: {
-    ...mapActions(['setReviewDeck', 'addSection', 'removeSection', 'editSection', 'setSize', 'setShowType', 
-    ]),
-    reviewSection(i) {
-      this.currSectionIndex = i
-      this.$bvModal.show('review-modal')
-    },
-    handleGoReview() {
-      this.setReviewDeck(this.newCards);
-      this.$router.push("review")
-    },
-    setNewCards() {
-      // let section = this.getSections[this.currSectionIndex];
-      // let charSet = this.getShowVocab ? section.words : section.characters
-      // this.newCards = charSet.filter(char => this.getReviewLevel(char) || -1 == 0).slice(0, this.newCharsCount)
-    },
+    ...mapActions(['setReviewDeck', 'addSection', 'removeSection', 'editSection', 'setSize', 'setShowType']),
     progressClass(section, level) {
       return StyleCalc.cardBgStyle(section.id, level)
     },
@@ -173,14 +154,6 @@ export default {
       this.removeSection(idx)
     },
   },
-  watch: {
-    newCharsCount() {
-      this.setNewCards()
-    },
-    currSectionIndex() {
-      this.setNewCards();
-    }
-  }
 }
 </script>
 

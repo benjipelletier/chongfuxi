@@ -13,7 +13,8 @@
             </div>
         </div>
         <div v-if="getEditSectionId === section.id" class="w-2/5 flex justify-end items-center space-x-2">
-            <button @click="removeWords(section, selectedList)" class="bg-red-500 h-10 w-10 active:outline-none focus:outline-none hover:bg-opacity-80 flex justify-center items-center rounded">
+            <button @click="removeWords(section, selectedList)" :disabled="selectedList.length === 0" class="disabled:opacity-50 bg-red-500 h-10 w-10 active:outline-none focus:outline-none hover:bg-opacity-80 flex justify-center items-center rounded" >
+
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
                     <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
                 </svg>
@@ -31,7 +32,7 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </button>
-                <button :class="progressClass(section, 4)" class="h-10 text-white font-bold active:outline-none focus:outline-none hover:bg-opacity-80 flex justify-center space-x-2 p-2">
+                <button :class="progressClass(section, 4)" class="h-10 text-white font-bold active:outline-none focus:outline-none hover:bg-opacity-80 flex justify-center space-x-2 p-2 rounded-r">
                     <div class="flex items-center h-full space-x-1">
                         <span>10</span>
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
@@ -45,12 +46,14 @@
                         </svg>
                     </div>
                 </button>
-                <button :class="progressClass(section, 4)" class="h-10 text-white font-bold active:outline-none focus:outline-none hover:bg-opacity-80 flex justify-center space-x-1 p-2 rounded-r border-gray-900 border-l-2">
-                        <span>10</span>
+            </div>
+            <div class="flex space-x-0">
+                <button @click="reviewSection()" :class="progressClass(section, 4)" class="h-10 text-white font-bold active:outline-none focus:outline-none hover:bg-opacity-80 flex justify-center space-x-1 p-2 rounded">
+                        <span>{{chooseShowType().length}}</span>
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
                             <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-                        <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-</svg>
+                            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
                 </button>
             </div>
             <button v-if="!section.base_section" @click="editMode(section.id)" class="h-10 w-10 bg-gray-600 hover:bg-opacity-80 active:outline-none focus:outline-none flex justify-center items-center rounded">
@@ -115,13 +118,9 @@ export default {
         },
     },
     methods: {
-        ...mapActions(['setEditSectionId', 'removeWordsFromSection']),
+        ...mapActions(['setEditSectionId', 'removeWordsFromSection', 'setReviewSession']),
         getLvlStyle(lvl) {
             return StyleCalc.cardBgColor(this.section.id, lvl);
-        },
-        reviewSection() {
-            console.log()
-            this.$emit('review-section', this.sectionIndex)
         },
         progressClass(section, level) {
             return StyleCalc.cardBgStyle(section.id, level)
@@ -152,6 +151,18 @@ export default {
         removeWords(section, words) {
             this.removeWordsFromSection({section, words})
             this.setEditSectionId(null)
+        },
+        reviewSection() {
+            this.setReviewSession({
+                isSRS: false,
+                cards: this.chooseShowType()
+            })
+            console.log('set')
+            this.$router.push("review")
+            console.log('pushing')
+        },
+        reviewSessionSRS() {
+
         }
     },
 }

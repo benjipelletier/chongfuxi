@@ -10,6 +10,7 @@ const state = {
     sections: [],
     progress: {},
     reviewSession: {
+        isSRS: true,
         cards: [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
     },
     user: {
@@ -131,7 +132,10 @@ const actions = {
                 sectionId: null
             }
         })
-     }
+     },
+    async setReviewSession({ commit }, reviewConfig) {
+        commit('setReviewSession', reviewConfig)
+    }
 }
 
 const mutations = {
@@ -162,7 +166,8 @@ const mutations = {
             Section.updateCharactersUnique(state.sections)
         }
     },
-    setEditSectionId(state, sectionId) { state.editSectionId = sectionId }
+    setEditSectionId(state, sectionId) { state.editSectionId = sectionId },
+    setReviewSession(state, data) { state.reviewSession = data }
 }
 
 Vue.use(Vuex)

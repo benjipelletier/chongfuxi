@@ -58,9 +58,6 @@ export default {
                 // centeredSlides: true,
 
             },
-            reviewSession: {
-                cards: []
-            },
             currentText: "",
             inputText: "",
             answerCorrect: false,
@@ -79,7 +76,9 @@ export default {
 
             return `font-size: ${size}rem;`
         },
-        ...mapGetters(['getReviewSession'])
+        ...mapGetters({
+            reviewSession: 'getReviewSession'
+        })
     },
     methods: {
         onSubmit(e) {
@@ -93,8 +92,6 @@ export default {
         }
     },
     mounted() {
-        this.reviewSession = this.getReviewSession;
-        console.log(this.reviewSession)
         this.$refs.input[0].focus()
     },
 }
