@@ -1,32 +1,23 @@
 <template>
-    <div class="page section">
-        <div>
-            <!-- <swiper ref="mySwiper" class="char-list-container" :options="swiperOptions"
-                :allowTouchMove="false">
-                <swiper-slide class="swiper-slide"  v-for="(char, i) in reviewSession.cards" :key="i">
-                    <div class="rounded display-card-wrapper">
-                        <div class="display-card rounded" 
-                            :class="{'current-display-card': i == currentIndex,
-                                    'disabled-display-card': i != currentIndex}">
-                            {{char}} 
-                        </div>
-                    </div>
-                </swiper-slide>
-                <div class="swiper-pagination" slot="pagination"></div>
-            </swiper> -->
-            <div class="char-list-container">
-                <div class="rounded display-card-wrapper" 
+    <div class="page">
+        <div class="h-full w-full pt-20">
+            <div class="flex flex-row items-center h-1/5">
+            <swiper ref="mySwiper" class="w-full h-full" :options="swiperOptions"> 
+                <swiper-slide class="bg-gray-900" 
                     v-for="(char, i) in reviewSession.cards" 
                     :key="i">
                     <div class="display-card rounded" 
                         :class="{'current-display-card': i == currentIndex,
-                                 'disabled-display-card': i != currentIndex}">
+                                    'disabled-display-card': i != currentIndex}">
                         {{char}} 
                     </div>
-                </div>
-            </div>
+                </swiper-slide>
+            </swiper>
+                <!-- <div class="display-card-wrapper" 
+                </div> -->
+            </div> 
         </div>
-        <transition-group tag="div" class="cards-wrapper" name="slide">
+        <transition-group tag="div" class="w-screen h-screen flex justify-center items-center absolute" name="slide">
             <div class="card-background" v-for="i in [currentIndex]" :key="i">
                     <div class="char-card" :class="{'correct-answer': answerCorrect, 'incorrect-answer': answerIncorrect}">
                         <span :style="get_text_size">{{reviewSession.cards[i]}}</span>
@@ -44,10 +35,18 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import { Swiper, SwiperSlide, directive } from 'vue-awesome-swiper'
+
+import 'swiper/css/swiper.css'
 
 export default {
     name: "Review",
     components: {
+        Swiper,
+        SwiperSlide
+    },
+    directives: {
+        swiper: directive
     },
     props: [
     ],
@@ -56,7 +55,6 @@ export default {
             swiperOptions: {
                 slidesPerView: 10,
                 // centeredSlides: true,
-
             },
             currentText: "",
             inputText: "",
@@ -99,21 +97,6 @@ export default {
 </script>
 
 <style scoped>
-
-.section {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-    background-color: #4158D0;
-    background-image: linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%);
-}
-
-.section > div {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
 .char-list-container {
     width: 100%;
     padding: 0;
@@ -151,8 +134,13 @@ export default {
     color: rgb(0,0,0,0.2);
     background-color: rgb(0,0,0,0.1);
     transition: all 0.2s;
-    position: absolute;
+    float: left;
     bottom: 0;
+}
+
+.current-display-card {
+    float: none;
+    clear: left;
 }
 
 
@@ -166,9 +154,6 @@ export default {
 }
 
 .cards-wrapper {
-    position: relative;
-    overflow: hidden;
-    height: 70%;
 }
 
 .behind {
@@ -266,12 +251,13 @@ input::placeholder {
 
 .page {
     height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #4158D0;
+    background-image: linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%);
 }
 
-.section {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
 
 </style>
