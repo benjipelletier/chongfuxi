@@ -1,29 +1,45 @@
 <template>
     <div class="page">
-        <div class="h-full w-full pt-20">
-            <div class="flex flex-row items-center h-1/5">
-            <swiper ref="mySwiper" class="w-full h-full" :options="swiperOptions"> 
-                <swiper-slide class="bg-gray-900" 
+        <div class="h-1/3 w-full flex items-center justify-center p-4">
+        </div>
+        <div class="h-1/3 w-full relative flex justify-center items-center">
+            <div class="h-full absolute left-0 right-1/2 flex items-center">
+                <div class="conveyor-bg left-conveyor justify-end overflow-hidden">
+                    <div class="conveyor-block" :class="{'correct': block.correct, 'incorrect': !block.correct}" v-for="block in conveyorLists[0]" :key="block.word">{{block.word}}</div>
+                </div>
+            </div>
+            <div class="h-full absolute right-0 left-1/2 flex items-center"> 
+                <div class="conveyor-bg right-conveyor overflow-hidden">
+                    <div class="conveyor-block" v-for="word in conveyorLists[1]" :key="word">{{word}}</div>
+                </div>
+            </div>
+            <!-- <swiper ref="mySwiper" class="w-full flex flex-row flex-wrap" :options="swiperOptions"> 
+                <swiper-slide 
                     v-for="(char, i) in reviewSession.cards" 
+                    class="py-4 flex items-center justify-center"
                     :key="i">
-                    <div class="display-card rounded" 
+                    <div class="display-card h-20 w-min flex justify-center p-4 items-center rounded" 
                         :class="{'current-display-card': i == currentIndex,
                                     'disabled-display-card': i != currentIndex}">
-                        {{char}} 
+                        <span class="text-4xl whitespace-nowrap text-gray-900">{{char}} </span>
                     </div>
                 </swiper-slide>
-            </swiper>
-                <!-- <div class="display-card-wrapper" 
-                </div> -->
-            </div> 
+            </swiper> -->
         </div>
+        <div class="h-1/3"></div>
         <transition-group tag="div" class="w-screen h-screen flex justify-center items-center absolute" name="slide">
-            <div class="card-background" v-for="i in [currentIndex]" :key="i">
-                    <div class="char-card" :class="{'correct-answer': answerCorrect, 'incorrect-answer': answerIncorrect}">
+            <div class="main-wrapper absolute flex-col items-center justify-center rounded-3xl bg-opacity-25" v-for="i in [currentIndex]" :key="i">
+                    <div class="pt-1 relative h-20">
+                    </div>
+                    <div class="char-card rounded-3xl relative" :class="{'correct-answer': answerCorrect, 'incorrect-answer': answerIncorrect}">
+                        <div class="bottom-0 bg-gray-300 w-10/12 absolute overflow-hidden h-2 mb-4 text-xs flex rounded">
+                            <div :style="`width: ${percent(progress.correctCount, reviewSession.cards.length)}%`" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500"></div>
+                            <div :style="`width: ${percent(progress.incorrectCount, reviewSession.cards.length)}%`" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500"></div>
+                        </div>
                         <span :style="get_text_size">{{reviewSession.cards[i]}}</span>
                     </div>
-                    <form @submit="onSubmit" class="input-container">
-                        <input ref="input" v-model="inputText" class="input" placeholder="pinyin" spellcheck="false">
+                    <form @submit="onSubmit" class="w-full h-20 flex justify-center items-center">
+                        <input ref="input" v-model.lazy.trim="inputText" class="input" placeholder="pinyin" spellcheck="false">
                     </form>
             </div>
         </transition-group>
@@ -35,37 +51,41 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { Swiper, SwiperSlide, directive } from 'vue-awesome-swiper'
 
-import 'swiper/css/swiper.css'
 
 export default {
     name: "Review",
     components: {
-        Swiper,
-        SwiperSlide
     },
     directives: {
-        swiper: directive
     },
     props: [
     ],
     data() {
         return {
             swiperOptions: {
-                slidesPerView: 10,
-                // centeredSlides: true,
+                slidesPerView: "auto",
+                centeredSlides: true,
+                spaceBetween: 20,
+                allowTouchMove: false,
             },
+            conveyorLists: [[],[]],
             currentText: "",
             inputText: "",
             answerCorrect: false,
             answerIncorrect: false,
-            characters: ["你", "好", "吗", "你", "好", "吗", "你", "好", "吗", "你", "好", "吗", "你", "好", "吗"],
-            currentIndex: 0
+            currentIndex: 0,
+            progress: {
+                correctCount: 0,
+                incorrectCount: 0,
+            }
+
         }
     },
     computed: {
-
+        swiper() {
+            return this.$refs.mySwiper.$swiper
+        },
         get_text_size() {
             // dynamically change font size based on char count
             let size = 8
@@ -81,89 +101,68 @@ export default {
     methods: {
         onSubmit(e) {
             e.preventDefault();
-            if (this.inputText.trim() == "") return;
+            if (this.inputText == "") return;
             this.answerCorrect = Math.floor(Math.random() * 2) === 1 ? true : false;
+            this.updateConveyor(this.answerCorrect)
             this.answerIncorrect = !this.answerCorrect;
+            if (this.answerCorrect) this.progress.correctCount++
+            else this.progress.incorrectCount++
             this.currentIndex++;
+            // this.swiper.slideTo(this.currentIndex, 200, false)
             this.inputText = "";
             this.$nextTick(() => this.$refs.input[0].focus())
+        },
+        updateConveyor(correct) {
+            this.conveyorLists[0].push({
+                word: this.reviewSession.cards[this.currentIndex],
+                correct 
+                })
+            this.conveyorLists[1].splice(0, 1)
+        },
+        percent(num, denom) {
+            return num*100/denom
         }
     },
     mounted() {
         this.$refs.input[0].focus()
+        this.conveyorLists = [[], this.reviewSession.cards.slice(1)]
     },
 }
 
 </script>
 
 <style scoped>
-.char-list-container {
-    width: 100%;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    /* box-shadow: 0px 3px 0 rgb(0, 0, 0, 0.1); */
-}
+    .swiper-slide {
+        width: fit-content;
+    }
 
-.swiper-slide {
-    height: 100px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.display-card-wrapper {
-    position: relative; 
-    width: 50px;
-    height: 60px;
-    margin: 0.5rem;
-}
 
 .display-card {
-    padding: 0;
-    height: 100%;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.8rem;
-    font-weight: 500;
     /* box-shadow: 2px 2px 0 rgb(204 197 185 / 50%); */
     color: rgb(0,0,0,0.2);
     background-color: rgb(0,0,0,0.1);
     transition: all 0.2s;
-    float: left;
-    bottom: 0;
+    font-weight: 300;
 }
 
 .current-display-card {
-    float: none;
-    clear: left;
-}
-
-
-.current-display-card, .display-card:hover {
     /* position: absolute; */
     /* background-color: red; */
     background-color: white;
     color: black;
-    bottom: 5px;
+    position: relative;
+    bottom: 10px;
     box-shadow: 0 0px 0 5px rgb(0,0,0,0.2);
+    opacity: 100%;
+    font-weight: 500;
 }
 
-.cards-wrapper {
-}
-
-.behind {
-    position: absolute;
+.disabled-display-card {
+    opacity: 50%;
 }
 
 .card-background {
-    background-color: rgb(0,0,0,0.2);
-    height: 500px;
-    width: 400px;
+    /* background-color: rgb(0,0,0,0.2); */
     display: flex;
     align-items: center;
     flex-direction: column;
@@ -173,12 +172,8 @@ export default {
 }
 
 .char-card {
+    height: 300px;
     background-color: white;
-    border-radius: 2rem;
-    height: 70%;
-    width: 90%;
-    top:10px;
-    margin: 20px;
     margin-bottom: 0;
     display: flex;
     justify-content: center;
@@ -213,11 +208,6 @@ export default {
     padding: 0;
 }
 
-.input-container {
-    width: 100%;
-    height: 15%;
-    margin: auto;
-}
 
 .input {
     height: 100%;
@@ -229,8 +219,7 @@ export default {
     border: none;
     text-align: center;
     text-shadow: 0 2px 0 rgba(0,0,0,0.2);
-    border-bottom: 2px solid rgba(0, 0, 0, 0.3);
-    transition: 0.2s border-bottom;
+    border-bottom: 4px solid rgba(0, 0, 0, 0.3);
     padding: 10px;
     box-sizing: border-box;
     caret-color: rgba(255, 255, 255, 0.8);
@@ -259,5 +248,36 @@ input::placeholder {
     background-image: linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%);
 }
 
+.conveyor-mid {
+    width: 400px;
+}
+
+.conveyor-bg {
+    @apply items-center flex space-x-2 w-full;
+    @apply bg-gray-900 h-24 bg-opacity-30;
+}
+
+.conveyor-bg.right-conveyor {
+    padding-left: 210px;
+}
+.conveyor-bg.left-conveyor {
+    padding-right: 210px;
+
+}
+
+.main-wrapper {
+    width: 400px;
+}
+
+.conveyor-block {
+    @apply px-4 py-6 bg-gray-900 bg-opacity-50 text-gray-300 flex justify-center items-center rounded h-10 text-2xl font-light;
+    @apply whitespace-nowrap;
+}
+.conveyor-block.correct {
+    @apply ring-inset ring-2 ring-green-500
+}
+.conveyor-block.incorrect {
+    @apply ring-inset ring-2 ring-red-500
+}
 
 </style>

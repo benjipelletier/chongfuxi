@@ -31,12 +31,5 @@ export class User extends Model {
 
             }
         }
-        // try {
-
-        //     const response = await axios.put(`${URL_BASE}/users/${uid}`)
-        //     console.log("USER ", response.data)
-        // } catch(e) {
-        //     console.log("Error: ", e)
-        // }
     }
 }
