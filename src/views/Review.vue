@@ -2,15 +2,22 @@
     <div class="page">
         <div class="h-1/3 w-full flex items-center justify-center p-4">
         </div>
-        <div class="h-1/3 w-full relative flex justify-center items-center">
+        <div class="z-10 h-1/3 w-full relative flex justify-center items-center">
             <div class="h-full absolute left-0 right-1/2 flex items-center">
                 <div class="conveyor-bg left-conveyor justify-end overflow-hidden">
-                    <div class="conveyor-block" :class="{'correct': block.correct, 'incorrect': !block.correct}" v-for="block in conveyorLists[0]" :key="block.word">{{block.word}}</div>
+                    <button @mouseover="rewindHoverIdx = i" @mouseleave="rewindHoverIdx = -1" class="relative conveyor-block focus:outline-none active:outline-none hover:cursor-pointer" @click="rewind(i)" :class="{'correct': block.correct, 'incorrect': !block.correct}" v-for="(block, i) in progress.words.slice(0, currentIndex)" :key="block.word">
+                        <div class="w-full h-full absolute flex justify-center items-center">
+                            <svg v-if="rewindActive(i)" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="#d6d6d6">
+                                <path d="M8.445 14.832A1 1 0 0010 14v-2.798l5.445 3.63A1 1 0 0017 14V6a1 1 0 00-1.555-.832L10 8.798V6a1 1 0 00-1.555-.832l-6 4a1 1 0 000 1.664l6 4z" />
+                            </svg>
+                        </div>
+                        <span :class="{'text-white text-opacity-0': rewindActive(i)}">{{block.word}}</span>
+                    </button>
                 </div>
             </div>
             <div class="h-full absolute right-0 left-1/2 flex items-center"> 
                 <div class="conveyor-bg right-conveyor overflow-hidden">
-                    <div class="conveyor-block" v-for="word in conveyorLists[1]" :key="word">{{word}}</div>
+                    <div class="conveyor-block" v-for="block in progress.words.slice(currentIndex + 1)" :key="'conv-right-'+block.word">{{block.word}}</div>
                 </div>
             </div>
             <!-- <swiper ref="mySwiper" class="w-full flex flex-row flex-wrap" :options="swiperOptions"> 
@@ -28,13 +35,13 @@
         </div>
         <div class="h-1/3"></div>
         <transition-group tag="div" class="w-screen h-screen flex justify-center items-center absolute" name="slide">
-            <div class="main-wrapper absolute flex-col items-center justify-center rounded-3xl bg-opacity-25" v-for="i in [currentIndex]" :key="i">
+            <div class="main-wrapper z-10 absolute flex-col items-center justify-center rounded-3xl bg-opacity-25" v-for="i in [currentIndex]" :key="i">
                     <div class="pt-1 relative h-20">
                     </div>
                     <div class="char-card rounded-3xl relative" :class="{'correct-answer': answerCorrect, 'incorrect-answer': answerIncorrect}">
                         <div class="bottom-0 bg-gray-300 w-10/12 absolute overflow-hidden h-2 mb-4 text-xs flex rounded">
-                            <div :style="`width: ${percent(progress.correctCount, reviewSession.cards.length)}%`" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500"></div>
-                            <div :style="`width: ${percent(progress.incorrectCount, reviewSession.cards.length)}%`" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500"></div>
+                            <div :style="`width: ${percent(numCorrect, reviewSession.cards.length)}%`" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500"></div>
+                            <div :style="`width: ${percent(numIncorrect, reviewSession.cards.length)}%`" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500"></div>
                         </div>
                         <span :style="get_text_size">{{reviewSession.cards[i]}}</span>
                     </div>
@@ -63,23 +70,22 @@ export default {
     ],
     data() {
         return {
+            rewindHoverIdx: -1,
             swiperOptions: {
                 slidesPerView: "auto",
                 centeredSlides: true,
                 spaceBetween: 20,
                 allowTouchMove: false,
             },
-            conveyorLists: [[],[]],
+
             currentText: "",
             inputText: "",
             answerCorrect: false,
             answerIncorrect: false,
             currentIndex: 0,
             progress: {
-                correctCount: 0,
-                incorrectCount: 0,
+                words: [],
             }
-
         }
     },
     computed: {
@@ -94,6 +100,12 @@ export default {
 
             return `font-size: ${size}rem;`
         },
+        numCorrect() {
+            return this.progress.words.slice(0, this.currentIndex).filter(block => block.correct === true).length
+        },
+        numIncorrect() {
+            return this.progress.words.slice(0, this.currentIndex).filter(block => block.correct === false).length
+        },
         ...mapGetters({
             reviewSession: 'getReviewSession'
         })
@@ -103,29 +115,35 @@ export default {
             e.preventDefault();
             if (this.inputText == "") return;
             this.answerCorrect = Math.floor(Math.random() * 2) === 1 ? true : false;
-            this.updateConveyor(this.answerCorrect)
             this.answerIncorrect = !this.answerCorrect;
-            if (this.answerCorrect) this.progress.correctCount++
-            else this.progress.incorrectCount++
+            this.progress.words[this.currentIndex].correct = this.answerCorrect
             this.currentIndex++;
             // this.swiper.slideTo(this.currentIndex, 200, false)
             this.inputText = "";
             this.$nextTick(() => this.$refs.input[0].focus())
         },
-        updateConveyor(correct) {
-            this.conveyorLists[0].push({
-                word: this.reviewSession.cards[this.currentIndex],
-                correct 
-                })
-            this.conveyorLists[1].splice(0, 1)
-        },
         percent(num, denom) {
             return num*100/denom
+        },
+        rewind(idx) {
+            this.currentIndex = idx
+            this.rewindHoverIdx = -1
+        },
+        rewindActive(i) {
+            return this.rewindHoverIdx == i
+        },
+        rewindHover(i) {
+            this.rewindHoverIdx = i
         }
     },
     mounted() {
         this.$refs.input[0].focus()
-        this.conveyorLists = [[], this.reviewSession.cards.slice(1)]
+        this.progress.words = this.reviewSession.cards.map(word => {
+            return {
+                word,
+                correct: null
+            }
+        })
     },
 }
 

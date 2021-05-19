@@ -4,6 +4,7 @@ import Vuex from 'vuex'
 // import settings from './server/data/settings.json'
 import { Section } from '@/js/models/section.js';
 import { User } from '../js/models/user.js';
+import { Definition } from '../js/models/definition.js';
 
 
 const state = {
@@ -32,6 +33,7 @@ const state = {
             sectionId: null
         }
     },
+    definitions: {}
 }
 
 const getters = {
@@ -135,6 +137,16 @@ const actions = {
      },
     async setReviewSession({ commit }, reviewConfig) {
         commit('setReviewSession', reviewConfig)
+    },
+    async setDefinition({ commit }, entry) {
+        try {
+            const defn = await Definition.load(entry)
+            commit('setDefinition', {entry, defn})
+        } catch(e) {
+            console.log(e)
+            console.log("Couldn't find definition for " + entry)
+
+        }
     }
 }
 
@@ -167,7 +179,12 @@ const mutations = {
         }
     },
     setEditSectionId(state, sectionId) { state.editSectionId = sectionId },
-    setReviewSession(state, data) { state.reviewSession = data }
+    setReviewSession(state, data) { state.reviewSession = data },
+    setDefinition(state, {entry, defn}) { 
+        if (state.definitions[entry] === undefined) {
+            state.definitions[entry] = defn
+        }
+    }
 }
 
 Vue.use(Vuex)

@@ -279,6 +279,34 @@ app.put('/users/:uid', async (req, res) => {
     }
 })
 
+app.post('/definitions/:entry', async (req, res) => {
+    console.log("POST /definitions/:entry")
+    const entry = req.params.entry
+    const { idToken } = req.body
+    try {
+        const doc = await definitions_ref.doc(entry).get()
+        if (!doc.exists) {
+            const defn = dictionary[entry]
+            if (defn === undefined) {
+                res.status(404).send({
+                    message: `No entry for ${entry} found`
+                })
+            } else {
+                await definitions_ref.doc(entry).set(defn)
+                res.status(200).send(defn)
+            }
+        } else {
+            res.status(200).send(doc.data())
+
+        }
+    } catch(e) {
+        console.log("Error: ", e)
+        res.status(404).send({
+            message: e.response
+        })
+    }
+})
+
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)
 })
