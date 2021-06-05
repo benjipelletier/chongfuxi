@@ -12,7 +12,7 @@ const state = {
     progress: {},
     reviewSession: {
         isSRS: true,
-        cards: [1, 2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3]
+        cards: [1,'你',3]
     },
     user: {
         loggedIn: false,
@@ -33,6 +33,10 @@ const state = {
             sectionId: null
         }
     },
+    globalSelect: {
+        mode: false,
+        vocab: []
+    },
     definitions: {}
 }
 
@@ -46,7 +50,8 @@ const getters = {
     getSize: state => state.size,
     getShowType: state => state.showType,
     getModals: state => state.modals,
-    getEditSectionId: state => state.editSectionId
+    getEditSectionId: state => state.editSectionId,
+    getGlobalSelect: state => state.globalSelect
 }
 
 const actions = {
@@ -147,7 +152,13 @@ const actions = {
             console.log("Couldn't find definition for " + entry)
 
         }
-    }
+    },
+    async setGlobalSelectMode({ commit }, mode) {
+        commit('setGlobalSelectMode', mode)
+    },
+    async updateGlobalSelectVocab({ commit }, vocab) {
+        commit('updateGlobalSelectVocab', vocab)
+    },
 }
 
 const mutations = {
@@ -184,7 +195,16 @@ const mutations = {
         if (state.definitions[entry] === undefined) {
             state.definitions[entry] = defn
         }
+    },
+    setGlobalSelectMode(state, mode) { state.globalSelect.mode = mode },
+    updateGlobalSelectVocab(state, vocab) { 
+        if (state.globalSelect.vocab.includes(vocab)) {
+            Vue.set(state.globalSelect, 'vocab', state.globalSelect.vocab.filter(x => x != vocab))
+        } else {
+            Vue.set(state.globalSelect, 'vocab', [vocab, ...state.globalSelect.vocab])
+        }
     }
+
 }
 
 Vue.use(Vuex)

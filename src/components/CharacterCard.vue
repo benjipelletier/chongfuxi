@@ -30,7 +30,7 @@ export default {
         }
     },
     computed: {
-        ...mapGetters(['getSize', 'getEditSectionId']),
+        ...mapGetters(['getSize', 'getEditSectionId', 'getGlobalSelect']),
         dynamicGridColumn() {
             let span = this.character.length
             if (this.getSize.idx == 0) { // small
@@ -61,21 +61,30 @@ export default {
             if (!this.addCharType) {
                 if (this.getEditSectionId === this.sectionId) {
                     return { 
-                        'ring-offset-gray-900 ring-offset-2 ring-gray-100 ring-inset hover:ring-2 hover:bg-gray-100 hover:text-black': !this.selected,
-                        'selectedCard': this.selected
+                        'selectedHover': !this.selected,
+                        'selected': this.selected
                     }
+                } else if (this.getGlobalSelect.mode) {
+                    return { 
+                        'selectedHover': !this.getGlobalSelect.vocab.includes(this.character),
+                        'selected': this.getGlobalSelect.vocab.includes(this.character)
+                    }
+
                 }
             }
             return {}
         }
     },
     methods: {
-        ...mapActions(['openAddCharacterModal']),
+        ...mapActions(['openAddCharacterModal', 'updateGlobalSelectVocab']),
         clickHandler() {
             if (this.addCharType) {
                 this.openAddCharacterModal(this.sectionId)
             } else if (this.getEditSectionId === this.sectionId) {
                 this.$emit('select', this.character)
+            } else if (this.getGlobalSelect.mode) {
+                console.log('hjerre')
+                this.updateGlobalSelectVocab(this.character)
             }
         }
     },
@@ -133,7 +142,10 @@ export default {
     text-shadow: 0 2px rgba(20,20,20,0.3)
 }
 
-.selectedCard {
+.selectedHover {
+    @apply ring-offset-gray-900 ring-offset-2 ring-gray-100 ring-inset hover:ring-2 hover:bg-gray-100 hover:text-black;
+}
+.selected {
     @apply opacity-100 ring-offset-gray-900 ring-inset ring-2 ring-gray-900 bg-white text-black !important
 }
 

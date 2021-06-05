@@ -4,6 +4,7 @@ import router from './router'
 import store from './store'
 // import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 import firebase from "firebase/app";
+import VTooltip from 'v-tooltip'
 
 // import 'bootstrap/dist/css/bootstrap.css'
 // import 'bootstrap-vue/dist/bootstrap-vue.css'
@@ -13,6 +14,8 @@ import "firebase/auth";
 import './assets/tailwind.css'
 
 Vue.config.productionTip = false
+
+Vue.use(VTooltip)
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {

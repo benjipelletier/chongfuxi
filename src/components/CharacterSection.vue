@@ -108,7 +108,7 @@ export default {
         'section',
     ],
     computed: {
-        ...mapGetters(['getReviewLevel', 'getSize', 'getShowType', 'getEditSectionId']),
+        ...mapGetters(['getReviewLevel', 'getSize', 'getShowType', 'getEditSectionId', 'getGlobalSelect']),
         cardSizeStyle() {
             return {
                 'sm-char': this.getSize.idx == 0,
