@@ -12,7 +12,7 @@ const state = {
     progress: {},
     reviewSession: {
         isSRS: true,
-        cards: [1,'你',3]
+        cards: ['好','你',3]
     },
     user: {
         loggedIn: false,

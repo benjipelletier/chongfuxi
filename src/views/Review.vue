@@ -1,71 +1,81 @@
 <template>
-    <div class="bg-gray-800 min-h-screen">
-        <div class="w-full flex flex-col justify-center pt-16">
-            <div class="w-full bg-gray-900 relative"> 
-
-                <div class="z-0 h-full w-full absolute">
-                    <div class="h-full absolute left-0 right-1/2 flex items-center">
-                        <div class="conveyor-bg left-conveyor justify-end overflow-hidden">
-                            <button @mouseover="rewindHoverIdx = i" @mouseleave="rewindHoverIdx = -1" class="relative conveyor-block focus:outline-none active:outline-none hover:cursor-pointer" @click="rewind(i)" :class="{'correct': block.correct, 'incorrect': !block.correct}" v-for="(block, i) in vocabResponses.slice(0, currentIndex)" :key="block.word">
-                                <div class="w-full h-full absolute flex justify-center items-center">
-                                    <svg v-if="rewindActive(i)" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="#d6d6d6">
-                                        <path d="M8.445 14.832A1 1 0 0010 14v-2.798l5.445 3.63A1 1 0 0017 14V6a1 1 0 00-1.555-.832L10 8.798V6a1 1 0 00-1.555-.832l-6 4a1 1 0 000 1.664l6 4z" />
-                                    </svg>
-                                </div>
-                                <span :class="{'text-white text-opacity-0': rewindActive(i)}">{{block.word}}</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="h-full absolute right-0 left-1/2 flex items-center"> 
-                        <div class="conveyor-bg right-conveyor overflow-hidden">
-                            <div class="conveyor-block" v-for="(block, i) in vocabResponses.slice(currentIndex + 1)" :key="'conv-right-'+i">{{block.word}}</div>
-                        </div>
-                    </div>
-                </div>
-                <transition-group tag="div" class="w-full flex justify-center py-10" name="slide">
-                    <div class="w-72 z-20 flex-col justify-center rounded-3xl char-card relative" v-for="i in [currentIndex]" :key="i"
-                    :class="{
-                        'correct-answer': currentState.matches('answer') && vocabResponses[i].correct === true,
-                        'incorrect-answer': currentState.matches('answer') && vocabResponses[i].correct === false, }"
-                    >
-                                <div v-if="currentState.matches('stats')">
-                                    sdf
-                                </div>
-                                <div v-else class="flex flex-col">
-                                    <div v-if="currentState.matches('answer')" class="h-1/5 w-full flex justify-center items-center">
-                                        <span v-if="vocabResponses[i].matchedDefn"> {{vocabResponses[i].matchedDefn.pinyin}}</span>
-                                    </div>
-                                    <div class="flex-grow h-3/5 w-full flex justify-center items-center">
-                                        <span :style="get_text_size(reviewSession.cards[i])">{{reviewSession.cards[i]}}</span>
-                                    </div>
-                                    <div v-if="currentState.matches('answer')" class="h-1/5 w-full">
-                                        <div v-if="vocabResponses[i].matchedDefn" class="flex">
-                                            <span v-for="(meaning, j) in vocabResponses[i].matchedDefn.meaning" :key="j">{{meaning}}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                    </div>
-                </transition-group>
-            </div>
-            <div class="w-full h-2 bg-gray-900 flex">
+    <div @keyup.enter="pageEnter" tabindex="0" class="bg-gray-800 min-h-screen">
+        <div class="w-full flex flex-col justify-center pt-16 space-y-2">
+            <div class="w-full h-2 flex">
                 <div :style="`width: ${percent(numCorrect, reviewSession.cards.length)}%`" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500"></div>
                 <div :style="`width: ${percent(numIncorrect, reviewSession.cards.length)}%`" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500"></div>
             </div>
-            <div class="w-full py-10 flex flex-col items-center space-y-8">
-                <form @submit="onSubmit" class="w-full h-full flex justify-center items-center">
-                    <input ref="input" v-model.trim="inputText" class="input text-5xl text-gray-200" placeholder="pinyin" spellcheck="false" :readonly="currentState.matches('answer')">
-                </form>
-                <div v-if="showedAnswer.pinyin" class="bg-gray-900 py-6 px-8 text-6xl text-white rounded-lg flex justify-center items-center">
-                    <span>{{showedAnswer.pinyin}}</span>
-                    <div class="absolute -left-full top-0 w-full text-right px-8 font-bold text-5xl opacity-10" >
+            <!-- <div class="w-full h-2 flex">
+                <div v-for="(resp, i) in vocabResponses" :key="i" class="w-full h-full" :class="{'bg-green-500': resp.correct === true, 'bg-red-500': resp.correct === false}"></div>
+            </div> -->
+            <div class="w-full flex justify-center overflow-hidden"> 
+                <div class="relative flex items-center">
+                    <!-- card --> 
+                    <div class="z-20 w-96 flex-col justify-center rounded-t-xl rounded-b p-4 bg-white" v-for="i in [currentIndex]" :key="i">
+                        <div v-if="currentState.matches('stats')">
+                            sdf
+                        </div>
+                        <div v-else class="flex justify-center items-center p-4 whitespace-nowrap">
+                            <span class="text-9xl">{{reviewSession.cards[i]}}</span>
+                        </div>
+                    </div>
+                    <!-- left conveyor -->
+                    <div class="absolute right-full flex justify-end space-x-2 mr-2">
+                        <button @mouseover="rewindHoverIdx = i" @mouseleave="rewindHoverIdx = -1" class="relative conveyor-block focus:outline-none active:outline-none hover:cursor-pointer" @click="rewind(i)" :class="{'correct': block.correct, 'incorrect': !block.correct}" v-for="(block, i) in vocabResponses.slice(0, currentIndex)" :key="block.word">
+                            <div class="w-full h-full absolute flex justify-center items-center">
+                                <svg v-if="rewindActive(i)" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="#d6d6d6">
+                                    <path d="M8.445 14.832A1 1 0 0010 14v-2.798l5.445 3.63A1 1 0 0017 14V6a1 1 0 00-1.555-.832L10 8.798V6a1 1 0 00-1.555-.832l-6 4a1 1 0 000 1.664l6 4z" />
+                                </svg>
+                            </div>
+                            <span :class="{'text-white text-opacity-0': rewindActive(i)}">{{block.word}}</span>
+                        </button>
+                    </div>
+                    <div class="absolute left-full flex space-x-2 ml-2">
+                        <div class="conveyor-block" v-for="(block, i) in vocabResponses.slice(currentIndex + 1)" :key="'conv-right-'+i">{{block.word}}</div>
+                    </div>
+                </div>
+            </div>
+            <div v-if="currentCardData && currentCardData.defNotFound" class="w-full flex justify-center">
+                <!-- <div v-if="hasDef" :class="{'bg-indigo-500 text-indigo-100': currentState.matches('pinyin'), 'bg-orange-500 text-orange-100': currentState.matches('meaning')}" class="bg-indigo-500 py-1 px-4 rounded text-xl font-light">{{currentState.matches('pinyin') ? 'pinyin' : 'meaning'}}</div> -->
+                <div class="bg-red-500 py-1 px-2 rounded text-xl font-light text-white flex flex-row justify-center items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Definition not found</span>
+                </div>
+            </div>
+            <div class="w-full flex flex-col items-center space-y-2">
+                <!-- input -->
+                <!-- <form v-if="!currentState.matches('stats')" @submit="onSubmit" class="w-full h-full flex justify-center items-center">
+                    <input ref="input" v-model.trim="inputText" class="input w-full text-5xl text-gray-200 py-2 bg-gray-900" placeholder="response" spellcheck="false">
+                </form> -->
+                <!-- pinyin -->
+                <div class="bg-gray-900 text-white rounded flex justify-center relative ring-inset w-96" :class="{'ring-4 ring-green-500': showPinyinAnswer && shownAnswer.pyMatch.found, 'ring-4 ring-red-500': showPinyinAnswer && !shownAnswer.pyMatch.found}">
+                    <form v-if="currentState.matches('pinyin')" @submit="onSubmit" class="w-full h-full flex justify-center items-center">
+                        <input ref="input" v-model.trim="inputText" class="input w-full text-4xl text-gray-200 py-2 bg-gray-900 rounded" placeholder="pinyin" spellcheck="false">
+                    </form>
+                    <div v-else>
+                        <span class="text-4xl" v-if="shownAnswer.pyMatch.found">{{shownAnswer.definition.getPinyin(shownAnswer.pyMatch.idx)}}</span>
+                        <div v-else-if="shownAnswer.definition.isDuoYinCi()" v-for="(py, i) in shownAnswer.definition.getPinyins()" :key="'defn'+i" class="m-1 bg-gray-800 p-2 rounded text-gray-200 text-md">
+                            {{py}}
+                        </div>
+                        <span class="text-5xl" v-else>{{shownAnswer.definition.getPinyins()[0]}}</span>
+                    </div>
+                    <div class="absolute text-right right-full w-full font-bold text-5xl opacity-10 whitespace-nowrap mr-4" style="direction: rtl" >
                         拼音
                     </div>
                 </div>
-                <div v-if="showedAnswer.defn" class="bg-gray-900 p-4 text-xl text-white rounded-lg flex justify-center items-center space-x-4 relative">
-                    <div v-for="(defn, i) in showedAnswer.defn" :key="'defn'+i" class="justify-center items-center bg-gray-700 py-2 px-4 rounded text-gray-200">
-                        {{defn}}
+                <!-- meaning -->
+                <div class="bg-gray-900 text-white rounded-t rounded-b-xl relative w-96 h-20 ring-inset"  :class="{'ring-4 ring-green-500': showMeaningAnswer && shownAnswer.meaningMatch.found, 'ring-4 ring-red-500':  showMeaningAnswer && !shownAnswer.meaningMatch.found}">
+                    <form v-if="!currentState.matches('answer')" @submit="onSubmit" class="w-full h-full flex justify-center items-center">
+                        <input ref="input" v-model.trim="inputText" class="input w-full h-full text-4xl text-gray-200 py-2 bg-gray-900 rounded-t rounded-b-xl" placeholder="meaning" spellcheck="false">
+                    </form>
+                    <div v-else class="w-full h-full flex flex-row flex-wrap">
+                        <div v-for="(defn, i) in shownAnswer.definition.getMeanings(shownAnswer.pyMatch.idx)" :key="'defn'+i" class="m-1 bg-gray-800 py-2 px-4 rounded text-gray-200 text-md">
+                            {{defn}}
+                        </div>
                     </div>
-                    <div class="absolute -left-full top-0 w-full text-right px-8 font-bold text-5xl opacity-10" >
+                    <div class="absolute text-right right-full top-0 w-full font-bold text-5xl opacity-10 whitespace-nowrap mr-4" style="direction: rtl" >
                         意思
                     </div>
                 </div>
@@ -81,29 +91,10 @@ import { Definition } from '@/js/models/definition.js'
 import { createMachine, interpret } from 'xstate';
 
 const stateMachine = createMachine({
-    initial: 'review',
+    initial: 'pinyin',
     states: {
-        review: {
-            states: {
-                pinyin: { on: { NEXT: 'defn' }},
-                defn: { on: { NEXT: 'pinyin' }}
-            }
-        },
-        answer: {
-            initial: 'pinyin',
-            on: {
-                NEXT: [
-                    {
-                        target: 'stats',
-                        cond: (ctx, evt) => { console.log('evt', evt.query.isLast); return evt.query.isLast }
-                    },
-                    {
-                        target: 'review',
-                    }
-                ],
-                REWIND: 'review'
-            }
-        },
+        pinyin: { on: { MEANING: 'meaning', END: 'stats' }},
+        meaning: { on: { PINYIN: 'pinyin', END: 'stats' }},
         stats: {
             type: 'final'
         }
@@ -127,16 +118,7 @@ export default {
             currentIndex: 0,
             rewindHoverIdx: -1,
             vocabResponses: [],
-            swiperOptions: {
-                slidesPerView: "auto",
-                centeredSlides: true,
-                spaceBetween: 20,
-                allowTouchMove: false,
-            },
-            showedAnswer: {
-                pinyin: null,
-                defn: ['hello', 'nice', 'cool']
-            }
+            shownAnswer: null,
         }
     },
     computed: {
@@ -148,6 +130,18 @@ export default {
         },
         numIncorrect() {
             return this.vocabResponses.slice(0, this.currentIndex).filter(block => block.correct === false).length
+        },
+        currentCardData() {
+            return this.vocabResponses[this.currentIndex]
+        },
+        showPinyinAnswer() {
+            return this.shownAnswer && this.shownAnswer.pyMatch !== null && this.shownAnswer.definition !== null 
+        },
+        showMeaningAnswer() {
+            return this.shownAnswer && this.shownAnswer.meaningMatch !== null && this.shownAnswer.definition !== null 
+        },
+        hasDef() {
+            return this.currentCardData && !this.currentCardData.defNotFound
         },
         ...mapGetters({
             reviewSession: 'getReviewSession'
@@ -162,37 +156,82 @@ export default {
 
             return `font-size: ${size}rem;`
         },
+        pageEnter() {
+            if (this.$refs.input) {
+                this.$refs.input.focus()
+            }
+        },
         async onSubmit(e) {
             e.preventDefault();
+            const input = this.inputText
+            this.inputText = ""
 
-            if (this.inputText === "") return
-            console.log('INPUT ', this.inputText)
+            if (this.currentCardData.defNotFound) {
+                this.currentIndex++
+                if (this.currentIndex >= this.vocabResponses.length) {
+                    this.send('END')
+                }
+            }
 
-            if (this.currentState.matches('review')) {
+            if (input === "") return
+            console.log('INPUT ', input)
 
-                Definition.get(this.reviewSession.cards[this.currentIndex])
-                .then(response => {
-                    this.vocabResponses[this.currentIndex].definition = response
-                    return response.getDefnByPinyin(this.inputText)
-                }).then(defn => {
-                    this.vocabResponses[this.currentIndex].matchedDefn = defn
-                    this.vocabResponses[this.currentIndex].correct = true
+            if (this.currentState.matches('pinyin')) {
+                this.currentCardData.definitionPromise
+                .then(definition => {
+                    this.currentCardData.definition = definition
+                    return definition.getIdxMatchPinyin(input)
+                }).then(matchedIdx => {
+                    this.currentCardData.pyMatch = {
+                        found: true, 
+                        idx: matchedIdx,
+                    }
                 }).catch(e => {
+                    this.currentCardData.pyMatch = {
+                        found: false,
+                    }
                     console.log('Definition error: ', e)
-                    this.vocabResponses[this.currentIndex].correct = false
+                }).finally(() => {
+                    this.shownAnswer = this.currentCardData
+                    this.send('MEANING')
+                    this.$nextTick(() => this.$refs.input.focus())
                 })
-
-
-            } else if (this.currentState.matches('answer')) {
-                // next card
-                this.currentIndex++;
-                this.inputText = "";
-                this.$nextTick(() => this.$refs.input[0].focus())
+            } else if (this.currentState.matches('meaning')) {
+                this.currentCardData.definitionPromise
+                .then(definition => {
+                    return definition.getIdxMatchMeaning(this.currentCardData.pyMatch.idx, input)
+                }).then(meaningIdx => {
+                    this.currentCardData.meaningMatch = {
+                        found: true,
+                        idx: meaningIdx
+                    }
+                    this.currentCardData.correct = true
+                }).catch(err => {
+                    this.currentCardData.meaningMatch = {
+                        found: false,
+                    }
+                    console.log(err)
+                    this.currentCardData.correct = false
+                }).finally(() => {
+                    this.currentIndex++;
+                    if (this.currentIndex < this.vocabResponses.length) {
+                        this.send('PINYIN')
+                    } else {
+                        this.send('END')
+                    }
+                    this.$nextTick(() => this.$refs.input.focus())
+                })
             } 
-
-            this.send({ type: 'NEXT', query: { isLast: this.currentIndex === this.reviewSession.cards.length}})
-            return
-
+        },
+        setCurrentDefn() {
+            this.currentCardData.definitionPromise = Definition.get(this.reviewSession.cards[this.currentIndex])
+            .then(response => {
+                console.log('found definition for ', this.currentCardData.word)
+                return response
+            }).catch(err => {
+                console.log(err)
+                this.currentCardData.defNotFound = true
+            })
         },
         percent(num, denom) {
             return num*100/denom
@@ -220,17 +259,29 @@ export default {
         this.vocabResponses = this.reviewSession.cards.map(word => {
             return {
                 word,
+                definitionPromise: null,
                 definition: null,
-                matchedDefn: null,
+                defNotFound: false,
+                // response data
+                pyMatch: null,
+                meaningMatch: null,
                 correct: null
             }
         })
+        this.setCurrentDefn()
     },
     created() {
         this.stateMachine.onTransition((state) => {
             this.currentState = state;
         }).start()
     },
+    watch: {
+        currentIndex: function() {
+            if (this.currentIndex < this.vocabResponses.length) {
+                this.setCurrentDefn()
+            }
+        }
+    }
 }
 
 </script>
@@ -275,17 +326,6 @@ export default {
     position: absolute;
 }
 
-.char-card {
-    background-color: white;
-    margin-bottom: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: 500;
-    box-shadow: var(--big-card-shadow-inset);
-    transition: 0.2s box-shadow
-}
-
 .slide-leave-active,
 .slide-enter-active {
   transition: all 0.3s ease;
@@ -312,9 +352,7 @@ export default {
 
 .input {
     caret-color: white;
-    background-color: transparent;
     text-align: center;
-    @apply py-2 bg-gray-700 rounded-lg;
 }
 
 .input::placeholder {
@@ -327,7 +365,6 @@ export default {
 
 .input:focus {
     outline: none;
-    @apply border-b-0 border-gray-800 bg-gray-900 shadow-xl;
 }
 
 .input:hover {
