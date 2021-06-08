@@ -1,5 +1,5 @@
 <template>
-    <div @keyup.enter="pageEnter" tabindex="0" class="bg-gray-800 min-h-screen">
+    <div class="bg-gray-800 min-h-screen">
         <div class="w-full flex flex-col justify-center pt-16 space-y-2">
             <div class="w-full h-2 flex">
                 <div :style="`width: ${percent(numCorrect, reviewSession.cards.length)}%`" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500"></div>
@@ -11,7 +11,7 @@
             <div class="w-full flex justify-center overflow-hidden"> 
                 <div class="relative flex items-center">
                     <!-- card --> 
-                    <div class="z-20 w-96 flex-col justify-center rounded-t-xl rounded-b p-4 bg-white" v-for="i in [currentIndex]" :key="i">
+                    <div class="w-96 flex-col justify-center rounded-t-xl rounded-b p-4 bg-white" v-for="i in [currentIndex]" :key="i">
                         <div v-if="currentState.matches('stats')">
                             sdf
                         </div>
@@ -35,9 +35,9 @@
                     </div>
                 </div>
             </div>
-            <div v-if="currentCardData && currentCardData.defNotFound" class="w-full flex justify-center">
+            <div v-if="this.currentState.matches('noDef')" class="w-full flex justify-center">
                 <!-- <div v-if="hasDef" :class="{'bg-indigo-500 text-indigo-100': currentState.matches('pinyin'), 'bg-orange-500 text-orange-100': currentState.matches('meaning')}" class="bg-indigo-500 py-1 px-4 rounded text-xl font-light">{{currentState.matches('pinyin') ? 'pinyin' : 'meaning'}}</div> -->
-                <div class="bg-red-500 py-1 px-2 rounded text-xl font-light text-white flex flex-row justify-center items-center space-x-2">
+                <div class="bg-red-500 py-1 px-2 w-96 rounded-t rounded-b-xl text-xl font-light text-white flex flex-row justify-center items-center space-x-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
                     </svg>
@@ -50,33 +50,33 @@
                     <input ref="input" v-model.trim="inputText" class="input w-full text-5xl text-gray-200 py-2 bg-gray-900" placeholder="response" spellcheck="false">
                 </form> -->
                 <!-- pinyin -->
-                <div class="bg-gray-900 text-white rounded flex justify-center relative ring-inset w-96" :class="{'ring-4 ring-green-500': showPinyinAnswer && shownAnswer.pyMatch.found, 'ring-4 ring-red-500': showPinyinAnswer && !shownAnswer.pyMatch.found}">
-                    <form v-if="currentState.matches('pinyin')" @submit="onSubmit" class="w-full h-full flex justify-center items-center">
-                        <input ref="input" v-model.trim="inputText" class="input w-full text-4xl text-gray-200 py-2 bg-gray-900 rounded" placeholder="pinyin" spellcheck="false">
+                <div v-if="showAnswer" class="bg-gray-900 text-white rounded flex justify-center relative w-96 h-14 ring-inset" :class="{'ring-4 ring-green-500': !currentState.matches('review.pinyin') && currentCardData.pyMatch.found , 'ring-4 ring-red-500': !currentState.matches('review.pinyin') && !currentCardData.pyMatch.found}">
+                    <form v-if="currentState.matches('review.pinyin')" @submit="onSubmitPinyin">
+                        <input ref="pinyinInputRef" v-model.trim="pinyinInput" class="input w-full text-4xl text-gray-200 py-2 bg-gray-900 rounded" placeholder="pinyin" spellcheck="false" :disabled="!this.currentState.matches('review.pinyin')">
                     </form>
-                    <div v-else>
-                        <span class="text-4xl" v-if="shownAnswer.pyMatch.found">{{shownAnswer.definition.getPinyin(shownAnswer.pyMatch.idx)}}</span>
-                        <div v-else-if="shownAnswer.definition.isDuoYinCi()" v-for="(py, i) in shownAnswer.definition.getPinyins()" :key="'defn'+i" class="m-1 bg-gray-800 p-2 rounded text-gray-200 text-md">
-                            {{py}}
+                    <div v-else class="flex w-full h-full justify-center rounded">
+                        <div v-for="(defs, i) in currentCardData.definition.definitions" :key="'defn'+i" class="w-full flex justify-center items-center text-3xl font-light first:rounded-l last:rounded-r odd:bg-green-500">
+                            {{defs.pinyin}}
                         </div>
-                        <span class="text-5xl" v-else>{{shownAnswer.definition.getPinyins()[0]}}</span>
                     </div>
-                    <div class="absolute text-right right-full w-full font-bold text-5xl opacity-10 whitespace-nowrap mr-4" style="direction: rtl" >
+                    <div class="absolute text-right right-full w-full font-bold text-5xl opacity-10 top-0 whitespace-nowrap mr-4" style="direction: rtl" >
                         拼音
                     </div>
                 </div>
                 <!-- meaning -->
-                <div class="bg-gray-900 text-white rounded-t rounded-b-xl relative w-96 h-20 ring-inset"  :class="{'ring-4 ring-green-500': showMeaningAnswer && shownAnswer.meaningMatch.found, 'ring-4 ring-red-500':  showMeaningAnswer && !shownAnswer.meaningMatch.found}">
-                    <form v-if="!currentState.matches('answer')" @submit="onSubmit" class="w-full h-full flex justify-center items-center">
-                        <input ref="input" v-model.trim="inputText" class="input w-full h-full text-4xl text-gray-200 py-2 bg-gray-900 rounded-t rounded-b-xl" placeholder="meaning" spellcheck="false">
+                <div v-if="showAnswer" class="bg-gray-900 text-white rounded-t rounded-b-xl relative w-96 ring-inset"  :class="{'ring-4 ring-green-500': currentState.matches('answer') && currentCardData.meaningMatch.found, 'ring-4 ring-red-500':  currentState.matches('answer') && !currentCardData.meaningMatch.found}">
+                    <form v-if="!currentState.matches('answer')" @submit="onSubmitMeaning">
+                        <input ref="meaningInputRef" v-model.trim="meaningInput" class="w-full input text-4xl text-gray-200 py-20 rounded-t rounded-b-xl bg-gray-900" placeholder="meaning" spellcheck="false" :disabled="!this.currentState.matches('review.meaning')">
                     </form>
-                    <div v-else class="w-full h-full flex flex-row flex-wrap">
-                        <div v-for="(defn, i) in shownAnswer.definition.getMeanings(shownAnswer.pyMatch.idx)" :key="'defn'+i" class="m-1 bg-gray-800 py-2 px-4 rounded text-gray-200 text-md">
-                            {{defn}}
+                    <div v-else class="w-full h-full flex p-2">
+                        <div v-for="(defs, i) in currentCardData.definition.definitions" :key="'defn'+i" class=" flex flex-wrap w-full h-full font-light">
+                            <div v-for="(meaning, i) in defs.meaning" :key="'defn'+i" class="m-1 bg-gray-800 py-2 px-4 rounded text-gray-200 text-md w-full">
+                                {{meaning}}
+                            </div>
                         </div>
                     </div>
                     <div class="absolute text-right right-full top-0 w-full font-bold text-5xl opacity-10 whitespace-nowrap mr-4" style="direction: rtl" >
-                        意思
+                        释义
                     </div>
                 </div>
             </div>
@@ -91,10 +91,31 @@ import { Definition } from '@/js/models/definition.js'
 import { createMachine, interpret } from 'xstate';
 
 const stateMachine = createMachine({
-    initial: 'pinyin',
+    initial: 'review',
     states: {
-        pinyin: { on: { MEANING: 'meaning', END: 'stats' }},
-        meaning: { on: { PINYIN: 'pinyin', END: 'stats' }},
+        review: {
+            initial: 'pinyin',
+            states: {
+                pinyin: { on: { NEXT: 'meaning' }},
+                meaning: {},
+            },
+            on: {
+                NODEF: 'noDef',
+                NEXT: 'answer'
+            }
+        },
+        answer: {
+            on: {
+                NEXT: 'review.pinyin',
+                NODEF: 'noDef'
+            }
+        },
+        noDef: {
+            on: { 
+                NEXT: 'review.',
+                END: 'stats'
+            }
+        },
         stats: {
             type: 'final'
         }
@@ -114,11 +135,11 @@ export default {
         return {
             stateMachine: interpret(stateMachine),
             currentState: stateMachine.initialState,
-            inputText: "",
+            pinyinInput: "",
+            meaningInput: "",
             currentIndex: 0,
             rewindHoverIdx: -1,
             vocabResponses: [],
-            shownAnswer: null,
         }
     },
     computed: {
@@ -134,11 +155,8 @@ export default {
         currentCardData() {
             return this.vocabResponses[this.currentIndex]
         },
-        showPinyinAnswer() {
-            return this.shownAnswer && this.shownAnswer.pyMatch !== null && this.shownAnswer.definition !== null 
-        },
-        showMeaningAnswer() {
-            return this.shownAnswer && this.shownAnswer.meaningMatch !== null && this.shownAnswer.definition !== null 
+        showAnswer() {
+            return this.currentState.matches('review') || this.currentState.matches('answer')
         },
         hasDef() {
             return this.currentCardData && !this.currentCardData.defNotFound
@@ -157,71 +175,84 @@ export default {
             return `font-size: ${size}rem;`
         },
         pageEnter() {
-            if (this.$refs.input) {
-                this.$refs.input.focus()
-            }
-        },
-        async onSubmit(e) {
-            e.preventDefault();
-            const input = this.inputText
-            this.inputText = ""
-
-            if (this.currentCardData.defNotFound) {
+            if (this.currentState.matches('review.pinyin')) {
+                this.$refs.pinyinInputRef.focus()
+            } else if (this.currentState.matches('review.meaning')) {
+                this.$refs.meaningInputRef.focus()
+            } else if (this.currentState.matches('answer')) {
                 this.currentIndex++
                 if (this.currentIndex >= this.vocabResponses.length) {
                     this.send('END')
+                } else {
+                    this.send('NEXT')
+                    this.$nextTick(() => this.$refs.pinyinInputRef.focus())
                 }
+            } else if (this.currentState.matches('noDef')) {
+                this.currentIndex++
+                if (this.currentIndex >= this.vocabResponses.length) {
+                    this.send('END')
+                } else {
+                    this.send('NEXT')
+                    this.$nextTick(() => this.$refs.pinyinInputRef.focus())
+                }
+            } else if (this.currentState.matches('stat')) {
+                // noop
             }
+        },
+        async onSubmitPinyin(e) {
+            e.preventDefault();
+            const input = this.pinyinInput
 
             if (input === "") return
-            console.log('INPUT ', input)
+            this.pinyinInput = ""
+            console.log('py INPUT ', input)
 
-            if (this.currentState.matches('pinyin')) {
-                this.currentCardData.definitionPromise
-                .then(definition => {
-                    this.currentCardData.definition = definition
-                    return definition.getIdxMatchPinyin(input)
-                }).then(matchedIdx => {
-                    this.currentCardData.pyMatch = {
-                        found: true, 
-                        idx: matchedIdx,
-                    }
-                }).catch(e => {
-                    this.currentCardData.pyMatch = {
-                        found: false,
-                    }
-                    console.log('Definition error: ', e)
-                }).finally(() => {
-                    this.shownAnswer = this.currentCardData
-                    this.send('MEANING')
-                    this.$nextTick(() => this.$refs.input.focus())
-                })
-            } else if (this.currentState.matches('meaning')) {
-                this.currentCardData.definitionPromise
-                .then(definition => {
-                    return definition.getIdxMatchMeaning(this.currentCardData.pyMatch.idx, input)
-                }).then(meaningIdx => {
-                    this.currentCardData.meaningMatch = {
-                        found: true,
-                        idx: meaningIdx
-                    }
-                    this.currentCardData.correct = true
-                }).catch(err => {
-                    this.currentCardData.meaningMatch = {
-                        found: false,
-                    }
-                    console.log(err)
-                    this.currentCardData.correct = false
-                }).finally(() => {
-                    this.currentIndex++;
-                    if (this.currentIndex < this.vocabResponses.length) {
-                        this.send('PINYIN')
-                    } else {
-                        this.send('END')
-                    }
-                    this.$nextTick(() => this.$refs.input.focus())
-                })
-            } 
+            this.currentCardData.definitionPromise
+            .then(definition => {
+                this.currentCardData.definition = definition
+                return definition.getIdxMatchPinyin(input)
+            }).then(matchedIdx => {
+                this.currentCardData.pyMatch = {
+                    found: true, 
+                    idx: matchedIdx,
+                }
+            }).catch(e => {
+                this.currentCardData.pyMatch = {
+                    found: false,
+                }
+                console.log('Definition error: ', e)
+            }).finally(() => {
+                this.send('NEXT')
+                this.$nextTick(() => this.$refs.meaningInputRef.focus())
+            })
+        },
+        async onSubmitMeaning(e) {
+
+            e.preventDefault();
+            if (this.meaningInput === "") return
+
+            const input = this.meaningInput
+            this.meaningInput = ""
+            console.log('meaning INPUT ', input)
+
+            this.currentCardData.definitionPromise
+            .then(definition => {
+                return definition.getIdxMatchMeaning(this.currentCardData.pyMatch.idx, input)
+            }).then(meaningIdx => {
+                this.currentCardData.meaningMatch = {
+                    found: true,
+                    idx: meaningIdx
+                }
+                this.currentCardData.correct = true
+            }).catch(err => {
+                this.currentCardData.meaningMatch = {
+                    found: false,
+                }
+                console.log(err)
+                this.currentCardData.correct = false
+            }).finally(() => {
+                this.send('NEXT')
+            })
         },
         setCurrentDefn() {
             this.currentCardData.definitionPromise = Definition.get(this.reviewSession.cards[this.currentIndex])
@@ -231,6 +262,7 @@ export default {
             }).catch(err => {
                 console.log(err)
                 this.currentCardData.defNotFound = true
+                this.send('NODEF')
             })
         },
         percent(num, denom) {
@@ -255,7 +287,8 @@ export default {
         }
     },
     mounted() {
-        this.$refs.input.focus()
+        console.log('INPUT ',this.$refs)
+        this.$refs.pinyinInputRef.focus()
         this.vocabResponses = this.reviewSession.cards.map(word => {
             return {
                 word,
@@ -269,6 +302,12 @@ export default {
             }
         })
         this.setCurrentDefn()
+        window.addEventListener('keyup', (ev) => {
+            if (ev.key == 'Enter') {
+                console.log('ev ', ev)
+                this.pageEnter()
+            }
+        });
     },
     created() {
         this.stateMachine.onTransition((state) => {
