@@ -1,82 +1,84 @@
 <template>
     <div class="bg-gray-800 min-h-screen">
-        <div class="w-full flex flex-col justify-center pt-16 space-y-2">
-            <div class="w-full h-2 flex">
-                <div :style="`width: ${percent(numCorrect, reviewSession.cards.length)}%`" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500"></div>
-                <div :style="`width: ${percent(numIncorrect, reviewSession.cards.length)}%`" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500"></div>
-            </div>
-            <!-- <div class="w-full h-2 flex">
-                <div v-for="(resp, i) in vocabResponses" :key="i" class="w-full h-full" :class="{'bg-green-500': resp.correct === true, 'bg-red-500': resp.correct === false}"></div>
-            </div> -->
-            <div class="w-full flex justify-center overflow-hidden"> 
-                <div class="relative flex items-center">
-                    <!-- card --> 
-                    <div class="w-96 flex-col justify-center rounded-t-xl rounded-b p-4 bg-white" v-for="i in [currentIndex]" :key="i">
-                        <div v-if="currentState.matches('stats')">
-                            sdf
-                        </div>
-                        <div v-else class="flex justify-center items-center p-4 whitespace-nowrap">
-                            <span class="text-9xl">{{reviewSession.cards[i]}}</span>
-                        </div>
-                    </div>
-                    <!-- left conveyor -->
-                    <div class="absolute right-full flex justify-end space-x-2 mr-2">
-                        <button @mouseover="rewindHoverIdx = i" @mouseleave="rewindHoverIdx = -1" class="relative conveyor-block focus:outline-none active:outline-none hover:cursor-pointer" @click="rewind(i)" :class="{'correct': block.correct, 'incorrect': !block.correct}" v-for="(block, i) in vocabResponses.slice(0, currentIndex)" :key="block.word">
-                            <div class="w-full h-full absolute flex justify-center items-center">
-                                <svg v-if="rewindActive(i)" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="#d6d6d6">
-                                    <path d="M8.445 14.832A1 1 0 0010 14v-2.798l5.445 3.63A1 1 0 0017 14V6a1 1 0 00-1.555-.832L10 8.798V6a1 1 0 00-1.555-.832l-6 4a1 1 0 000 1.664l6 4z" />
-                                </svg>
+        <div class="w-full h-2 flex fixed top-16">
+            <div :style="`width: ${percent(numCorrect, reviewSession.cards.length)}%`" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500"></div>
+            <div :style="`width: ${percent(numIncorrect, reviewSession.cards.length)}%`" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500"></div>
+        </div>
+        <div class="w-full h-2 fixed top-16 flex">
+            <div v-for="(resp, i) in vocabResponses" :key="i" class="w-full h-full" :class="{'bg-green-500': resp.correct === true, 'bg-red-500': resp.correct === false}"></div>
+        </div>
+        <div class="w-full min-h-screen flex flex-col pt-16">
+            <div class="w-full flex flex-col my-10 space-y-2">
+                <div class="w-full flex justify-center overflow-hidden"> 
+                    <div class="relative flex items-center">
+                        <!-- card --> 
+                        <div class="w-96 flex-col justify-center rounded-t-xl rounded-b p-4 bg-white" v-for="i in [currentIndex]" :key="i">
+                            <div v-if="currentState.matches('stats')">
+                                sdf
                             </div>
-                            <span :class="{'text-white text-opacity-0': rewindActive(i)}">{{block.word}}</span>
-                        </button>
-                    </div>
-                    <div class="absolute left-full flex space-x-2 ml-2">
-                        <div class="conveyor-block" v-for="(block, i) in vocabResponses.slice(currentIndex + 1)" :key="'conv-right-'+i">{{block.word}}</div>
-                    </div>
-                </div>
-            </div>
-            <div v-if="this.currentState.matches('noDef')" class="w-full flex justify-center">
-                <!-- <div v-if="hasDef" :class="{'bg-indigo-500 text-indigo-100': currentState.matches('pinyin'), 'bg-orange-500 text-orange-100': currentState.matches('meaning')}" class="bg-indigo-500 py-1 px-4 rounded text-xl font-light">{{currentState.matches('pinyin') ? 'pinyin' : 'meaning'}}</div> -->
-                <div class="bg-red-500 py-1 px-2 w-96 rounded-t rounded-b-xl text-xl font-light text-white flex flex-row justify-center items-center space-x-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                    </svg>
-                    <span>Definition not found</span>
-                </div>
-            </div>
-            <div class="w-full flex flex-col items-center space-y-2">
-                <!-- input -->
-                <!-- <form v-if="!currentState.matches('stats')" @submit="onSubmit" class="w-full h-full flex justify-center items-center">
-                    <input ref="input" v-model.trim="inputText" class="input w-full text-5xl text-gray-200 py-2 bg-gray-900" placeholder="response" spellcheck="false">
-                </form> -->
-                <!-- pinyin -->
-                <div v-if="showAnswer" class="bg-gray-900 text-white rounded flex justify-center relative w-96 h-14 ring-inset" :class="{'ring-4 ring-green-500': !currentState.matches('review.pinyin') && currentCardData.pyMatch.found , 'ring-4 ring-red-500': !currentState.matches('review.pinyin') && !currentCardData.pyMatch.found}">
-                    <form v-if="currentState.matches('review.pinyin')" @submit="onSubmitPinyin">
-                        <input ref="pinyinInputRef" v-model.trim="pinyinInput" class="input w-full text-4xl text-gray-200 py-2 bg-gray-900 rounded" placeholder="pinyin" spellcheck="false" :disabled="!this.currentState.matches('review.pinyin')">
-                    </form>
-                    <div v-else class="flex w-full h-full justify-center rounded">
-                        <div v-for="(defs, i) in currentCardData.definition.definitions" :key="'defn'+i" class="w-full flex justify-center items-center text-3xl font-light first:rounded-l last:rounded-r odd:bg-green-500">
-                            {{defs.pinyin}}
-                        </div>
-                    </div>
-                    <div class="absolute text-right right-full w-full font-bold text-5xl opacity-10 top-0 whitespace-nowrap mr-4" style="direction: rtl" >
-                        拼音
-                    </div>
-                </div>
-                <!-- meaning -->
-                <div v-if="showAnswer" class="bg-gray-900 text-white rounded-t rounded-b-xl relative w-96 ring-inset"  :class="{'ring-4 ring-green-500': currentState.matches('answer') && currentCardData.meaningMatch.found, 'ring-4 ring-red-500':  currentState.matches('answer') && !currentCardData.meaningMatch.found}">
-                    <form v-if="!currentState.matches('answer')" @submit="onSubmitMeaning">
-                        <input ref="meaningInputRef" v-model.trim="meaningInput" class="w-full input text-4xl text-gray-200 py-20 rounded-t rounded-b-xl bg-gray-900" placeholder="meaning" spellcheck="false" :disabled="!this.currentState.matches('review.meaning')">
-                    </form>
-                    <div v-else class="w-full h-full flex p-2">
-                        <div v-for="(defs, i) in currentCardData.definition.definitions" :key="'defn'+i" class=" flex flex-wrap w-full h-full font-light">
-                            <div v-for="(meaning, i) in defs.meaning" :key="'defn'+i" class="m-1 bg-gray-800 py-2 px-4 rounded text-gray-200 text-md w-full">
-                                {{meaning}}
+                            <div v-else class="flex justify-center items-center p-4 whitespace-nowrap">
+                                <span :class="cardTextSize(vocabResponses[i].word)">{{vocabResponses[i].word}}</span>
                             </div>
                         </div>
+                        <!-- left conveyor -->
+                        <div class="absolute right-full flex justify-end space-x-2 mr-2">
+                            <button @mouseover="rewindHoverIdx = i" @mouseleave="rewindHoverIdx = -1" class="relative conveyor-block focus:outline-none active:outline-none hover:cursor-pointer" @click="rewind(i)" :class="{'correct': block.correct === true, 'incorrect': block.correct === false}" v-for="(block, i) in vocabResponses.slice(0, currentIndex)" :key="block.word">
+                                <div class="w-full h-full absolute flex justify-center items-center">
+                                    <svg v-if="rewindActive(i)" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="#d6d6d6">
+                                        <path d="M8.445 14.832A1 1 0 0010 14v-2.798l5.445 3.63A1 1 0 0017 14V6a1 1 0 00-1.555-.832L10 8.798V6a1 1 0 00-1.555-.832l-6 4a1 1 0 000 1.664l6 4z" />
+                                    </svg>
+                                </div>
+                                <span :class="{'text-white text-opacity-0': rewindActive(i)}">{{block.word}}</span>
+                            </button>
+                        </div>
+                        <div class="absolute left-full flex space-x-2 ml-2">
+                            <div class="conveyor-block" v-for="(block, i) in vocabResponses.slice(currentIndex + 1)" :key="'conv-right-'+i">{{block.word}}</div>
+                        </div>
                     </div>
-                    <div class="absolute text-right right-full top-0 w-full font-bold text-5xl opacity-10 whitespace-nowrap mr-4" style="direction: rtl" >
-                        释义
+                </div>
+                <div v-if="this.currentState.matches('noDef')" class="w-full flex justify-center">
+                    <!-- <div v-if="hasDef" :class="{'bg-indigo-500 text-indigo-100': currentState.matches('pinyin'), 'bg-orange-500 text-orange-100': currentState.matches('meaning')}" class="bg-indigo-500 py-1 px-4 rounded text-xl font-light">{{currentState.matches('pinyin') ? 'pinyin' : 'meaning'}}</div> -->
+                    <div class="bg-red-500 py-1 px-2 w-96 rounded-t rounded-b-xl text-xl font-light text-white flex flex-row justify-center items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                        <span>Definition not found</span>
+                    </div>
+                </div>
+                <div class="w-full flex flex-col items-center space-y-2">
+                    <!-- input -->
+                    <!-- <form v-if="!currentState.matches('stats')" @submit="onSubmit" class="w-full h-full flex justify-center items-center">
+                        <input ref="input" v-model.trim="inputText" class="input w-full text-5xl text-gray-200 py-2 bg-gray-900" placeholder="response" spellcheck="false">
+                    </form> -->
+                    <!-- pinyin -->
+                    <div v-if="showAnswer" class="w-96 bg-gray-900 text-white rounded flex justify-center relative h-14 ring-inset" :class="{'ring-4 ring-green-500': !currentState.matches('review.pinyin') && currentCardData.pyMatch.found , 'ring-4 ring-red-500': !currentState.matches('review.pinyin') && !currentCardData.pyMatch.found}">
+                        <form v-if="currentState.matches('review.pinyin')" @submit="onSubmitPinyin">
+                            <input ref="pinyinInputRef" v-model.trim="pinyinInput" class="input w-full text-4xl text-gray-200 py-2 bg-gray-900 rounded" placeholder="pinyin" spellcheck="false" :disabled="!this.currentState.matches('review.pinyin')" @focus="pinyinInputFocus = true" @blur="pinyinInputFocus = false">
+                        </form>
+                        <div v-else class="flex w-full h-full justify-center rounded">
+                            <div v-for="(defs, i) in currentCardData.definition.definitions" :key="'defn'+i" class="flex justify-center items-center text-3xl font-regular flex-1 first:rounded-l last:rounded-r text-shadow" :class="{'bg-green-500': i === currentCardData.pyMatch.idx}">
+                                {{numberToToneMarks(defs.pinyin)}}
+                            </div>
+                        </div>
+                        <div class="absolute text-right right-full w-full font-bold text-5xl opacity-10 top-0 whitespace-nowrap mr-4" style="direction: rtl" >
+                            拼音
+                        </div>
+                    </div>
+                    <!-- meaning -->
+                    <div v-if="showAnswer" ref="meaningSection" class="w-96 bg-gray-900 text-white rounded-t rounded-b-xl relative ring-inset"  :class="{'ring-4 ring-green-500': currentState.matches('answer') && currentCardData.meaningMatch.found, 'ring-4 ring-red-500':  currentState.matches('answer') && !currentCardData.meaningMatch.found}">
+                        <form v-if="!currentState.matches('answer')" @submit="onSubmitMeaning">
+                            <input ref="meaningInputRef" v-model.trim="meaningInput" class="w-full input text-4xl text-gray-200 py-10 rounded-t rounded-b-xl bg-gray-900" placeholder="meaning" spellcheck="false" :disabled="!currentState.matches('review.meaning')">
+                        </form>
+                        <div v-else class="h-full flex p-2">
+                            <div v-for="(defs, i) in currentCardData.definition.definitions" :key="'defn'+i" class=" flex flex-wrap h-full flex-1 font-regular text-shadow">
+                                <div v-for="(meaning, j) in defs.meanings" :key="'defn'+j" class="m-1 bg-gray-800 py-2 px-4 rounded text-gray-200 text-lg w-full" :class="{'bg-green-500': currentCardData.meaningMatch.found && currentCardData.meaningMatch.idx[0] === i && currentCardData.meaningMatch.idx[1] === j}">
+                                    {{meaning}}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="absolute text-right right-full top-0 w-full font-bold text-5xl opacity-10 whitespace-nowrap mr-4" style="direction: rtl" >
+                            释义
+                        </div>
                     </div>
                 </div>
             </div>
@@ -89,6 +91,7 @@
 import { mapGetters } from 'vuex'
 import { Definition } from '@/js/models/definition.js'
 import { createMachine, interpret } from 'xstate';
+import * as pinyinUtil from 'pinyin-tone'
 
 const stateMachine = createMachine({
     initial: 'review',
@@ -107,7 +110,8 @@ const stateMachine = createMachine({
         answer: {
             on: {
                 NEXT: 'review.pinyin',
-                NODEF: 'noDef'
+                NODEF: 'noDef',
+                END: 'stats'
             }
         },
         noDef: {
@@ -140,6 +144,7 @@ export default {
             currentIndex: 0,
             rewindHoverIdx: -1,
             vocabResponses: [],
+            pinyinInputFocus: false,
         }
     },
     computed: {
@@ -166,22 +171,27 @@ export default {
         })
     },
     methods: {
-        get_text_size(text) {
-            // dynamically change font size based on char count
-            let size = 8
-            if (text.length > 3) size = 4
-            else if (text.length > 2) size = 6
+        cardTextSize(text) {
 
-            return `font-size: ${size}rem;`
+            // dynamically change font size based on char count
+            if (text.length >= 4) return 'text-7xl'
+            else if (text.length == 3) return 'text-8xl'
+            return 'text-9xl'
+        },
+        numberToToneMarks(py) {
+            return pinyinUtil(py)
         },
         pageEnter() {
+            if (!this.allowPageEnter) return
+
             if (this.currentState.matches('review.pinyin')) {
-                this.$refs.pinyinInputRef.focus()
+                this.$nextTick(() => this.$refs.pinyinInputRef.focus())
             } else if (this.currentState.matches('review.meaning')) {
-                this.$refs.meaningInputRef.focus()
+                this.$nextTick(() => this.$refs.meaningInputRef.focus())
             } else if (this.currentState.matches('answer')) {
                 this.currentIndex++
                 if (this.currentIndex >= this.vocabResponses.length) {
+                    console.log('end')
                     this.send('END')
                 } else {
                     this.send('NEXT')
@@ -199,7 +209,7 @@ export default {
                 // noop
             }
         },
-        async onSubmitPinyin(e) {
+        onSubmitPinyin(e) {
             e.preventDefault();
             const input = this.pinyinInput
 
@@ -226,10 +236,12 @@ export default {
                 this.$nextTick(() => this.$refs.meaningInputRef.focus())
             })
         },
-        async onSubmitMeaning(e) {
+        onSubmitMeaning(e) {
 
-            e.preventDefault();
+            e.preventDefault()
             if (this.meaningInput === "") return
+
+            this.allowPageEnter = false
 
             const input = this.meaningInput
             this.meaningInput = ""
@@ -237,7 +249,7 @@ export default {
 
             this.currentCardData.definitionPromise
             .then(definition => {
-                return definition.getIdxMatchMeaning(this.currentCardData.pyMatch.idx, input)
+                return definition.getIdxMatchMeaning(input)
             }).then(meaningIdx => {
                 this.currentCardData.meaningMatch = {
                     found: true,
@@ -286,9 +298,11 @@ export default {
             this.stateMachine.send(event)
         }
     },
+    updated() {
+    },
     mounted() {
         console.log('INPUT ',this.$refs)
-        this.$refs.pinyinInputRef.focus()
+        this.$nextTick(() => this.$refs.pinyinInputRef.focus())
         this.vocabResponses = this.reviewSession.cards.map(word => {
             return {
                 word,
@@ -298,14 +312,16 @@ export default {
                 // response data
                 pyMatch: null,
                 meaningMatch: null,
-                correct: null
+                correct: null,
+                allowPageEnter: true
             }
         })
         this.setCurrentDefn()
         window.addEventListener('keyup', (ev) => {
             if (ev.key == 'Enter') {
-                console.log('ev ', ev)
+                console.log('keyup')
                 this.pageEnter()
+                this.allowPageEnter = true
             }
         });
     },
@@ -330,6 +346,9 @@ export default {
     width: fit-content;
 }
 
+.text-shadow {
+    text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
+}
 
 .display-card {
     /* box-shadow: 2px 2px 0 rgb(204 197 185 / 50%); */
@@ -437,7 +456,7 @@ input::placeholder {
 }
 
 .conveyor-block {
-    @apply px-4 py-6 bg-gray-700 bg-opacity-50 text-gray-300 flex justify-center items-center rounded h-10 text-2xl font-light;
+    @apply px-4 py-6 bg-gray-900 bg-opacity-50 text-gray-300 flex justify-center items-center rounded h-10 text-2xl font-light;
     @apply whitespace-nowrap;
 }
 .conveyor-block.correct {

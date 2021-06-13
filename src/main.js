@@ -12,10 +12,13 @@ import 'typeface-roboto/index.css';
 // import 'swiper/swiper-bundle.css'
 import "firebase/auth";
 import './assets/tailwind.css'
+import VueScrollactive from 'vue-scrollactive';
+
 
 Vue.config.productionTip = false
 
 Vue.use(VTooltip)
+Vue.use(VueScrollactive);
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {

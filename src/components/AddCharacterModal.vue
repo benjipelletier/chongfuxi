@@ -105,7 +105,9 @@ export default {
       addChar(e) {
           console.log()
           e.preventDefault()
-          if (this.input.length == 0) return
+          if (this.input.length == 0) {
+              this.confirm(new Event('sdf'))
+          }
           if (this.wordsToAdd.includes(this.input)) return
           this.wordsToAdd.push(this.input)
           this.input = ""

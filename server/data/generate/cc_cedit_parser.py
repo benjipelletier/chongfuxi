@@ -13,7 +13,7 @@
 import json
 
 DICT_FILE = 'cedict_ts.u8' 
-OUT_JSON_FILE = '../dictionary-lst.json'
+OUT_JSON_FILE = '../dictionary-new.json'
 OUT_JSON_FILE_LST = '../words-lst.json'
 
 
@@ -48,11 +48,11 @@ with open(DICT_FILE) as file:
         parsed['english'] = english
         list_of_dicts.append(parsed)
 
-    def remove_surnames():
-        for x in range(len(list_of_dicts)-1, -1, -1):
-            if "surname " in list_of_dicts[x]['english']:
-                if list_of_dicts[x]['traditional'] == list_of_dicts[x+1]['traditional']:
-                    list_of_dicts.pop(x)
+    # def remove_surnames():
+    #     for x in range(len(list_of_dicts)-1, -1, -1):
+    #         if "surname " in list_of_dicts[x]['english']:
+    #             if list_of_dicts[x]['traditional'] == list_of_dicts[x+1]['traditional']:
+    #                 list_of_dicts.pop(x)
             
     def main():
 
@@ -63,8 +63,8 @@ with open(DICT_FILE) as file:
         
         #remove entries for surnames from the data (optional):
 
-        print("Removing Surnames . . .")
-        remove_surnames()
+        # print("Removing Surnames . . .")
+        # remove_surnames()
 
         return list_of_dicts
 
@@ -83,8 +83,8 @@ parsed_dict = main()
 
 def make_def_block(py, meaning):
     return {
-        'pinyin': py,
-        'meaning': meaning
+        'pinyin': py.lower(),
+        'meanings': meaning
     }
 
 defs = {}
@@ -101,7 +101,15 @@ for item in list_of_dicts:
             # traditional differs
             pass
         else:
-            defs[simp]['definitions'].append(def_block_candidate)
+            added = False
+            for block in defs[simp]['definitions']:
+                if (block['pinyin'].lower() == def_block_candidate['pinyin'].lower()):
+                    block['meanings'].extend(def_block_candidate['meanings'])
+                    added = True
+                    break
+            if not added:
+                defs[simp]['definitions'].append(def_block_candidate)
+            
     else:
         defs[simp] = {
             'traditional': trad,
@@ -110,26 +118,26 @@ for item in list_of_dicts:
             ]
         }
 
-def make_toneless(py):
-    return " ".join([syl[:-1] if syl[-1].isdigit() else syl for syl in py.split(" ")])
+# def make_toneless(py):
+#     return " ".join([syl[:-1] if syl[-1].isdigit() else syl for syl in py.split(" ")])
 
 
-lst = [{
-    'simplified': key.lower(),
-    'traditional': defs[key]['traditional'].lower(),
-    'pronunciations': [
-        {
-            'pinyin': defn['pinyin'].lower(),
-            'toneless': make_toneless(defn['pinyin'].lower())
-        }
-        for defn in defs[key]['definitions']
-    ]
- } for key in defs.keys()]
+# lst = [{
+#     'simplified': key.lower(),
+#     'traditional': defs[key]['traditional'].lower(),
+#     'pronunciations': [
+#         {
+#             'pinyin': defn['pinyin'].lower(),
+#             'toneless': make_toneless(defn['pinyin'].lower())
+#         }
+#         for defn in defs[key]['definitions']
+#     ]
+#  } for key in defs.keys()]
 
-# with open(OUT_JSON_FILE, 'w') as outfile:
-#     # json.dump(defs, outfile,  indent=2, ensure_ascii=False)
-#     json.dump(lst, outfile,  indent=2, ensure_ascii=False)
-
-with open(OUT_JSON_FILE_LST, 'w') as outfile_lst:
+with open(OUT_JSON_FILE, 'w') as outfile:
     # json.dump(defs, outfile,  indent=2, ensure_ascii=False)
-    json.dump(lst, outfile_lst,  indent=2, ensure_ascii=False)
+    json.dump(defs, outfile,  indent=2, ensure_ascii=False)
+
+# with open(OUT_JSON_FILE_LST, 'w') as outfile_lst:
+#     # json.dump(defs, outfile,  indent=2, ensure_ascii=False)
+#     json.dump(lst, outfile_lst,  indent=2, ensure_ascii=False)

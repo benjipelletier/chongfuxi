@@ -12,7 +12,7 @@ const state = {
     progress: {},
     reviewSession: {
         isSRS: true,
-        cards: ['好','你',3]
+        cards: ['啊','羡慕','水龙头', '家庭主妇',3]
     },
     user: {
         loggedIn: false,
@@ -78,6 +78,13 @@ const actions = {
                 idToken: idToken
             })
             User.load(user.uid)
+                .then(userObj => {
+                    console.log("LOADED USER: ", userObj )
+
+                })
+                .catch(e => {
+                    print(e)
+                })
         } else {
             commit('setUserLoggedIn', false)
             commit('setUserData', null)

@@ -13,6 +13,9 @@ module.exports = {
       gray: colors.gray,
       orange: colors.orange,
     },
+    minWidth: {
+      '96': '24rem',
+    },
     extend: {},
   },
   variants: {

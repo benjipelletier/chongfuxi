@@ -69,9 +69,10 @@
             </div>
 
 
+          <scrollactive class="flex flex-col space-y-4">
             <div class="flex flex-col overflow-ellipsis overflow-hidden" v-for="(section, i) in getSections" :key="i">
-              <div class="dark:bg-white dark:bg-opacity-10 dark:hover:bg-opacity-20 active:bg-opacity-30 cursor-pointer h-12 rounded-t flex items-center">
-                <a :href="'#' + section.canonicalId" class="w-full text-white font-light text-2xl w-full h-full px-2 flex items-center">
+              <div class="h-12 rounded-t flex items-center">
+                <a :href="'#' + section.canonicalId" class="scrollactive-item bg-white bg-opacity-10 hover:bg-opacity-20 cursor-pointer w-full text-gray-200 font-light text-2xl w-full h-full px-2 rounded-t flex items-center">
                   {{section.title}}
                 </a>
               </div>
@@ -85,6 +86,7 @@
                 </div>
               </div>
             </div>
+          </scrollactive >
 
             <div class="flex flex-row h-14 rounded">
               <button @click="showNewSecModal" class="flex justify-center items-center w-full bg-opacity-10 bg-white hover:bg-opacity-20 focus:outline-none active:bg-opacity-30 first:rounded-l last:rounded-r">
@@ -199,11 +201,15 @@ export default {
         console.log('set')
         this.$router.push("review")
       }
-    }
+    },
   },
 }
 </script>
 
 <style scoped>
+
+.is-active {
+ @apply bg-white bg-opacity-20;
+}
 
 </style>

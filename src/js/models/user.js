@@ -10,26 +10,15 @@ export class User extends Model {
 
         }
     }
-    static async load(uid) {
+    static async load(uid, userData) {
         const idToken = getIdToken()
-        try {
-            let response = await axios.get(`${URL_BASE}/users/${uid}`, {
-                params: {
-                    idToken
-                }
-            })
-            console.log('USER ', response.data)
-        } catch(e) {
-            console.log('Error: ', e)
-            try {
-                let response = await axios.put(`${URL_BASE}/users/${uid}`, {
-                    idToken
-                })
-                console.log('USER FROM POST ', response.data)
-            } catch(e2) {
-            console.log('Error: ', e2)
-
-            }
-        }
+        // doesn't follow REST convention
+        const userResponse = await axios.put(`${URL_BASE}/users/${uid}`, {
+            idToken,
+            userData
+        })
+        const progressResponse = await axios.get(`${URL_BASE}/users/${uid}/progress`)
+        console.log('progress ', progressResponse)
+        return new User(userResponse.data)
     }
 }

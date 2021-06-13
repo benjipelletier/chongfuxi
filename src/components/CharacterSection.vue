@@ -1,6 +1,6 @@
 <template>
 <div class="mb-5 flex flex-col">
-    <span class="block relative -top-20 invisible" :id="section.canonicalId"></span>
+    <span class="block relative -top-16 invisible" :id="section.canonicalId"></span>
     <div class="w-full h-14 flex overflow-clip">
         <div class="w-3/5 text-white font-thin text-5xl">
             <div @click="collapsed = !collapsed" class="inline-flex space-x-4 items-center hover: hover:bg-opacity-10 cursor-pointer rounded">

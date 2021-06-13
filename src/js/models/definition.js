@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { Model } from "@/js/models/base.js"
 import { URL_BASE } from '../common.js'
+import stringSimilarity from 'string-similarity'
 
 export class Definition extends Model {
     get defaults() {
@@ -9,25 +10,25 @@ export class Definition extends Model {
             definitions: []
         }
     }
+    static async get(entry) {
+        // doesn't follow REST convention
+        return axios.put(`${URL_BASE}/definitions/${entry}`)
+        .then(response => {
+            return new Definition(response.data)
+        })
+    }
     getPinyin(pyIdx) {
         console.log('py idx', pyIdx)
         return this.definitions[pyIdx].pinyin
     }
     getMeanings(pyIdx) {
-        return this.definitions[pyIdx].meaning
+        return this.definitions[pyIdx].meanings
     }
     isDuoYinCi() {
         return this.definitions.length > 1
     }
     getPinyins() {
         return this.definitions.map(block => block.pinyin)
-    }
-    static async get(entry) {
-        // doesn't follow REST convention
-        return axios.post(`${URL_BASE}/definitions/${entry}`)
-        .then(response => {
-            return new Definition(response.data)
-        })
     }
     getIdxMatchPinyin(pinyin, requireTones = false) {
         // returns index 
@@ -44,18 +45,33 @@ export class Definition extends Model {
             reject('Could not match definition by pinyin')
         })
     }
-    getIdxMatchMeaning(pyIdx, input) {
+    getFlattenedMeanings() {
+        return this.definitions.map(def => def.meanings).flat()
+    }
+    getIdxMatchMeaning(input) {
         input = input.toLowerCase()
+        let highestMatchRating = 0
+        let highestMatchIdxPair = []
         return new Promise((resolve, reject) => {
-            if (pyIdx === null) reject('invalid pyIdx')
-            this.definitions[pyIdx].meaning.forEach((meaning, i) => {
-                meaning.toLowerCase().split(/\s*(\([^()]*\))/).forEach(part => {
-                    if (part.trim() === input) {
-                        return resolve(i)
-                    }
+            this.definitions.forEach((def, pyIdx) => {
+                def.meanings.forEach((meaning, meaningIdx) => {
+                    const meaningLowerCase = meaning.toLowerCase()
+                    meaningLowerCase.split(/\s*(\([^()]*\))/)
+                    .forEach(part => {
+                        const rating = stringSimilarity.compareTwoStrings(input, part)
+                        console.log('NICE',part, rating)
+                        if (rating > highestMatchRating) {
+                            highestMatchRating = rating
+                            highestMatchIdxPair = [pyIdx, meaningIdx]
+                        }
+                    })
                 })
             })
-            reject('Could not match meaning')
+            if (highestMatchRating >= 0.6) {
+                resolve(highestMatchIdxPair)
+            } else {
+                reject('Could not match meaning')
+            }
         })
     }
     normalizePinyin(pinyin, requireTones = false) {

@@ -26,7 +26,8 @@ app.get('/', (req, res) => {
     res.send('Hello World!')
 })
 
-async function verifyAuth(idToken) {
+async function getUidFromToken(idToken) {
+    console.log('idToken ',idToken)
     let decodedToken = await admin.auth().verifyIdToken(idToken)
     return decodedToken.uid;
 }
@@ -55,8 +56,8 @@ app.get('/sections', async (req, res) => {
     if (req.query.idToken) {
         try {
             console.log("getting user uuid from token")
-            const uid = await verifyAuth(req.query.idToken);
-            const user_sections = await sections_ref.where('user', '==', uid).get()
+            const uid = await getUidFromToken(req.query.idToken);
+            const user_sections = await sections_ref.where('user', '==', uid).orderBy('createdAt').get()
             user_sections.forEach(doc => {
                 payload.push({
                     id: doc.id,
@@ -66,6 +67,7 @@ app.get('/sections', async (req, res) => {
             res.send(payload)
         } catch(e) {
             console.log(e)
+            res.send(payload)
         }
     } else {
         res.send(payload)
@@ -78,13 +80,14 @@ app.post('/section', async (req, res) => {
     if (idToken) {
         try {
             console.log("getting user uuid from token...")
-            const uid = await verifyAuth(idToken);
+            const uid = await getUidFromToken(idToken);
             console.log("Adding section data to firestore...")
             const section = {
                 base_sections: false,
                 title: title,
                 user: uid,
                 words: [],
+                createdAt: admin.firestore.Timestamp.now(),
             }
             const response = await sections_ref.add(section)
             section.id = response.id
@@ -108,7 +111,7 @@ app.put('/section/:sectionId', async (req, res) => {
     if (idToken) {
         try {
             console.log("getting user uuid from token...")
-            const uid = await verifyAuth(idToken);
+            const uid = await getUidFromToken(idToken);
             console.log("Editing section data...")
             const doc = await sections_ref.doc(sectionId)
             const section = await doc.get()
@@ -142,7 +145,7 @@ app.delete('/section/:sectionId', async (req, res) => {
     if (idToken) {
         try {
             console.log("getting user uuid from token...")
-            const uid = await verifyAuth(idToken);
+            const uid = await getUidFromToken(idToken);
             console.log("Deleting section data to firestore...")
             const doc = await sections_ref.doc(sectionId)
             const section = await doc.get()
@@ -188,7 +191,7 @@ app.patch('/section/:sectionId/words', async (req, res) => {
     if (idToken) {
         try {
             console.log("getting user uuid from token...")
-            const uid = await verifyAuth(idToken);
+            const uid = await getUidFromToken(idToken);
             const doc = await sections_ref.doc(sectionId)
             const section = await doc.get()
             if (section.data().user !== uid) {
@@ -256,33 +259,54 @@ app.get('/users/:uid', async (req, res) => {
 })
 
 app.put('/users/:uid', async (req, res) => {
+    // creates entry if none found in db
     console.log("PUT /users/:uid")
-    const uid = req.params.uid
-    const { idToken } = req.body
-    console.log(idToken)
-    if (idToken) {
+    const userUid = req.params.uid
+    const { idToken, userData } = req.body
+
+    verifyUser(idToken, userUid)
+    .then(async uid => {
         try {
-            const doc = await users_ref.doc(uid)
-            await doc.set({test: 3}, {merge: true})
-            const user = await users_ref.doc(uid).get()
-            res.status(200).send(user)
+            const doc = await users_ref.doc(uid).get()
+            if (!doc.exists) {
+                const userObj = {
+                    name: userData.name,
+                    email: userData.email,
+                    createdAt: admin.firestore.Timestamp.now(),
+                }
+                await users_ref.doc(uid).set(userObj)
+                res.status(200).send(userObj)
+            } else {
+                res.status(200).send(doc.data())
+            }
         } catch(e) {
-            console.log("Error: ", e)
-            res.status(404).send({
-                message: e.response
-            })
+            res.status(404).send(e)
         }
-    } else {
-        res.status(400).send({
-            message: 'No idToken found'
-        })
-    }
+
+    }).catch(e => {
+        res.status(400).send(e)
+    })
 })
 
-app.post('/definitions/:entry', async (req, res) => {
-    console.log("POST /definitions/:entry")
-    const entry = req.params.entry
+app.get('/users/:uid/progress', async (req, res) => {
+    const userUid = req.params.uid
     const { idToken } = req.body
+
+    verifyUser(idToken, userUid)
+    .then(async uid => {
+        try {
+            let response = users_ref.doc(uid).collection('progress')
+            res.status(200).send(response)
+        } catch (e) {
+            res.status(400).send(e)
+        }
+    })
+})
+
+app.put('/definitions/:entry', async (req, res) => {
+    // creates entry if none found in db
+    console.log("PUT /definitions/:entry")
+    const entry = req.params.entry
     try {
         const doc = await definitions_ref.doc(entry).get()
         if (!doc.exists) {
@@ -297,7 +321,6 @@ app.post('/definitions/:entry', async (req, res) => {
             }
         } else {
             res.status(200).send(doc.data())
-
         }
     } catch(e) {
         console.log("Error: ", e)
@@ -306,6 +329,70 @@ app.post('/definitions/:entry', async (req, res) => {
         })
     }
 })
+
+function verifyUser(idToken, uid) {
+    return new Promise(async (resolve, reject) => {
+        if (idToken) {
+            try {
+                const retrievedUid = await getUidFromToken(idToken);
+                console.log('ret', retrievedUid)
+                if (retrievedUid === uid) {
+                    resolve(retrievedUid)
+                } else {
+                    reject("Can't verify user. uid does not match.")
+                }
+            } catch (e) {
+                reject("Can't verify user. Error getting uid: " + e)
+            }
+        } else {
+            reject("Can't verify user. idToken doesn't exist.")
+        }
+    })
+}
+
+function ProgressModel() {
+    return {
+        numCorrect: 0,
+        numIncorrect: 0,
+        level: 0,
+        nextReviewDueDate: null,
+        nonTimedReview: {
+            numCorrect: 0,
+            numIncorrect: 0
+        },
+        createdAt: admin.firestore.Timestamp.now(),
+    }
+}
+
+
+async function createProgressEntry(docRef) {
+    await docRef.set(ProgressModel())
+    console.log('done')
+}
+
+app.put('/users/:uid/progress/:entryId', async (req, res) => {
+    // creates entries for vocab if none found in db
+    const { uid, entryId } = req.params
+    const { idToken, progressData } = req.body
+    try { 
+        let userUid = await verifyUser(idToken, uid)
+        console.log('uid', uid, userUid)
+        const progressDoc_ref = await users_ref.doc(`${userUid}/progress/${entryId}`)
+        const progressDoc = await progressDoc_ref.get()
+        console.log(progressDoc.exists)
+        if (progressDoc.exists) {
+        } else {
+            console.log('here')
+            await createProgressEntry(progressDoc_ref)
+        }
+        // await progressDoc_ref.update(progressData)
+        res.status(200).send(progressData)
+
+    } catch (e) {
+        res.status(400).send(e)
+    }
+})
+
 
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)
