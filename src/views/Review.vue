@@ -4,25 +4,26 @@
             <div :style="`width: ${percent(numCorrect, reviewSession.cards.length)}%`" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500"></div>
             <div :style="`width: ${percent(numIncorrect, reviewSession.cards.length)}%`" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500"></div>
         </div>
-        <div class="w-full h-2 fixed top-16 flex">
-            <div v-for="(resp, i) in vocabResponses" :key="i" class="w-full h-full" :class="{'bg-green-500': resp.correct === true, 'bg-red-500': resp.correct === false}"></div>
-        </div>
+        <!-- <div class="w-full h-2 fixed top-16 flex space-x-1">
+            <div v-for="(resp, i) in reviewProgress" :key="i" class="flex-grow h-full" :class="{'bg-green-500': resp.correct === true, 'bg-red-500': resp.correct === false}"></div>
+        </div> -->
         <div class="w-full min-h-screen flex flex-col pt-16">
             <div class="w-full flex flex-col my-10 space-y-2">
                 <div class="w-full flex justify-center overflow-hidden"> 
                     <div class="relative flex items-center">
                         <!-- card --> 
                         <div class="w-96 flex-col justify-center rounded-t-xl rounded-b p-4 bg-white" v-for="i in [currentIndex]" :key="i">
-                            <div v-if="currentState.matches('stats')">
-                                sdf
+                            <div v-if="currentState.matches('stats')" class="flex flex-col justify-center items-center text-3xl font-bold">
+                                <div>Correct: {{numCorrect}}/{{reviewProgress.length}}</div>
+                                <div>Incorrect: {{numIncorrect}}/{{reviewProgress.length}}</div>
                             </div>
                             <div v-else class="flex justify-center items-center p-4 whitespace-nowrap">
-                                <span :class="cardTextSize(vocabResponses[i].word)">{{vocabResponses[i].word}}</span>
+                                <span :class="cardTextSize(reviewProgress[i].word)">{{reviewProgress[i].word}}</span>
                             </div>
                         </div>
                         <!-- left conveyor -->
-                        <div class="absolute right-full flex justify-end space-x-2 mr-2">
-                            <button @mouseover="rewindHoverIdx = i" @mouseleave="rewindHoverIdx = -1" class="relative conveyor-block focus:outline-none active:outline-none hover:cursor-pointer" @click="rewind(i)" :class="{'correct': block.correct === true, 'incorrect': block.correct === false}" v-for="(block, i) in vocabResponses.slice(0, currentIndex)" :key="block.word">
+                        <div class="absolute right-full flex justify-end space-x-4 mr-4">
+                            <button @mouseover="rewindHoverIdx = i" @mouseleave="rewindHoverIdx = -1" class="relative conveyor-block focus:outline-none active:outline-none hover:cursor-pointer" @click="rewind(i)" :class="{'correct': block.correct === true, 'incorrect': block.correct === false}" v-for="(block, i) in reviewProgress.slice(0, currentIndex)" :key="block.word">
                                 <div class="w-full h-full absolute flex justify-center items-center">
                                     <svg v-if="rewindActive(i)" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="#d6d6d6">
                                         <path d="M8.445 14.832A1 1 0 0010 14v-2.798l5.445 3.63A1 1 0 0017 14V6a1 1 0 00-1.555-.832L10 8.798V6a1 1 0 00-1.555-.832l-6 4a1 1 0 000 1.664l6 4z" />
@@ -31,18 +32,25 @@
                                 <span :class="{'text-white text-opacity-0': rewindActive(i)}">{{block.word}}</span>
                             </button>
                         </div>
-                        <div class="absolute left-full flex space-x-2 ml-2">
-                            <div class="conveyor-block" v-for="(block, i) in vocabResponses.slice(currentIndex + 1)" :key="'conv-right-'+i">{{block.word}}</div>
+                        <div class="absolute left-full flex space-x-4 ml-4">
+                            <div class="conveyor-block ring-inset ring-2 ring-gray-700" v-for="(block, i) in reviewProgress.slice(currentIndex + 1)" :key="'conv-right-'+i">{{block.word}}</div>
                         </div>
                     </div>
                 </div>
-                <div v-if="this.currentState.matches('noDef')" class="w-full flex justify-center">
-                    <!-- <div v-if="hasDef" :class="{'bg-indigo-500 text-indigo-100': currentState.matches('pinyin'), 'bg-orange-500 text-orange-100': currentState.matches('meaning')}" class="bg-indigo-500 py-1 px-4 rounded text-xl font-light">{{currentState.matches('pinyin') ? 'pinyin' : 'meaning'}}</div> -->
+                <div v-if="currentState.matches('noDef')" class="w-full flex justify-center">
                     <div class="bg-red-500 py-1 px-2 w-96 rounded-t rounded-b-xl text-xl font-light text-white flex flex-row justify-center items-center space-x-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
                         </svg>
                         <span>Definition not found</span>
+                    </div>
+                </div>
+                <div v-if="currentState.matches('new')" class="w-full flex justify-center">
+                    <div class="bg-green-500 py-1 px-2 w-96 rounded-t rounded-b text-xl font-light text-white flex flex-row justify-center items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clip-rule="evenodd" />
+                        </svg>
+                        <span>New Word</span>
                     </div>
                 </div>
                 <div class="w-full flex flex-col items-center space-y-2">
@@ -51,12 +59,12 @@
                         <input ref="input" v-model.trim="inputText" class="input w-full text-5xl text-gray-200 py-2 bg-gray-900" placeholder="response" spellcheck="false">
                     </form> -->
                     <!-- pinyin -->
-                    <div v-if="showAnswer" class="w-96 bg-gray-900 text-white rounded flex justify-center relative h-14 ring-inset" :class="{'ring-4 ring-green-500': !currentState.matches('review.pinyin') && currentCardData.pyMatch.found , 'ring-4 ring-red-500': !currentState.matches('review.pinyin') && !currentCardData.pyMatch.found}">
+                    <div v-if="showAnswer" class="w-96 bg-gray-900 text-white rounded flex justify-center relative h-14 ring-inset" :class="{'ring-4 ring-green-500': !currentState.matches('review.pinyin') && currentCardData.pinyinMatch.found === true, 'ring-4 ring-red-500': !currentState.matches('review.pinyin') && currentCardData.pinyinMatch.found === false}">
                         <form v-if="currentState.matches('review.pinyin')" @submit="onSubmitPinyin">
-                            <input ref="pinyinInputRef" v-model.trim="pinyinInput" class="input w-full text-4xl text-gray-200 py-2 bg-gray-900 rounded" placeholder="pinyin" spellcheck="false" :disabled="!this.currentState.matches('review.pinyin')" @focus="pinyinInputFocus = true" @blur="pinyinInputFocus = false">
+                            <input ref="pinyinInputRef" v-model.trim="pinyinInput" class="input w-full text-4xl text-gray-200 py-2 bg-gray-900 rounded" placeholder="pinyin" spellcheck="false" :disabled="!currentState.matches('review.pinyin')">
                         </form>
                         <div v-else class="flex w-full h-full justify-center rounded">
-                            <div v-for="(defs, i) in currentCardData.definition.definitions" :key="'defn'+i" class="flex justify-center items-center text-3xl font-regular flex-1 first:rounded-l last:rounded-r text-shadow" :class="{'bg-green-500': i === currentCardData.pyMatch.idx}">
+                            <div v-for="(defs, i) in currentCardData.definition.definitions" :key="'defn'+i" class="flex justify-center items-center text-3xl font-regular flex-1 first:rounded-l last:rounded-r text-shadow" :class="{'bg-green-500': i === currentCardData.pinyinMatch.idx}">
                                 {{numberToToneMarks(defs.pinyin)}}
                             </div>
                         </div>
@@ -65,9 +73,9 @@
                         </div>
                     </div>
                     <!-- meaning -->
-                    <div v-if="showAnswer" ref="meaningSection" class="w-96 bg-gray-900 text-white rounded-t rounded-b-xl relative ring-inset"  :class="{'ring-4 ring-green-500': currentState.matches('answer') && currentCardData.meaningMatch.found, 'ring-4 ring-red-500':  currentState.matches('answer') && !currentCardData.meaningMatch.found}">
-                        <form v-if="!currentState.matches('answer')" @submit="onSubmitMeaning">
-                            <input ref="meaningInputRef" v-model.trim="meaningInput" class="w-full input text-4xl text-gray-200 py-10 rounded-t rounded-b-xl bg-gray-900" placeholder="meaning" spellcheck="false" :disabled="!currentState.matches('review.meaning')">
+                    <div v-if="showAnswer" ref="meaningSection" class="w-96 bg-gray-900 text-white rounded-t rounded-b-xl relative ring-inset"  :class="{'ring-4 ring-green-500': currentState.matches('answer') && currentCardData.meaningMatch.found === true, 'ring-4 ring-red-500':  currentState.matches('answer') && currentCardData.meaningMatch.found === false}">
+                        <form v-if="currentState.matches('review')" @submit="onSubmitMeaning">
+                            <input ref="meaningInputRef" v-model.trim="meaningInput" class="w-full input text-4xl text-gray-200 py-10 rounded-t rounded-b-xl rounded-br bg-gray-900" placeholder="meaning" spellcheck="false" :disabled="!currentState.matches('review.meaning')">
                         </form>
                         <div v-else class="h-full flex p-2">
                             <div v-for="(defs, i) in currentCardData.definition.definitions" :key="'defn'+i" class=" flex flex-wrap h-full flex-1 font-regular text-shadow">
@@ -89,7 +97,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { Definition } from '@/js/models/definition.js'
+import { Progress } from '@/js/models/progress.js'
 import { createMachine, interpret } from 'xstate';
 import * as pinyinUtil from 'pinyin-tone'
 
@@ -104,6 +112,7 @@ const stateMachine = createMachine({
             },
             on: {
                 NODEF: 'noDef',
+                NEW: 'new',
                 NEXT: 'answer'
             }
         },
@@ -116,7 +125,13 @@ const stateMachine = createMachine({
         },
         noDef: {
             on: { 
-                NEXT: 'review.',
+                NEXT: 'review.pinyin',
+                END: 'stats'
+            }
+        },
+        new: {
+            on: {
+                NEXT: 'review.pinyin',
                 END: 'stats'
             }
         },
@@ -143,8 +158,8 @@ export default {
             meaningInput: "",
             currentIndex: 0,
             rewindHoverIdx: -1,
-            vocabResponses: [],
-            pinyinInputFocus: false,
+            reviewProgress: [],
+            allowPageEnter: true
         }
     },
     computed: {
@@ -152,27 +167,24 @@ export default {
             return this.$refs.mySwiper.$swiper
         },
         numCorrect() {
-            return this.vocabResponses.slice(0, this.currentIndex).filter(block => block.correct === true).length
+            return this.reviewProgress.slice(0, this.currentIndex).filter(block => block.correct === true).length
         },
         numIncorrect() {
-            return this.vocabResponses.slice(0, this.currentIndex).filter(block => block.correct === false).length
+            return this.reviewProgress.slice(0, this.currentIndex).filter(block => block.correct === false).length
         },
         currentCardData() {
-            return this.vocabResponses[this.currentIndex]
+            return this.reviewProgress[this.currentIndex]
         },
         showAnswer() {
-            return this.currentState.matches('review') || this.currentState.matches('answer')
-        },
-        hasDef() {
-            return this.currentCardData && !this.currentCardData.defNotFound
+            return this.currentState.matches('review') || this.currentState.matches('answer') || this.currentState.matches('new')
         },
         ...mapGetters({
-            reviewSession: 'getReviewSession'
+            reviewSession: 'getReviewSession',
+            userReviewSets: 'getUserReviewSets'
         })
     },
     methods: {
         cardTextSize(text) {
-
             // dynamically change font size based on char count
             if (text.length >= 4) return 'text-7xl'
             else if (text.length == 3) return 'text-8xl'
@@ -189,24 +201,25 @@ export default {
             } else if (this.currentState.matches('review.meaning')) {
                 this.$nextTick(() => this.$refs.meaningInputRef.focus())
             } else if (this.currentState.matches('answer')) {
-                this.currentIndex++
-                if (this.currentIndex >= this.vocabResponses.length) {
-                    console.log('end')
-                    this.send('END')
-                } else {
-                    this.send('NEXT')
-                    this.$nextTick(() => this.$refs.pinyinInputRef.focus())
-                }
+                this.advanceCard()
             } else if (this.currentState.matches('noDef')) {
-                this.currentIndex++
-                if (this.currentIndex >= this.vocabResponses.length) {
-                    this.send('END')
-                } else {
-                    this.send('NEXT')
-                    this.$nextTick(() => this.$refs.pinyinInputRef.focus())
-                }
+                this.advanceCard()
+            } else if (this.currentState.matches('new')) {
+                this.advanceCard()
             } else if (this.currentState.matches('stat')) {
                 // noop
+            }
+        },
+        advanceCard() {
+            if (this.reviewSession.isSRS) {
+                this.currentCardData.put()
+            }
+            this.currentIndex++
+            if (this.currentIndex >= this.reviewProgress.length) {
+                this.send('END')
+            } else {
+                this.send('NEXT')
+                this.$nextTick(() => this.$refs.pinyinInputRef.focus())
             }
         },
         onSubmitPinyin(e) {
@@ -222,14 +235,9 @@ export default {
                 this.currentCardData.definition = definition
                 return definition.getIdxMatchPinyin(input)
             }).then(matchedIdx => {
-                this.currentCardData.pyMatch = {
-                    found: true, 
-                    idx: matchedIdx,
-                }
+                this.currentCardData.setPinyinMatch(true, matchedIdx)
             }).catch(e => {
-                this.currentCardData.pyMatch = {
-                    found: false,
-                }
+                this.currentCardData.setPinyinMatch(false, null)
                 console.log('Definition error: ', e)
             }).finally(() => {
                 this.send('NEXT')
@@ -237,7 +245,6 @@ export default {
             })
         },
         onSubmitMeaning(e) {
-
             e.preventDefault()
             if (this.meaningInput === "") return
 
@@ -251,38 +258,36 @@ export default {
             .then(definition => {
                 return definition.getIdxMatchMeaning(input)
             }).then(meaningIdx => {
-                this.currentCardData.meaningMatch = {
-                    found: true,
-                    idx: meaningIdx
-                }
-                this.currentCardData.correct = true
-            }).catch(err => {
-                this.currentCardData.meaningMatch = {
-                    found: false,
-                }
-                console.log(err)
-                this.currentCardData.correct = false
+                this.currentCardData.setMeaningMatch(true, meaningIdx)
+            }).catch(e => {
+                this.currentCardData.setMeaningMatch(false, null)
+                console.log('Definition error: ', e)
             }).finally(() => {
                 this.send('NEXT')
             })
         },
         setCurrentDefn() {
-            this.currentCardData.definitionPromise = Definition.get(this.reviewSession.cards[this.currentIndex])
-            .then(response => {
-                console.log('found definition for ', this.currentCardData.word)
-                return response
-            }).catch(err => {
-                console.log(err)
-                this.currentCardData.defNotFound = true
+            this.currentCardData.setDefinitionPromise()
+            this.currentCardData.definitionPromise
+            .catch(e => {
                 this.send('NODEF')
+                console.log(e)
             })
+        },
+        checkNewCard() {
+            if (this.reviewSession.isSRS) {
+                if (this.userReviewSets.new.has(this.currentCardData.word)) {
+                    this.send('NEW')
+                    this.currentCardData.setNew(true)
+                }
+            }
         },
         percent(num, denom) {
             return num*100/denom
         },
         rewind(idx) {
             for (let i = this.currentIndex; i >= idx; --i) {
-                this.vocabResponses[i].correct = null
+                this.reviewProgress[i].correct = null
             }
             this.currentIndex = idx
             this.rewindHoverIdx = -1
@@ -303,19 +308,10 @@ export default {
     mounted() {
         console.log('INPUT ',this.$refs)
         this.$nextTick(() => this.$refs.pinyinInputRef.focus())
-        this.vocabResponses = this.reviewSession.cards.map(word => {
-            return {
-                word,
-                definitionPromise: null,
-                definition: null,
-                defNotFound: false,
-                // response data
-                pyMatch: null,
-                meaningMatch: null,
-                correct: null,
-                allowPageEnter: true
-            }
+        this.reviewProgress = this.reviewSession.cards.map(word => {
+            return new Progress({ word })
         })
+        this.checkNewCard()
         this.setCurrentDefn()
         window.addEventListener('keyup', (ev) => {
             if (ev.key == 'Enter') {
@@ -332,7 +328,8 @@ export default {
     },
     watch: {
         currentIndex: function() {
-            if (this.currentIndex < this.vocabResponses.length) {
+            if (this.currentIndex < this.reviewProgress.length) {
+                this.checkNewCard()
                 this.setCurrentDefn()
             }
         }

@@ -14,7 +14,6 @@
         </div>
         <div v-if="getEditSectionId === section.id" class="w-2/5 flex justify-end items-center space-x-2">
             <button @click="removeWords(section, selectedList)" :disabled="selectedList.length === 0" class="disabled:opacity-50 bg-red-500 h-10 w-10 active:outline-none focus:outline-none hover:bg-opacity-80 flex justify-center items-center rounded" >
-
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
                     <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
                 </svg>
@@ -27,20 +26,15 @@
         </div>
         <div v-else class="w-2/5 flex justify-end items-center space-x-2">
             <div class="flex space-x-0">
-                <button :class="progressClass(section, 4)" class="h-10 w-10 active:outline-none focus:outline-none hover:bg-opacity-80 flex justify-center items-center rounded-l border-gray-900 border-r-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="white">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </button>
-                <button :class="progressClass(section, 4)" class="h-10 text-white font-bold active:outline-none focus:outline-none hover:bg-opacity-80 flex justify-center space-x-2 p-2 rounded-r">
+                <button @click="reviewSectionSRS()" :disabled="getReadySet.size === 0" :class="progressClass(section, 4)" class="h-10 text-white font-bold active:outline-none focus:outline-none hover:bg-opacity-80 disabled:opacity-25 flex justify-center space-x-2 p-2 rounded">
                     <div class="flex items-center h-full space-x-1">
-                        <span>10</span>
+                        <span>{{getReadySet.size}}</span>
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
                         </svg>
                     </div>
                     <div class="flex items-center h-full space-x-1">
-                        <span>32</span>
+                        <span>{{getWaitingSet.size}}</span>
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
                             <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
                         </svg>
@@ -73,7 +67,6 @@
             v-for="(char, i) in chooseShowType()"
             :key="i" 
             :character="char"
-            :reviewLevel="getReviewLevel(char)"
             :color="section.color"
             :sectionId="section.id"
             :selected="selectedList.includes(char)"
@@ -108,7 +101,7 @@ export default {
         'section',
     ],
     computed: {
-        ...mapGetters(['getReviewLevel', 'getSize', 'getShowType', 'getEditSectionId', 'getGlobalSelect']),
+        ...mapGetters(['getSize', 'getShowType', 'getEditSectionId', 'getGlobalSelect', 'getUserReviewSets']),
         cardSizeStyle() {
             return {
                 'sm-char': this.getSize.idx == 0,
@@ -116,6 +109,12 @@ export default {
                 'lg-char': this.getSize.idx == 2,
             }
         },
+        getReadySet() {
+            return new Set(this.chooseShowType().filter(word => this.getUserReviewSets.ready.has(word)))
+        },
+        getWaitingSet() {
+            return new Set(this.chooseShowType().filter(word => this.getUserReviewSets.waiting.has(word)))
+        }
     },
     methods: {
         ...mapActions(['setEditSectionId', 'removeWordsFromSection', 'setReviewSession']),
@@ -162,8 +161,12 @@ export default {
             console.log('pushing')
         },
         reviewSessionSRS() {
-
-        }
+            this.setReviewSession({
+                isSRS: true,
+                cards: this.getReadySet()
+            })
+            this.$router.push("review")
+        },
     },
 }
 </script>

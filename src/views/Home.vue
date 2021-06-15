@@ -35,28 +35,37 @@
               </button>
             </div>
 
-            <div class="flex space-x-2 w-full">
-              <button class="bg-indigo-500 h-14 w-1/2 text-white text-xl font-light active:outline-none focus:outline-none hover:bg-opacity-80 flex justify-center space-x-2 p-2 rounded">
+            <div v-if="getUser.loggedIn" class="flex space-x-2 w-full">
+              <button @click="reviewSessionSRS()" class="bg-indigo-500 h-14 flex-grow text-white text-xl font-light active:outline-none focus:outline-none hover:bg-opacity-80 flex justify-center space-x-2 p-2 rounded">
+                  <div v-if="getUserReviewSets.new.size !== 0" class="flex items-center h-full space-x-1">
+                      <span>{{getUserReviewSets.new.size}}</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clip-rule="evenodd" />
+                      </svg>
+                  </div>
                   <div class="flex items-center h-full space-x-1">
-                      <span>10</span>
+                      <span>{{getUserReviewSets.ready.size}}</span>
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
                           <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
                       </svg>
                   </div>
                   <div class="flex items-center h-full space-x-1">
-                      <span>32</span>
+                      <span>{{getUserReviewSets.waiting.size}}</span>
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
                           <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
                       </svg>
                   </div>
               </button>
-              <div class="w-1/2 flex space-x-1">
+              <div class="flex space-x-1">
                 <button @click="reviewSelectGo" :class="{'rounded-l': getGlobalSelect.mode, 'rounded': !getGlobalSelect.mode}" class="bg-indigo-500 h-14 w-full text-white text-xl font-light active:outline-none focus:outline-none hover:bg-opacity-80 flex justify-center space-x-2 p-2 disabled:opacity-50" :disabled="getGlobalSelect.mode && getGlobalSelect.vocab.length === 0">
                     <div class="flex items-center h-full space-x-1">
                       <span v-if="getGlobalSelect.mode"> {{getGlobalSelect.vocab.length}} </span>
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
+                      <svg v-if="getGlobalSelect.mode" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
                         <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
                         <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                      </svg> 
+                      <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
                       </svg>
                     </div>
                 </button>
@@ -149,7 +158,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['getSections', 'getReviewLevel', 'getSize', 'getShowType', 'getModals', 'getGlobalSelect']),
+    ...mapGetters(['getSections', 'getReviewLevel', 'getSize', 'getShowType', 'getModals', 'getGlobalSelect', 'getUser', 'getUserReviewSets']),
   },
   methods: {
     ...mapActions(['setReviewDeck', 'addSection', 'removeSection', 'editSection', 'setSize', 'setShowType', 'setGlobalSelectMode', 'setReviewSession']),
@@ -157,9 +166,9 @@ export default {
       return StyleCalc.cardBgStyle(section.id, level)
     },
     progressWidth(section, level) {
-      let sec_len = section.characters.length;
-      let chars_len = section.characters.filter(char => this.getReviewLevel(char) == level).length
-      let percent = Math.floor(chars_len*100/sec_len)
+      let sec_len = section.words.length;
+      let words_len = section.words.filter(word => this.getReviewLevel(word) == level).length
+      let percent = Math.floor(words_len*100/sec_len)
       return `width: ${percent}%`
     },
     // new section
@@ -202,6 +211,15 @@ export default {
         this.$router.push("review")
       }
     },
+    reviewSessionSRS() {
+      if (this.getUserReviewSets.new.size + this.getUserReviewSets.ready.size !== 0) {
+        this.setReviewSession({
+            isSRS: true,
+            cards: this.getUser.data.progress.getWordsToReview()
+        })
+        this.$router.push("review")
+      }
+    }
   },
 }
 </script>

@@ -1,8 +1,11 @@
-// import axios from 'axios'
-import store from '../store/index.js'
+import firebase from "firebase/app";
 
 export const URL_BASE = 'http://localhost:3000'
 
-export function getIdToken() {
-    return store.getters.getUser.data?.idToken 
+export async function getIdToken() {
+    return await firebase.auth().currentUser.getIdToken(true)
+}
+
+export async function getUid() {
+    return await firebase.auth().currentUser.uid
 }

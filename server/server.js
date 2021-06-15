@@ -18,7 +18,6 @@ const db = admin.firestore();
 
 const definitions_ref = db.collection('definitions')
 const users_ref = db.collection('users')
-const progress_ref = db.collection('progress')
 const sections_ref = db.collection('sections')
 
 
@@ -27,7 +26,6 @@ app.get('/', (req, res) => {
 })
 
 async function getUidFromToken(idToken) {
-    console.log('idToken ',idToken)
     let decodedToken = await admin.auth().verifyIdToken(idToken)
     return decodedToken.uid;
 }
@@ -268,25 +266,41 @@ app.put('/users/:uid', async (req, res) => {
     .then(async uid => {
         try {
             const doc = await users_ref.doc(uid).get()
-            if (!doc.exists) {
-                const userObj = {
-                    name: userData.name,
-                    email: userData.email,
-                    createdAt: admin.firestore.Timestamp.now(),
-                }
-                await users_ref.doc(uid).set(userObj)
-                res.status(200).send(userObj)
-            } else {
-                res.status(200).send(doc.data())
+            let userObj = {
+                name: userData.name,
+                email: userData.email,
+                photo: userData.photo,
             }
+            if (!doc.exists) {
+
+                await users_ref.doc(uid).set({
+                    ...userObj,
+                    createdAt: admin.firestore.Timestamp.now(),
+                })
+            } else {
+                await users_ref.doc(uid).update(userObj)
+            }
+            // get progress
+            let progressResponse = await getUserProgress(uid)
+            progressDict = {}
+            progressResponse.forEach(progressEntry => {
+                progressDict[progressEntry.id] = progressEntry.data()
+            })
+            res.status(200).send({
+                ...userObj,
+                progress: progressDict
+            })
         } catch(e) {
             res.status(404).send(e)
         }
-
     }).catch(e => {
         res.status(400).send(e)
     })
 })
+
+async function getUserProgress(uid) {
+    return await users_ref.doc(uid).collection('progress').get()
+}
 
 app.get('/users/:uid/progress', async (req, res) => {
     const userUid = req.params.uid
@@ -295,7 +309,7 @@ app.get('/users/:uid/progress', async (req, res) => {
     verifyUser(idToken, userUid)
     .then(async uid => {
         try {
-            let response = users_ref.doc(uid).collection('progress')
+            let response = await getUserProgress(uid)
             res.status(200).send(response)
         } catch (e) {
             res.status(400).send(e)
@@ -335,7 +349,6 @@ function verifyUser(idToken, uid) {
         if (idToken) {
             try {
                 const retrievedUid = await getUidFromToken(idToken);
-                console.log('ret', retrievedUid)
                 if (retrievedUid === uid) {
                     resolve(retrievedUid)
                 } else {
@@ -350,12 +363,42 @@ function verifyUser(idToken, uid) {
     })
 }
 
+
+Date.prototype.addHours = function(h) {
+    this.setTime(this.getTime() + (h*60*60*1000));
+    return this;
+}
+
+Date.prototype.roundDownHour = function(h) {
+    this.setMinutes(0, 0, 0)
+    return this;
+}
+
+timingsInHours = {
+    1: 4,
+    2: 8,
+    3: 24,
+    4: 48,
+    5: 168,
+    6: 336,
+    7: 730,
+    8: 1460,
+    9: 2920
+}
+function getReviewDatForLevel(level) {
+    console.log('level', level)
+    let date = new Date()
+    date.addHours(timingsInHours[level])
+    date.roundDownHour()
+    return admin.firestore.Timestamp.fromDate(date)
+}
+
 function ProgressModel() {
     return {
         numCorrect: 0,
         numIncorrect: 0,
-        level: 0,
-        nextReviewDueDate: null,
+        level: 1,
+        nextReviewDueDate: getReviewDatForLevel(1),
         nonTimedReview: {
             numCorrect: 0,
             numIncorrect: 0
@@ -364,28 +407,38 @@ function ProgressModel() {
     }
 }
 
+function runSRS(currentProgress, correct) {
+    let penalty = 1
+    if (currentProgress.level >= 5) {
+        penalty = 2
+    }
 
-async function createProgressEntry(docRef) {
-    await docRef.set(ProgressModel())
-    console.log('done')
+    if (correct === true) {
+        currentProgress.level = Math.min(currentProgress.level + 1, 9)
+        currentProgress.nextReviewDueDate = getReviewDateForLevel(currentProgress.level)
+    } else if (correct === false) {
+        currentProgress.level = Math.max(currentProgress.level - penalty, 1)
+        currentProgress.nextReviewDueDate = getReviewDateForLevel(currentProgress.level)
+    }
+    return currentProgress
 }
 
 app.put('/users/:uid/progress/:entryId', async (req, res) => {
     // creates entries for vocab if none found in db
     const { uid, entryId } = req.params
-    const { idToken, progressData } = req.body
+    const { idToken, correct } = req.body
     try { 
         let userUid = await verifyUser(idToken, uid)
         console.log('uid', uid, userUid)
         const progressDoc_ref = await users_ref.doc(`${userUid}/progress/${entryId}`)
         const progressDoc = await progressDoc_ref.get()
-        console.log(progressDoc.exists)
+        console.log('HERE', entryId)
         if (progressDoc.exists) {
+            await progressDoc_ref.update(runSRS(progressDoc.data(), correct))
         } else {
-            console.log('here')
-            await createProgressEntry(progressDoc_ref)
+        console.log('HERE', entryId)
+            await progressDoc_ref.set(ProgressModel())
         }
-        // await progressDoc_ref.update(progressData)
         res.status(200).send(progressData)
 
     } catch (e) {

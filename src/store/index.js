@@ -43,7 +43,7 @@ const state = {
 const getters = {
     getSections: state => state.sections,
     getReviewLevel: state => (char) => {
-      return state.progress[char]?.review_level || 0
+      return state.user.data?.progress.collection[char]?.level || 0
     },
     getReviewSession: state => state.reviewSession,
     getUser: state => state.user,
@@ -51,7 +51,8 @@ const getters = {
     getShowType: state => state.showType,
     getModals: state => state.modals,
     getEditSectionId: state => state.editSectionId,
-    getGlobalSelect: state => state.globalSelect
+    getGlobalSelect: state => state.globalSelect,
+    getUserReviewSets: state => state.user.data.progress.reviewSets
 }
 
 const actions = {
@@ -69,22 +70,19 @@ const actions = {
     // },
     async fetchUser({ commit }, user) {
         if (user) {
-            let idToken = await user.getIdToken(true);
+            console.log('here')
+            try {
+                const userObj = await User.load(user.uid, {
+                    name: user.displayName,
+                    email: user.email,
+                    photo: user.photoURL
+                })
+                console.log("LOADED USER: ", userObj )
+                commit('setUserData', userObj)
+            } catch (e) {
+                console.log('no ', e)
+            }
             commit('setUserLoggedIn', true)
-            commit('setUserData', {
-                displayName: user.displayName,
-                email: user.email,
-                photo: user.photoURL,
-                idToken: idToken
-            })
-            User.load(user.uid)
-                .then(userObj => {
-                    console.log("LOADED USER: ", userObj )
-
-                })
-                .catch(e => {
-                    print(e)
-                })
         } else {
             commit('setUserLoggedIn', false)
             commit('setUserData', null)
@@ -165,6 +163,7 @@ const actions = {
     },
     async updateGlobalSelectVocab({ commit }, vocab) {
         commit('updateGlobalSelectVocab', vocab)
+        commit('updateReviewNewSet', vocab)
     },
 }
 
@@ -203,15 +202,23 @@ const mutations = {
             state.definitions[entry] = defn
         }
     },
-    setGlobalSelectMode(state, mode) { state.globalSelect.mode = mode },
+    setGlobalSelectMode(state, mode) { 
+        state.globalSelect.mode = mode
+        if (mode === false) {
+            Vue.set(state.globalSelect, 'vocab', [])
+            state.user.data.progress.removeNew()
+        }
+    },
     updateGlobalSelectVocab(state, vocab) { 
         if (state.globalSelect.vocab.includes(vocab)) {
             Vue.set(state.globalSelect, 'vocab', state.globalSelect.vocab.filter(x => x != vocab))
         } else {
             Vue.set(state.globalSelect, 'vocab', [vocab, ...state.globalSelect.vocab])
         }
+    },
+    updateReviewNewSet(state, vocab) {
+        state.user.data.progress.updateNew(vocab)
     }
-
 }
 
 Vue.use(Vuex)

@@ -17,7 +17,6 @@ export default {
     name: "CharacterCard",
     props: {
         character: null,
-        reviewLevel: null,
         color: null,
         sectionId: null,
         addCharType: {
@@ -30,7 +29,7 @@ export default {
         }
     },
     computed: {
-        ...mapGetters(['getSize', 'getEditSectionId', 'getGlobalSelect']),
+        ...mapGetters(['getReviewLevel', 'getSize', 'getEditSectionId', 'getGlobalSelect']),
         dynamicGridColumn() {
             let span = this.character.length
             if (this.getSize.idx == 0) { // small
@@ -42,6 +41,10 @@ export default {
                 if (this.character.length > 2) span = 3
             }
             return `grid-column: span ${span};`;
+        },
+        reviewLevel() {
+            return this.getReviewLevel(this.character)
+
         },
         cardBgStyle() { 
             return StyleCalc.cardBgStyle(this.sectionId, this.reviewLevel);
@@ -56,7 +59,6 @@ export default {
                 'lg-char': this.getSize.idx == 2,
             }
         },
-        getCharTextColor() { return StyleCalc.charTextColor(this.sectionId, this.reviewLevel); },
         selectCharStyle() {
             if (!this.addCharType) {
                 if (this.getEditSectionId === this.sectionId) {
@@ -69,7 +71,6 @@ export default {
                         'selectedHover': !this.getGlobalSelect.vocab.includes(this.character),
                         'selected': this.getGlobalSelect.vocab.includes(this.character)
                     }
-
                 }
             }
             return {}

@@ -65,7 +65,7 @@
 <script>
 // import { mapGetters, mapActions } from 'vuex'
 import { mapGetters } from 'vuex'
-import { Sections } from '@/js/model.js'
+import { Section } from '@/js/models/section.js'
 
 export default {
   name: 'Modal',
@@ -107,7 +107,7 @@ export default {
           }
           const sectionTitles = this.getSections.map(sec => sec.canonicalId)
           console.log(this.titleInput)
-          if (sectionTitles.includes(Sections.canonicalId(this.titleInput))) {
+          if (sectionTitles.includes(Section.getCanonicalId(this.titleInput))) {
                 this.errors.push("Title already exists")
                 return
           }

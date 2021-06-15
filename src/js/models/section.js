@@ -24,7 +24,7 @@ export class Section extends Model {
         }
     }
     static async load() {
-        const idToken = getIdToken()
+        const idToken = await getIdToken()
         try {
             const response = await axios.get(URL_BASE + '/sections', {
                 params: {
@@ -39,7 +39,7 @@ export class Section extends Model {
         }
     }
     static async post(title) {
-        const idToken = getIdToken()
+        const idToken = await getIdToken()
         try {
             const response = await axios.post(URL_BASE + '/section', {
                 title: title,
@@ -53,7 +53,7 @@ export class Section extends Model {
         }
     }
     static async delete(sectionId) {
-        const idToken = getIdToken()
+        const idToken = await getIdToken()
         console.log(sectionId)
         try {
             await axios.delete(URL_BASE + `/section/${sectionId}`, {
@@ -66,7 +66,7 @@ export class Section extends Model {
         }
     }
     static async put(sectionId, newTitle) {
-        const idToken = getIdToken()
+        const idToken = await getIdToken()
         console.log(sectionId, idToken)
         try {
             await axios.put(URL_BASE + `/section/${sectionId}`, {
@@ -79,7 +79,7 @@ export class Section extends Model {
     }
     async patchWords({wordsToAdd = [], wordsToRemove = []}) {
         // API calls to add/remove words
-        const idToken = getIdToken()
+        const idToken = await getIdToken()
         await axios.patch(URL_BASE + `/section/${this.id}/words`, {
             idToken,
             wordsToAdd,
@@ -87,7 +87,10 @@ export class Section extends Model {
         })
     }
     static getCanonicalId(title) {
-        return title.replace(/\s\s+/g, ' ').trim().replaceAll(" ", "_").toLowerCase()
+        return title.replace(/\s\s+/g, ' ')
+                    .trim()
+                    .replace(/'+/g, '')
+                    .replaceAll(" ", "_").toLowerCase()
     }
     static wordsToChars(words) {
         let charSet =  words.reduce((acc, word) => {
