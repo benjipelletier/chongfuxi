@@ -23,6 +23,7 @@ export class Progress extends Model {
         }
     }
     setDefinitionPromise() {
+        console.log('trying to get')
         this.definitionPromise = Definition.get(this.word)
         .then(response => {
             console.log('found definition for ', this.word)
@@ -56,7 +57,10 @@ export class Progress extends Model {
             idToken,
             'correct': this.correct
         }).then(response => {
-            console.log(response)
+            return {
+                word: this.word,
+                updatedData: response.data
+            }
         }).catch(e => {
             console.log(e)
         })

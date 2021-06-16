@@ -11,8 +11,8 @@ const state = {
     sections: [],
     progress: {},
     reviewSession: {
-        isSRS: true,
-        cards: ['啊','羡慕','水龙头', '家庭主妇',3]
+        isSRS: false,
+        cards: ['女', '啊','羡慕','水龙头', '家庭主妇',3]
     },
     user: {
         loggedIn: false,
@@ -43,7 +43,7 @@ const state = {
 const getters = {
     getSections: state => state.sections,
     getReviewLevel: state => (char) => {
-      return state.user.data?.progress.collection[char]?.level || 0
+      return state.user.data?.progress.collection[char]?.level
     },
     getReviewSession: state => state.reviewSession,
     getUser: state => state.user,
@@ -52,8 +52,14 @@ const getters = {
     getModals: state => state.modals,
     getEditSectionId: state => state.editSectionId,
     getGlobalSelect: state => state.globalSelect,
-    getUserReviewSets: state => state.user.data.progress.reviewSets
+    getUserReviewSets: state => {
+        if (!state.user.loggedIn) {
+            return {}
+        }
+        return state.user.data.progress.reviewSets
+    }
 }
+
 
 const actions = {
     async fetchSections({ commit }) {
@@ -165,6 +171,9 @@ const actions = {
         commit('updateGlobalSelectVocab', vocab)
         commit('updateReviewNewSet', vocab)
     },
+    async updateUserProgress({ commit }, updatedProgress) {
+        commit('updateUserProgress', updatedProgress)
+    }
 }
 
 const mutations = {
@@ -218,6 +227,9 @@ const mutations = {
     },
     updateReviewNewSet(state, vocab) {
         state.user.data.progress.updateNew(vocab)
+    },
+    updateUserProgress(state, { word, updatedData }) {
+        state.user.data.progress.updateProgress(word, updatedData)
     }
 }
 

@@ -11,6 +11,7 @@ import VTooltip from 'v-tooltip'
 import 'typeface-roboto/index.css';
 // import 'swiper/swiper-bundle.css'
 import "firebase/auth";
+import "firebase/firestore";
 import './assets/tailwind.css'
 import VueScrollactive from 'vue-scrollactive';
 

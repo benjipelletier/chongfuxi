@@ -79,6 +79,7 @@ export class Definition extends Model {
         if (!requireTones) {
             pinyin = pinyin.split(' ').map(syl => parseInt(syl.slice(-1)) ? syl.slice(0, -1) : syl).join('')
         }
+        pinyin = pinyin.replace(/u:/g, 'v')
         pinyin = pinyin.replace(/'/g, '')
         pinyin = pinyin.replace(/\s+/g, '')
 

@@ -88,10 +88,7 @@
               <!-- <div class="bg-gray-900 h-3 rounded-b"> </div> -->
               <div class="relative">
                 <div class="overflow-hidden h-2 text-xs flex rounded-b bg-gray-900">
-                  <div :style="progressWidth(section, 4)" :class="progressClass(section, 4)" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center"></div>
-                  <div :style="progressWidth(section, 3)" :class="progressClass(section, 3)" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center"></div>
-                  <div :style="progressWidth(section, 2)" :class="progressClass(section, 2)" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center"></div>
-                  <div :style="progressWidth(section, 1)" :class="progressClass(section, 1)" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center"></div>
+                  <div v-for="barI in [10,9,8,7,6,5,4,3,2,1,0]" :key="'progress-bar-' + barI" :style="progressWidth(section, barI)" :class="progressClass(section, barI)" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center"></div>
                 </div>
               </div>
             </div>
@@ -168,7 +165,7 @@ export default {
     progressWidth(section, level) {
       let sec_len = section.words.length;
       let words_len = section.words.filter(word => this.getReviewLevel(word) == level).length
-      let percent = Math.floor(words_len*100/sec_len)
+      let percent = Math.ceil(words_len*100/sec_len)
       return `width: ${percent}%`
     },
     // new section
@@ -209,6 +206,7 @@ export default {
         })
         console.log('set')
         this.$router.push("review")
+        this.setGlobalSelectMode(false)
       }
     },
     reviewSessionSRS() {

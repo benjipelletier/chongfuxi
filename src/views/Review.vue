@@ -18,7 +18,7 @@
                                 <div>Incorrect: {{numIncorrect}}/{{reviewProgress.length}}</div>
                             </div>
                             <div v-else class="flex justify-center items-center p-4 whitespace-nowrap">
-                                <span :class="cardTextSize(reviewProgress[i].word)">{{reviewProgress[i].word}}</span>
+                                <span :class="cardTextSize(currentCardData.word)">{{currentCardData.word}}</span>
                             </div>
                         </div>
                         <!-- left conveyor -->
@@ -96,10 +96,11 @@
 
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import { Progress } from '@/js/models/progress.js'
 import { createMachine, interpret } from 'xstate';
 import * as pinyinUtil from 'pinyin-tone'
+import Vue from 'vue'
 
 const stateMachine = createMachine({
     initial: 'review',
@@ -184,6 +185,7 @@ export default {
         })
     },
     methods: {
+        ...mapActions(['updateUserProgress']),
         cardTextSize(text) {
             // dynamically change font size based on char count
             if (text.length >= 4) return 'text-7xl'
@@ -191,35 +193,51 @@ export default {
             return 'text-9xl'
         },
         numberToToneMarks(py) {
-            return pinyinUtil(py)
+            return pinyinUtil(py.replace(/u:/g, 'v'))
+        },
+        focusPinyin() {
+            if (this.$refs.pinyinInputRef) {
+                Vue.nextTick(() => this.$refs.pinyinInputRef.focus())
+            }
+        },
+        focusMeaning() {
+            if (this.$refs.meaningInputRef) {
+                Vue.nextTick(() => this.$refs.meaningInputRef.focus())
+            }
         },
         pageEnter() {
             if (!this.allowPageEnter) return
 
             if (this.currentState.matches('review.pinyin')) {
-                this.$nextTick(() => this.$refs.pinyinInputRef.focus())
+                this.focusPinyin()
             } else if (this.currentState.matches('review.meaning')) {
-                this.$nextTick(() => this.$refs.meaningInputRef.focus())
+                this.focusMeaning()
             } else if (this.currentState.matches('answer')) {
                 this.advanceCard()
             } else if (this.currentState.matches('noDef')) {
                 this.advanceCard()
             } else if (this.currentState.matches('new')) {
                 this.advanceCard()
-            } else if (this.currentState.matches('stat')) {
-                // noop
+            } else if (this.currentState.matches('stats')) {
+                this.$router.push({ path: '/' })
             }
         },
         advanceCard() {
             if (this.reviewSession.isSRS) {
                 this.currentCardData.put()
+                .then(response => {
+                    console.log(response)
+                    this.updateUserProgress(response)
+                })
             }
             this.currentIndex++
             if (this.currentIndex >= this.reviewProgress.length) {
                 this.send('END')
             } else {
                 this.send('NEXT')
-                this.$nextTick(() => this.$refs.pinyinInputRef.focus())
+                setTimeout(() => {
+                    this.focusPinyin()
+                }, 100)
             }
         },
         onSubmitPinyin(e) {
@@ -241,7 +259,7 @@ export default {
                 console.log('Definition error: ', e)
             }).finally(() => {
                 this.send('NEXT')
-                this.$nextTick(() => this.$refs.meaningInputRef.focus())
+                this.focusMeaning()
             })
         },
         onSubmitMeaning(e) {
@@ -267,6 +285,7 @@ export default {
             })
         },
         setCurrentDefn() {
+            console.log('set curre')
             this.currentCardData.setDefinitionPromise()
             this.currentCardData.definitionPromise
             .catch(e => {
@@ -301,30 +320,32 @@ export default {
         },
         send(event) {
             this.stateMachine.send(event)
-        }
-    },
-    updated() {
-    },
-    mounted() {
-        console.log('INPUT ',this.$refs)
-        this.$nextTick(() => this.$refs.pinyinInputRef.focus())
-        this.reviewProgress = this.reviewSession.cards.map(word => {
-            return new Progress({ word })
-        })
-        this.checkNewCard()
-        this.setCurrentDefn()
-        window.addEventListener('keyup', (ev) => {
+        },
+        keyupEventHandler(ev) {
             if (ev.key == 'Enter') {
                 console.log('keyup')
                 this.pageEnter()
                 this.allowPageEnter = true
             }
-        });
+        },
     },
     created() {
+        this.reviewProgress = this.reviewSession.cards.map(word => {
+            return new Progress({ word })
+        })
+        this.checkNewCard()
+        this.setCurrentDefn()
+        window.addEventListener('keyup', this.keyupEventHandler);
         this.stateMachine.onTransition((state) => {
             this.currentState = state;
         }).start()
+    },
+    destroyed() {
+        console.log('DONE')
+        window.removeEventListener('keyup', this.keyupEventHandler)
+    },
+    mounted() {
+        this.focusPinyin()
     },
     watch: {
         currentIndex: function() {

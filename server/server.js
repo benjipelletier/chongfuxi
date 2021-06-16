@@ -375,6 +375,7 @@ Date.prototype.roundDownHour = function(h) {
 }
 
 timingsInHours = {
+    0: 0,
     1: 4,
     2: 8,
     3: 24,
@@ -383,9 +384,10 @@ timingsInHours = {
     6: 336,
     7: 730,
     8: 1460,
-    9: 2920
+    9: 2920,
 }
-function getReviewDatForLevel(level) {
+function getReviewDateForLevel(level) {
+    if (level === 10) return Infinity
     console.log('level', level)
     let date = new Date()
     date.addHours(timingsInHours[level])
@@ -397,8 +399,8 @@ function ProgressModel() {
     return {
         numCorrect: 0,
         numIncorrect: 0,
-        level: 1,
-        nextReviewDueDate: getReviewDatForLevel(1),
+        level: 0,
+        nextReviewDueDate: getReviewDateForLevel(0),
         nonTimedReview: {
             numCorrect: 0,
             numIncorrect: 0
@@ -414,11 +416,14 @@ function runSRS(currentProgress, correct) {
     }
 
     if (correct === true) {
-        currentProgress.level = Math.min(currentProgress.level + 1, 9)
+        currentProgress.level = Math.min(currentProgress.level + 1, 10)
+        console.log('new level', currentProgress.level)
         currentProgress.nextReviewDueDate = getReviewDateForLevel(currentProgress.level)
+        currentProgress.numCorrect++
     } else if (correct === false) {
-        currentProgress.level = Math.max(currentProgress.level - penalty, 1)
-        currentProgress.nextReviewDueDate = getReviewDateForLevel(currentProgress.level)
+        currentProgress.level = Math.max(currentProgress.level - penalty, 0)
+        currentProgress.nextReviewDueDate = getReviewDateForLevel(0)
+        currentProgress.numIncorrect++
     }
     return currentProgress
 }
@@ -433,15 +438,19 @@ app.put('/users/:uid/progress/:entryId', async (req, res) => {
         const progressDoc_ref = await users_ref.doc(`${userUid}/progress/${entryId}`)
         const progressDoc = await progressDoc_ref.get()
         console.log('HERE', entryId)
+        let updatedProgress = {}
         if (progressDoc.exists) {
-            await progressDoc_ref.update(runSRS(progressDoc.data(), correct))
+            updatedProgress = runSRS(progressDoc.data(), correct)
+            await progressDoc_ref.update(updatedProgress)
         } else {
-        console.log('HERE', entryId)
-            await progressDoc_ref.set(ProgressModel())
+            console.log('HERE', entryId)
+            updatedProgress = ProgressModel()
+            await progressDoc_ref.set(updatedProgress)
         }
-        res.status(200).send(progressData)
+        res.status(200).send(updatedProgress)
 
     } catch (e) {
+        console.log(e)
         res.status(400).send(e)
     }
 })

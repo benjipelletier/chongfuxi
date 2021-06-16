@@ -25,8 +25,15 @@
             </button>
         </div>
         <div v-else class="w-2/5 flex justify-end items-center space-x-2">
+            <div v-if="getGlobalSelect.mode">
+                <button @click="selectAll()" :class="progressClass(section, 10)" class="h-10 text-white font-bold active:outline-none focus:outline-none hover:bg-opacity-80 disabled:opacity-25 flex justify-center items-center space-x-2 p-2 rounded">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M6.672 1.911a1 1 0 10-1.932.518l.259.966a1 1 0 001.932-.518l-.26-.966zM2.429 4.74a1 1 0 10-.517 1.932l.966.259a1 1 0 00.517-1.932l-.966-.26zm8.814-.569a1 1 0 00-1.415-1.414l-.707.707a1 1 0 101.415 1.415l.707-.708zm-7.071 7.072l.707-.707A1 1 0 003.465 9.12l-.708.707a1 1 0 001.415 1.415zm3.2-5.171a1 1 0 00-1.3 1.3l4 10a1 1 0 001.823.075l1.38-2.759 3.018 3.02a1 1 0 001.414-1.415l-3.019-3.02 2.76-1.379a1 1 0 00-.076-1.822l-10-4z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
             <div class="flex space-x-0">
-                <button @click="reviewSectionSRS()" :disabled="getReadySet.size === 0" :class="progressClass(section, 4)" class="h-10 text-white font-bold active:outline-none focus:outline-none hover:bg-opacity-80 disabled:opacity-25 flex justify-center space-x-2 p-2 rounded">
+                <button @click="reviewSectionSRS()" :disabled="getReadySet.size === 0" :class="progressClass(section, 10)" class="h-10 text-white font-bold active:outline-none focus:outline-none hover:bg-opacity-80 disabled:opacity-25 flex justify-center space-x-2 p-2 rounded">
                     <div class="flex items-center h-full space-x-1">
                         <span>{{getReadySet.size}}</span>
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
@@ -42,7 +49,7 @@
                 </button>
             </div>
             <div class="flex space-x-0">
-                <button @click="reviewSection()" :class="progressClass(section, 4)" class="h-10 text-white font-bold active:outline-none focus:outline-none hover:bg-opacity-80 flex justify-center space-x-1 p-2 rounded">
+                <button @click="reviewSection()" :class="progressClass(section, 10)" class="h-10 text-white font-bold active:outline-none focus:outline-none hover:bg-opacity-80 flex justify-center space-x-1 p-2 rounded">
                         <span>{{chooseShowType().length}}</span>
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
                             <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
@@ -109,6 +116,9 @@ export default {
                 'lg-char': this.getSize.idx == 2,
             }
         },
+        getNewSet() {
+            return this.getUserReviewSets.new
+        },
         getReadySet() {
             return new Set(this.chooseShowType().filter(word => this.getUserReviewSets.ready.has(word)))
         },
@@ -117,10 +127,7 @@ export default {
         }
     },
     methods: {
-        ...mapActions(['setEditSectionId', 'removeWordsFromSection', 'setReviewSession']),
-        getLvlStyle(lvl) {
-            return StyleCalc.cardBgColor(this.section.id, lvl);
-        },
+        ...mapActions(['setEditSectionId', 'removeWordsFromSection', 'setReviewSession', 'updateGlobalSelectVocab']),
         progressClass(section, level) {
             return StyleCalc.cardBgStyle(section.id, level)
         },
@@ -160,13 +167,18 @@ export default {
             this.$router.push("review")
             console.log('pushing')
         },
-        reviewSessionSRS() {
+        reviewSectionSRS() {
             this.setReviewSession({
                 isSRS: true,
-                cards: this.getReadySet()
+                cards: [...this.getReadySet]
             })
             this.$router.push("review")
         },
+        selectAll() {
+            this.chooseShowType().forEach(word => {
+                this.updateGlobalSelectVocab(word)
+            })
+        }
     },
 }
 </script>

@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { Model } from "@/js/models/base.js"
 import { URL_BASE, getIdToken } from '../common.js'
+import firebase from "firebase/app";
 
 export class User extends Model {
     constructor(attributes = {}) {
@@ -11,7 +12,6 @@ export class User extends Model {
     }
     get defaults() {
         return {
-            progress: new UserProgress()
         }
     }
     static async load(uid, userData) {
@@ -31,6 +31,14 @@ export class UserProgress extends Model {
     constructor(attributes = {}) {
         super(attributes)
         this.updateReviewSets()
+        console.log('constructor', attributes)
+        setInterval(() => {
+            const now = new Date()
+            console.log('now', now.getMinutes())
+            if (now.getMinutes() === 0) {
+                this.updateReviewSets()
+            }
+        }, 60000)
     }
     get defaults() {
         return {
@@ -45,12 +53,16 @@ export class UserProgress extends Model {
     updateReviewSets() {
         let readySet = new Set()
         let waitingSet = new Set()
+        let nowSeconds = firebase.firestore.Timestamp.now().seconds
 
         for (const word in this.collection) {
-            console.log('date', (new Date()).getSeconds() - this.collection[word].nextReviewDueDate._seconds)
-            console.log('date', this.collection[word].nextReviewDueDate)
-            if (!this.collection[word].nextReviewTime) {
-                readySet.add(word)
+            if (this.collection[word].nextReviewDueDate !== null) {
+                let dueSeconds = this.collection[word].nextReviewDueDate._seconds
+                if ((dueSeconds - nowSeconds) < 0) {
+                    readySet.add(word)
+                } else {
+                    waitingSet.add(word)
+                }
             } else {
                 waitingSet.add(word)
             }
@@ -72,5 +84,13 @@ export class UserProgress extends Model {
     }
     getWordsToReview() {
         return [...this.reviewSets.new, ...this.reviewSets.ready]
+    }
+    updateProgress(word, updatedData) {
+        this.collection[word] = updatedData
+        console.log('set ', word, updatedData)
+        if (this.reviewSets.new.has(word)) {
+            this.reviewSets.new.delete(word)
+        }
+        this.updateReviewSets()
     }
 }

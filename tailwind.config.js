@@ -1,6 +1,6 @@
+var _ = require('lodash');
 const colors = require('tailwindcss/colors')
 const { colors: defaultColors } = require('tailwindcss/defaultTheme')
-
 
 module.exports = {
   purge: { content: ['./public/**/*.html', './src/**/*.vue'] },
@@ -16,7 +16,9 @@ module.exports = {
     minWidth: {
       '96': '24rem',
     },
-    extend: {},
+    extend: {
+      // opacity: _.chain(_.range(100).map(num => {return{num: `${num}`, value: `${num/100}`}})).keyBy('num').mapValues('value').value()
+    },
   },
   variants: {
     extend: {
