@@ -3,6 +3,7 @@
         <div class="w-full h-2 flex fixed top-16">
             <div :style="`width: ${percent(numCorrect, reviewSession.cards.length)}%`" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500"></div>
             <div :style="`width: ${percent(numIncorrect, reviewSession.cards.length)}%`" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500"></div>
+            <div :style="`width: ${percent(currentIndex - numCorrect - numIncorrect, reviewSession.cards.length)}%`" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gray-500"></div>
         </div>
         <!-- <div class="w-full h-2 fixed top-16 flex space-x-1">
             <div v-for="(resp, i) in reviewProgress" :key="i" class="flex-grow h-full" :class="{'bg-green-500': resp.correct === true, 'bg-red-500': resp.correct === false}"></div>
@@ -19,6 +20,9 @@
                             </div>
                             <div v-else class="flex justify-center items-center p-4 whitespace-nowrap">
                                 <span :class="cardTextSize(currentCardData.word)">{{currentCardData.word}}</span>
+                                <div v-if="getReviewLevel(currentCardData.word) !== undefined" class="w-8 h-8 bg-orange-400 absolute right-0 top-0 m-2 rounded text-white text-xl font-bold flex justify-center items-center">
+                                    {{getReviewLevel(currentCardData.word)}}
+                                </div>
                             </div>
                         </div>
                         <!-- left conveyor -->
@@ -59,6 +63,18 @@
                         <input ref="input" v-model.trim="inputText" class="input w-full text-5xl text-gray-200 py-2 bg-gray-900" placeholder="response" spellcheck="false">
                     </form> -->
                     <!-- pinyin -->
+                    <div v-if="showOverride" class="w-96 bg-gray-900 h-10 rounded flex ">
+                        <button @click="overrideCorrect(false)" class="flex-grow flex justify-center items-center text-gray-700 hover:bg-red-500 rounded-l focus:outline-none hover:text-white active:bg-opacity-80">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        <button @click="overrideCorrect(true)" class="flex-grow flex justify-center items-center text-gray-700 hover:bg-green-500 rounded-r focus:outline-none hover:text-white active:bg-opacity-80">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </button>
+                    </div>
                     <div v-if="showAnswer" class="w-96 bg-gray-900 text-white rounded flex justify-center relative h-14 ring-inset" :class="{'ring-4 ring-green-500': !currentState.matches('review.pinyin') && currentCardData.pinyinMatch.found === true, 'ring-4 ring-red-500': !currentState.matches('review.pinyin') && currentCardData.pinyinMatch.found === false}">
                         <form v-if="currentState.matches('review.pinyin')" @submit="onSubmitPinyin">
                             <input ref="pinyinInputRef" v-model.trim="pinyinInput" class="input w-full text-4xl text-gray-200 py-2 bg-gray-900 rounded" placeholder="pinyin" spellcheck="false" :disabled="!currentState.matches('review.pinyin')">
@@ -108,31 +124,33 @@ const stateMachine = createMachine({
         review: {
             initial: 'pinyin',
             states: {
-                pinyin: { on: { NEXT: 'meaning' }},
-                meaning: {},
+                pinyin: { on: { MEANING: 'meaning' }},
+                meaning: { on: {}},
             },
             on: {
                 NODEF: 'noDef',
                 NEW: 'new',
-                NEXT: 'answer'
+                END: 'stats',
+                ANSWER: 'answer',
+                RESTART: 'review.pinyin'
             }
         },
         answer: {
             on: {
-                NEXT: 'review.pinyin',
                 NODEF: 'noDef',
-                END: 'stats'
+                END: 'stats',
+                RESTART: 'review.pinyin'
             }
         },
         noDef: {
             on: { 
-                NEXT: 'review.pinyin',
-                END: 'stats'
+                END: 'stats',
+                RESTART: 'review.pinyin'
             }
         },
         new: {
             on: {
-                NEXT: 'review.pinyin',
+                RESTART: 'review.pinyin',
                 END: 'stats'
             }
         },
@@ -179,9 +197,13 @@ export default {
         showAnswer() {
             return this.currentState.matches('review') || this.currentState.matches('answer') || this.currentState.matches('new')
         },
+        showOverride() {
+            return this.currentState.matches('review') || this.currentState.matches('answer') 
+        },
         ...mapGetters({
             reviewSession: 'getReviewSession',
-            userReviewSets: 'getUserReviewSets'
+            userReviewSets: 'getUserReviewSets',
+            getReviewLevel: 'getReviewLevel'
         })
     },
     methods: {
@@ -229,12 +251,15 @@ export default {
                     console.log(response)
                     this.updateUserProgress(response)
                 })
+                .catch(e => {
+                    console.log(e)
+                })
             }
             this.currentIndex++
             if (this.currentIndex >= this.reviewProgress.length) {
                 this.send('END')
             } else {
-                this.send('NEXT')
+                this.send('RESTART')
                 setTimeout(() => {
                     this.focusPinyin()
                 }, 100)
@@ -258,7 +283,7 @@ export default {
                 this.currentCardData.setPinyinMatch(false, null)
                 console.log('Definition error: ', e)
             }).finally(() => {
-                this.send('NEXT')
+                this.send('MEANING')
                 this.focusMeaning()
             })
         },
@@ -281,7 +306,7 @@ export default {
                 this.currentCardData.setMeaningMatch(false, null)
                 console.log('Definition error: ', e)
             }).finally(() => {
-                this.send('NEXT')
+                this.send('ANSWER')
             })
         },
         setCurrentDefn() {
@@ -328,17 +353,25 @@ export default {
                 this.allowPageEnter = true
             }
         },
+        overrideCorrect(correct) {
+            this.currentCardData.overrideCorrect(correct)
+            this.advanceCard()
+        }
     },
     created() {
+        console.log('mapping')
         this.reviewProgress = this.reviewSession.cards.map(word => {
             return new Progress({ word })
         })
+        console.log('mapped')
         this.checkNewCard()
         this.setCurrentDefn()
         window.addEventListener('keyup', this.keyupEventHandler);
+        console.log('starting state')
         this.stateMachine.onTransition((state) => {
             this.currentState = state;
         }).start()
+        console.log('started state')
     },
     destroyed() {
         console.log('DONE')
@@ -346,6 +379,7 @@ export default {
     },
     mounted() {
         this.focusPinyin()
+        console.log('mounted')
     },
     watch: {
         currentIndex: function() {

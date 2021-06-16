@@ -19,7 +19,8 @@ export class Progress extends Model {
                 found: null,
                 idx: null
             },
-            new: false
+            new: false,
+            correct: null
         }
     }
     setDefinitionPromise() {
@@ -38,14 +39,17 @@ export class Progress extends Model {
     setMeaningMatch(found, idx) {
         this.meaningMatch.found = found
         this.meaningMatch.idx = idx
+        this.setCorrect()
     }
-    get correct() {
+    setCorrect() {
         if (this.pinyinMatch.found === true && this.meaningMatch.found === true) {
-            return true
+            this.correct = true
         } else if (this.pinyinMatch.found === false || this.meaningMatch.found === false) {
-            return false
+            this.correct = false
         }
-        return null
+    }
+    overrideCorrect(correct) {
+        this.correct = correct
     }
     setNew(isNew) {
         this.new = isNew
@@ -61,8 +65,6 @@ export class Progress extends Model {
                 word: this.word,
                 updatedData: response.data
             }
-        }).catch(e => {
-            console.log(e)
         })
     }
 }

@@ -143,10 +143,18 @@ export default {
     text-shadow: 0 2px rgba(20,20,20,0.3)
 }
 
-.selectedHover {
+:not(.not-reviewed).selectedHover {
+    @apply  ring-gray-100 ring-inset hover:ring-2;
+}
+.not-reviewed.selectedHover {
     @apply ring-offset-gray-900 ring-offset-2 ring-gray-100 ring-inset hover:ring-2 hover:bg-gray-100 hover:text-black;
 }
-.selected {
+
+:not(.not-reviewed).selected {
+    @apply  ring-gray-100 ring-inset ring-2 !important;
+}
+
+.not-reviewed.selected {
     @apply opacity-100 ring-offset-gray-900 ring-inset ring-2 ring-gray-900 bg-white text-black !important
 }
 

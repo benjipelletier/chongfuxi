@@ -224,7 +224,7 @@ export default {
 }
 
 .sm-char {
-    gap:0;
+    gap:0.3rem;
     grid-template-columns: repeat(auto-fill, minmax(2rem, 1fr));
 }
 

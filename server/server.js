@@ -388,7 +388,6 @@ timingsInHours = {
 }
 function getReviewDateForLevel(level) {
     if (level === 10) return Infinity
-    console.log('level', level)
     let date = new Date()
     date.addHours(timingsInHours[level])
     date.roundDownHour()
@@ -437,13 +436,22 @@ app.put('/users/:uid/progress/:entryId', async (req, res) => {
         console.log('uid', uid, userUid)
         const progressDoc_ref = await users_ref.doc(`${userUid}/progress/${entryId}`)
         const progressDoc = await progressDoc_ref.get()
-        console.log('HERE', entryId)
         let updatedProgress = {}
         if (progressDoc.exists) {
+            let nowSeconds = admin.firestore.Timestamp.now().seconds
+            let dueTimestamp = progressDoc.data().nextReviewDueDate
+            if (dueTimestamp !== null) {
+                let dueSeconds = dueTimestamp._seconds
+                console.log('seconds ', nowSeconds, dueSeconds)
+                if ((dueSeconds - nowSeconds) > 0) {
+                    res.status(409).send('Card not due yet, did not update level.')
+                    return
+                } 
+            }
             updatedProgress = runSRS(progressDoc.data(), correct)
             await progressDoc_ref.update(updatedProgress)
+            console.log(progressDoc.data().level, '->', updatedProgress.level)
         } else {
-            console.log('HERE', entryId)
             updatedProgress = ProgressModel()
             await progressDoc_ref.set(updatedProgress)
         }
