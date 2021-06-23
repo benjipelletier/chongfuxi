@@ -14,12 +14,22 @@ import "firebase/auth";
 import "firebase/firestore";
 import './assets/tailwind.css'
 import VueScrollactive from 'vue-scrollactive';
+import Chartkick from 'vue-chartkick'
+import Chart from 'chart.js'
+import VueVirtualScroller from 'vue-virtual-scroller'
+import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
+import VCalendar from 'v-calendar';
+
 
 
 Vue.config.productionTip = false
 
 Vue.use(VTooltip)
 Vue.use(VueScrollactive);
+Vue.use(Chartkick.use(Chart))
+Vue.use(VueVirtualScroller)
+Vue.use(VCalendar);
+
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {

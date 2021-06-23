@@ -69,7 +69,7 @@
             </button>
         </div>
     </div>
-        <div v-if="!collapsed" :class="cardSizeStyle" class="character-grid my-2" id="panel-2">
+        <div v-show="!collapsed" :class="cardSizeStyle" class="character-grid my-2" id="panel-2">
             <CharacterCard 
             v-for="(char, i) in chooseShowType()"
             :key="i" 
@@ -108,7 +108,7 @@ export default {
         'section',
     ],
     computed: {
-        ...mapGetters(['getSize', 'getShowType', 'getEditSectionId', 'getGlobalSelect', 'getUserReviewSets']),
+        ...mapGetters(['getSize', 'getShowType', 'getEditSectionId', 'getGlobalSelect', 'getUserProgress']),
         cardSizeStyle() {
             return {
                 'sm-char': this.getSize.idx == 0,
@@ -116,14 +116,11 @@ export default {
                 'lg-char': this.getSize.idx == 2,
             }
         },
-        getNewSet() {
-            return this.getUserReviewSets.new
-        },
         getReadySet() {
-            return new Set(this.chooseShowType().filter(word => this.getUserReviewSets.ready.has(word)))
+            return new Set(this.chooseShowType().filter(word => this.getUserProgress.readyHas(word)))
         },
         getWaitingSet() {
-            return new Set(this.chooseShowType().filter(word => this.getUserReviewSets.waiting.has(word)))
+            return new Set(this.chooseShowType().filter(word => this.getUserProgress.waitingHas(word)))
         }
     },
     methods: {

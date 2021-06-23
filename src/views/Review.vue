@@ -20,7 +20,7 @@
                             </div>
                             <div v-else class="flex justify-center items-center p-4 whitespace-nowrap">
                                 <span :class="cardTextSize(currentCardData.word)">{{currentCardData.word}}</span>
-                                <div v-if="getReviewLevel(currentCardData.word) !== undefined" class="w-8 h-8 bg-orange-400 absolute right-0 top-0 m-2 rounded text-white text-xl font-bold flex justify-center items-center">
+                                <div v-if="getReviewLevel(currentCardData.word) !== undefined" class="w-8 h-8 bg-gray-800 absolute right-0 top-0 m-2 rounded text-white text-xl font-regular flex justify-center items-center">
                                     {{getReviewLevel(currentCardData.word)}}
                                 </div>
                             </div>
@@ -202,7 +202,7 @@ export default {
         },
         ...mapGetters({
             reviewSession: 'getReviewSession',
-            userReviewSets: 'getUserReviewSets',
+            userProgress: 'getUserProgress',
             getReviewLevel: 'getReviewLevel'
         })
     },
@@ -320,7 +320,7 @@ export default {
         },
         checkNewCard() {
             if (this.reviewSession.isSRS) {
-                if (this.userReviewSets.new.has(this.currentCardData.word)) {
+                if (this.userProgress.newHas(this.currentCardData.word)) {
                     this.send('NEW')
                     this.currentCardData.setNew(true)
                 }

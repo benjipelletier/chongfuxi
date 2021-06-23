@@ -264,8 +264,10 @@ app.put('/users/:uid', async (req, res) => {
 
     verifyUser(idToken, userUid)
     .then(async uid => {
+        console.log('got verify: ', uid)
         try {
             const doc = await users_ref.doc(uid).get()
+        console.log('got doc')
             let userObj = {
                 name: userData.name,
                 email: userData.email,

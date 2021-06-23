@@ -5,6 +5,7 @@ import Vuex from 'vuex'
 import { Section } from '@/js/models/section.js';
 import { User } from '../js/models/user.js';
 import { Definition } from '../js/models/definition.js';
+// import createPersistedState from "vuex-persistedstate";
 
 
 const state = {
@@ -16,7 +17,7 @@ const state = {
     },
     user: {
         loggedIn: false,
-        data: null
+        data: new User()
     },
     size: {
       labels: ["小","中","大"],
@@ -43,7 +44,10 @@ const state = {
 const getters = {
     getSections: state => state.sections,
     getReviewLevel: state => (char) => {
-      return state.user.data?.progress.collection[char]?.level
+      return state.user.data.progress.collection[char]?.level
+    },
+    getUserProgress: state => {
+        return state.user.data.progress
     },
     getReviewSession: state => state.reviewSession,
     getUser: state => state.user,
@@ -52,12 +56,6 @@ const getters = {
     getModals: state => state.modals,
     getEditSectionId: state => state.editSectionId,
     getGlobalSelect: state => state.globalSelect,
-    getUserReviewSets: state => {
-        if (!state.user.loggedIn) {
-            return {}
-        }
-        return state.user.data.progress.reviewSets
-    }
 }
 
 
@@ -66,32 +64,13 @@ const actions = {
         let sections = await Section.load()
         commit('setSections', sections);
     },
-    // async fetchProgress({ commit }) {
-    //     // const response = await axios.get(URL_BASE + '/user')
-    //     console.log(commit)
-    //     // commit('setProgress', response.data)
-    // },
-    // async setReviewDeck({ commit }, newCards) {
-    //     commit('setReviewDeck', newCards)
-    // },
     async fetchUser({ commit }, user) {
         if (user) {
-            console.log('here')
-            try {
-                const userObj = await User.load(user.uid, {
-                    name: user.displayName,
-                    email: user.email,
-                    photo: user.photoURL
-                })
-                console.log("LOADED USER: ", userObj )
-                commit('setUserData', userObj)
-            } catch (e) {
-                console.log('no ', e)
-            }
             commit('setUserLoggedIn', true)
+            commit('fetchAndSetUserData', user)
         } else {
             commit('setUserLoggedIn', false)
-            commit('setUserData', null)
+            commit('setUserData', new User())
         }
     },
     async addSection({ commit }, title) {
@@ -177,7 +156,7 @@ const actions = {
 }
 
 const mutations = {
-    setSections(state, sections) { state.sections = sections },
+    setSections(state, sections) { state.sections = Object.freeze(sections) },
     setReviewDeck(state, cards) { state.reviewSession.cards = cards},
     setProgress(state, data) { state.progress = data },
     setUserLoggedIn(state, value) { state.user.loggedIn = value },
@@ -230,6 +209,16 @@ const mutations = {
     },
     updateUserProgress(state, { word, updatedData }) {
         state.user.data.progress.updateProgress(word, updatedData)
+    },
+    async fetchAndSetUserData(state, user) {
+        console.log('USER FOUND ', user)
+        if (!state.user.data.retreivedData) {
+            state.user.data = await User.load(user.uid, {
+                name: user.displayName,
+                email: user.email,
+                photo: user.photoURL
+            })
+        }
     }
 }
 
@@ -240,4 +229,5 @@ export default new Vuex.Store({
   getters,
   actions,
   mutations,
+//   plugins: [createPersistedState()],
 })

@@ -2,27 +2,32 @@ import axios from 'axios'
 import { Model } from "@/js/models/base.js"
 import { URL_BASE, getIdToken } from '../common.js'
 import firebase from "firebase/app";
+import "firebase/firestore";
 
 export class User extends Model {
     constructor(attributes = {}) {
+        const collection = attributes.progress || {}
         attributes.progress = new UserProgress({ 
-            collection: attributes.progress
+            collection
         })
         super(attributes)
     }
     get defaults() {
         return {
+            retreivedData: false
         }
     }
     static async load(uid, userData) {
-        console.log('loading')
+        console.log(uid, userData)
+        console.log('LOADING USER EXPENSIVE')
         const idToken = await getIdToken()
         // doesn't follow REST convention
         return axios.put(`${URL_BASE}/users/${uid}`, {
             idToken,
             userData
         }).then(response => {
-            return new User(response.data)
+            console.log(response)
+            return new User({...response.data, retreivedData: true})
         })
     }
 }
@@ -42,55 +47,153 @@ export class UserProgress extends Model {
     }
     get defaults() {
         return {
-            collection: {},
+            collection: {
+                // 'sdf': {
+                //     nextReviewDueDate: { _seconds: 1624376375 }
+                // },
+                // '2sdf': {
+                //     nextReviewDueDate: { _seconds: 1624490000 }
+                // },
+                // '22sdf': {
+                //     nextReviewDueDate: { _seconds: 1624396375 }
+                // }
+            },
             reviewSets: {
-                new: new Set(),
-                ready: new Set(),
-                waiting: new Set()
+                new: [],
+                ready: [],
+                waiting: []
             }
         }
     }
     updateReviewSets() {
-        let readySet = new Set()
-        let waitingSet = new Set()
+        let readySet = []
+        let waitingSet = []
         let nowSeconds = firebase.firestore.Timestamp.now().seconds
 
         for (const word in this.collection) {
             if (this.collection[word].nextReviewDueDate !== null) {
                 let dueSeconds = this.collection[word].nextReviewDueDate._seconds
+                console.log(nowSeconds, dueSeconds)
                 if ((dueSeconds - nowSeconds) < 0) {
-                    readySet.add(word)
+                    readySet.push(word)
                 } else {
-                    waitingSet.add(word)
+                    waitingSet.push(word)
                 }
             } else {
-                waitingSet.add(word)
+                waitingSet.push(word)
             }
         }
         this.reviewSets.ready = readySet
         this.reviewSets.waiting = waitingSet
     }
     updateNew(vocab) {
-        if (!this.reviewSets.new.has(vocab) &&
-            !this.reviewSets.ready.has(vocab) &&
-            !this.reviewSets.waiting.has(vocab)) {
-                this.reviewSets.new.add(vocab)
-        } else if (this.reviewSets.new.has(vocab)) {
-            this.reviewSets.new.delete(vocab)
+        if (!this.reviewSets.new.includes(vocab) &&
+            !this.reviewSets.ready.includes(vocab) &&
+            !this.reviewSets.waiting.includes(vocab)) {
+                this.reviewSets.new.push(vocab)
+        } else if (this.reviewSets.new.includes(vocab)) {
+            this.removeFromNew(vocab)
         }
     }
     removeNew() {
-        this.reviewSets.new = new Set()
+        this.reviewSets.new = []
+    }
+    removeFromNew(word) {
+        const idx = this.reviewSets.new.indexOf(word)
+        if (idx > -1) {
+            this.reviewSets.new.splice(idx, 1)
+        }
     }
     getWordsToReview() {
         return [...this.reviewSets.new, ...this.reviewSets.ready]
     }
     updateProgress(word, updatedData) {
         this.collection[word] = updatedData
-        console.log('set ', word, updatedData)
-        if (this.reviewSets.new.has(word)) {
-            this.reviewSets.new.delete(word)
-        }
         this.updateReviewSets()
+    }
+    newHas(word) {
+        const idx = this.reviewSets.new.indexOf(word)
+        return idx > -1
+    }
+    readyHas(word) {
+        const idx = this.reviewSets.ready.indexOf(word)
+        return idx > -1
+    }
+    waitingHas(word) {
+        const idx = this.reviewSets.waiting.indexOf(word)
+        return idx > -1
+    }
+    isSameDay(d1, d2) {
+        return d1.getDate() === d2.getDate() && d1.getMonth() === d2.getMonth() && d1.getFullYear() === d2.getFullYear()
+    }
+    isSameHour(d1, d2) {
+        return d1.getHours() === d2.getHours() && this.isSameDay(d1, d2)
+    }
+    groupByDueDateToday() {
+        const today = new Date()
+        let entries = []
+
+        for (const word in this.collection) {
+            const dueSeconds = this.collection[word].nextReviewDueDate._seconds
+            const revDate = new Date(dueSeconds * 1000)
+
+            const dueNow = this.reviewSets.ready.includes(word)
+            const sameDay = this.isSameDay(revDate, today)
+
+            if (!dueNow && sameDay) {
+                let found = false
+                entries.forEach(entry => {
+                    if (this.isSameHour(entry.date, revDate)) {
+                        entry.words.push(word)
+                        found = true
+                    }
+                })
+                if (!found) {
+                    entries.push({
+                        date: revDate,
+                        words: [word]
+                    })
+                }
+            }
+        }
+        console.log('today', entries)
+        return entries
+    }
+    groupByDueDatesExludingToday() {
+        let entries = []
+
+        for (const word in this.collection) {
+            const dueSeconds = this.collection[word].nextReviewDueDate._seconds
+            const revDate = new Date(dueSeconds * 1000)
+
+            const dueNow = this.reviewSets.ready.includes(word)
+
+            if (dueNow) continue
+
+            let found = false
+            entries.forEach(entry => {
+                if (this.isSameHour(entry.date, revDate)) {
+                    entry.words.push(word)
+                    found = true
+                }
+            })
+            if (!found) {
+                entries.push({
+                    date: revDate,
+                    words: [word]
+                })
+            }
+        }
+        console.log('entries ', entries)
+        return entries
+    }
+    getDueDates() {
+        let dates = []
+        for (const word in this.collection) {
+            const revDate = new Date(this.collection[word].nextReviewDueDate._seconds * 1000)
+
+            dates.push(revDate)
+        }
+        return dates
     }
 }

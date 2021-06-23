@@ -37,20 +37,20 @@
 
             <div v-if="getUser.loggedIn" class="flex space-x-2 w-full">
               <button @click="reviewSessionSRS()" class="bg-indigo-500 h-14 flex-grow text-white text-xl font-light active:outline-none focus:outline-none hover:bg-opacity-80 flex justify-center space-x-2 p-2 rounded">
-                  <div v-if="getUserReviewSets.new.size !== 0" class="flex items-center h-full space-x-1">
-                      <span>{{getUserReviewSets.new.size}}</span>
+                  <div v-if="getUserProgress.reviewSets.new.length !== 0" class="flex items-center h-full space-x-1">
+                      <span>{{getUserProgress.reviewSets.new.length}}</span>
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clip-rule="evenodd" />
                       </svg>
                   </div>
                   <div class="flex items-center h-full space-x-1">
-                      <span>{{getUserReviewSets.ready.size}}</span>
+                      <span>{{getUserProgress.reviewSets.ready.length}}</span>
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
                           <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
                       </svg>
                   </div>
                   <div class="flex items-center h-full space-x-1">
-                      <span>{{getUserReviewSets.waiting.size}}</span>
+                      <span>{{getUserProgress.reviewSets.waiting.length}}</span>
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
                           <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
                       </svg>
@@ -103,12 +103,34 @@
           </div>
         </div>
         <div id="main-content" class="flex flex-col mt-16 p-4 ml-0 w-full md:ml-72">
+            <div class="mb-4 flex">
+              <!-- <div v-for="(attr, i) in this.getUserProgress.groupByDueDateToday()" :key="i">
+                {{attr}}
+              </div> -->
+            <bar-chart :data="getLevelChartData"></bar-chart>
+            <v-calendar :attributes="calendarAttrs" is-dark>
+              <template #day-popover="{ day, format, masks, attributes }">
+                <div class="">
+                    <span>{{ format(day.date, masks.dayPopover) }}</span>
+                  <div
+                    v-for="attr in orderAttributes(attributes)"
+                    :key="attr.key"
+                    :attribute="attr">
+                    {{ attr.customData.label }}
+                  </div>
+                </div>
+              </template>
+            </v-calendar>
+              <!-- <div v-for="(times, i) in this.getUserProgress.groupByDueDateToday()" :key="i">
+                {{times.date}}
+              </div> -->
+            </div>
             <CharacterSection 
-              v-for="(section, i) in getSections" 
-              :key="i"
-              :section="section" 
-              :sectionIdx="i" 
-              @editSection="showEditSecModal" />
+            v-for="(section, i) in getSections" 
+            :key="i"
+            :section="section" 
+            :sectionIdx="i" 
+            @editSection="showEditSecModal" />
         </div>
       </div>
       <Modal
@@ -137,12 +159,14 @@ import AddCharacterModal from '@/components/AddCharacterModal.vue'
 import { mapGetters, mapActions } from 'vuex'
 import { StyleCalc } from '@/util/helpers.js'
 
+
+
 export default {
   name: 'Home',
   components: {
     CharacterSection,
     Modal,
-    AddCharacterModal
+    AddCharacterModal,
   },
   data() {
     return {
@@ -152,10 +176,42 @@ export default {
         title: null,
         idx: null
       },
+      defaultCalendarAttrs: [
+        {
+          key: 'today',
+          highlight: {
+            color: 'indigo',
+            fillMode: 'solid',
+            contentClass: 'italic',
+          },
+          dates: new Date(),
+        },
+      ]
     }
   },
   computed: {
-    ...mapGetters(['getSections', 'getReviewLevel', 'getSize', 'getShowType', 'getModals', 'getGlobalSelect', 'getUser', 'getUserReviewSets']),
+    ...mapGetters(['getSections', 'getReviewLevel', 'getSize', 'getShowType', 'getModals', 'getGlobalSelect', 'getUser', 'getUserProgress']),
+    calendarAttrs() {
+    return [...this.defaultCalendarAttrs,
+    ...this.getUserProgress.groupByDueDatesExludingToday().map(entry => {
+      return {
+        dates: entry.date,
+        popover: {
+          visibility: 'hover'
+        },
+        bar: 'indigo',
+        customData: {
+          label: entry.date.toLocaleString('en-US', { hour: 'numeric', hour12: true }) + ' : ' + entry.words.length + ' due',
+          date: entry.date
+        }
+      }
+    })]
+    },
+    getLevelChartData() {
+      let arr = new Array(11).fill(0).map((x, i) => [i, Object.keys(this.getUserProgress.collection).filter(word => this.getUserProgress.collection[word].level == i).length])
+      console.log(arr)
+      return arr
+    }
   },
   methods: {
     ...mapActions(['setReviewDeck', 'addSection', 'removeSection', 'editSection', 'setSize', 'setShowType', 'setGlobalSelectMode', 'setReviewSession']),
@@ -210,13 +266,21 @@ export default {
       }
     },
     reviewSessionSRS() {
-      if (this.getUserReviewSets.new.size + this.getUserReviewSets.ready.size !== 0) {
+      if (this.getUserProgress.reviewSets.new.length + this.getUserProgress.reviewSets.ready.length !== 0) {
         this.setReviewSession({
             isSRS: true,
-            cards: this.getUser.data.progress.getWordsToReview()
+            cards: this.getUserProgress.getWordsToReview()
         })
         this.$router.push("review")
       }
+    },
+    orderAttributes(attrs) {
+      return attrs.sort(function compare(a, b) {
+        console.log('a',  a)
+        var dateA = new Date(a.customData.date);
+        var dateB = new Date(b.customData.date);
+        return dateA - dateB;
+      });
     }
   },
 }
