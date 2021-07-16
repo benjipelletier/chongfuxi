@@ -48,14 +48,17 @@ export class UserProgress extends Model {
     get defaults() {
         return {
             collection: {
-                // 'sdf': {
-                //     nextReviewDueDate: { _seconds: 1624376375 }
+                // 'a': {
+                //     nextReviewDueDate: { _seconds: 1624647225 },
+                //     level: 2
                 // },
-                // '2sdf': {
-                //     nextReviewDueDate: { _seconds: 1624490000 }
+                // 'b': {
+                //     nextReviewDueDate: { _seconds: 1624997225 },
+                //     level: 2
                 // },
-                // '22sdf': {
-                //     nextReviewDueDate: { _seconds: 1624396375 }
+                // 'c': {
+                //     nextReviewDueDate: { _seconds: 1624647225 },
+                //     level: 3
                 // }
             },
             reviewSets: {
@@ -73,7 +76,6 @@ export class UserProgress extends Model {
         for (const word in this.collection) {
             if (this.collection[word].nextReviewDueDate !== null) {
                 let dueSeconds = this.collection[word].nextReviewDueDate._seconds
-                console.log(nowSeconds, dueSeconds)
                 if ((dueSeconds - nowSeconds) < 0) {
                     readySet.push(word)
                 } else {
@@ -195,5 +197,14 @@ export class UserProgress extends Model {
             dates.push(revDate)
         }
         return dates
+    }
+    getNumWordsInLevel(level) {
+        return Object.keys(this.collection).filter(word => this.collection[word].level == level).length
+    }
+    getNumWordsInLevelDue(level) {
+        return Object.keys(this.collection).filter(word => this.collection[word].level == level && this.reviewSets.ready.includes(word)).length
+    }
+    getNumWordsInLevelWaiting(level) {
+        return Object.keys(this.collection).filter(word => this.collection[word].level == level && this.reviewSets.waiting.includes(word)).length
     }
 }

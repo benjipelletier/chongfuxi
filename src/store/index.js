@@ -76,6 +76,7 @@ const actions = {
     async addSection({ commit }, title) {
         let section = await Section.post(title)
         if (!section) return
+        console.log('posted ', section)
         commit('addSection', section)
     },
     async setEditSectionId({ commit }, sectionId) {
@@ -161,7 +162,9 @@ const mutations = {
     setProgress(state, data) { state.progress = data },
     setUserLoggedIn(state, value) { state.user.loggedIn = value },
     setUserData(state, data) { state.user.data = data; },
-    addSection(state, data) { state.sections.push(data) },
+    addSection(state, data) {
+        Vue.set(state, 'sections', [...state.sections, data])
+    },
     removeSection(state, sectionId) { 
         state.sections = state.sections.filter(e => e.id !== sectionId)
     },
@@ -178,10 +181,15 @@ const mutations = {
     },
     updateModal(state, payload) { state.modals[payload.modalId] = payload.data },
     editSectionWords(state, { section, wordsToAdd, wordsToRemove }) {
-        section.editWords({wordsToAdd, wordsToRemove})
+        const stateSection = state.sections.find(e => e.id === section.id)
+        stateSection.editWords({wordsToAdd, wordsToRemove})
         if (state.showType.idx === 2) {
             Section.updateCharactersUnique(state.sections)
         }
+        console.log('here', section)
+        console.log('here', stateSection)
+        console.log('here', state.sections)
+        Vue.set(state, 'sections', state.sections)
     },
     setEditSectionId(state, sectionId) { state.editSectionId = sectionId },
     setReviewSession(state, data) { state.reviewSession = data },

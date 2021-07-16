@@ -1,6 +1,6 @@
 <template>
     <div class="bg-gray-800 min-h-screen">
-        <div class="w-full h-2 flex fixed top-16">
+        <div class="z-10 w-full h-2 flex fixed top-16">
             <div :style="`width: ${percent(numCorrect, reviewSession.cards.length)}%`" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500"></div>
             <div :style="`width: ${percent(numIncorrect, reviewSession.cards.length)}%`" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500"></div>
             <div :style="`width: ${percent(currentIndex - numCorrect - numIncorrect, reviewSession.cards.length)}%`" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gray-500"></div>
@@ -15,6 +15,7 @@
                         <!-- card --> 
                         <div class="w-96 flex-col justify-center rounded-t-xl rounded-b p-4 bg-white" v-for="i in [currentIndex]" :key="i">
                             <div v-if="currentState.matches('stats')" class="flex flex-col justify-center items-center text-3xl font-bold">
+                                <pie-chart  :dataset="{borderWidth: 0}" :colors="['#10B981', '#EF4444']" :data="{'Correct': numCorrect, 'Incorrect': numIncorrect, 'Unanswered': reviewProgress.length-numCorrect-numIncorrect}"></pie-chart>
                                 <div>Correct: {{numCorrect}}/{{reviewProgress.length}}</div>
                                 <div>Incorrect: {{numIncorrect}}/{{reviewProgress.length}}</div>
                             </div>
@@ -207,7 +208,7 @@ export default {
         })
     },
     methods: {
-        ...mapActions(['updateUserProgress']),
+        ...mapActions(['updateUserProgress', 'setGlobalSelectMode']),
         cardTextSize(text) {
             // dynamically change font size based on char count
             if (text.length >= 4) return 'text-7xl'

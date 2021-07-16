@@ -1,7 +1,7 @@
 <template>
     <main class="dark:bg-gray-900 min-h-screen">
       <div class="flex items-start">
-        <div id="sidebar" class="w-72 pt-16 h-screen fixed hidden md:block dark:bg-gray-800">
+        <div id="sidebar" class="w-72 pt-16 h-screen overflow-y-scroll fixed hidden md:block dark:bg-gray-800">
           <div class="w-auto h-auto flex flex-col space-y-4 p-4">
             <!-- Words/Chars -->
             <div class="flex flex-row h-14 rounded">
@@ -107,7 +107,10 @@
               <!-- <div v-for="(attr, i) in this.getUserProgress.groupByDueDateToday()" :key="i">
                 {{attr}}
               </div> -->
-            <bar-chart :data="getLevelChartData"></bar-chart>
+            <div class="flex-grow">
+              <column-chart :stacked="true" :colors="['#60A5FA', '#5D5D5F']" :data="[{data: dueChartData}, {data: waitingChartData}]"></column-chart>
+            </div>
+            <div class="flex-grow">
             <v-calendar :attributes="calendarAttrs" is-dark>
               <template #day-popover="{ day, format, masks, attributes }">
                 <div class="">
@@ -121,6 +124,8 @@
                 </div>
               </template>
             </v-calendar>
+            </div>
+
               <!-- <div v-for="(times, i) in this.getUserProgress.groupByDueDateToday()" :key="i">
                 {{times.date}}
               </div> -->
@@ -160,6 +165,19 @@ import { mapGetters, mapActions } from 'vuex'
 import { StyleCalc } from '@/util/helpers.js'
 
 
+const timingsInHours = {
+    0: '马上',
+    1: '4小时',
+    2: '8小时',
+    3: '1天',
+    4: '2天',
+    5: '1周',
+    6: '2周',
+    7: '1月',
+    8: '2月',
+    9: '4月',
+    10: '永远'
+}
 
 export default {
   name: 'Home',
@@ -208,9 +226,27 @@ export default {
     })]
     },
     getLevelChartData() {
-      let arr = new Array(11).fill(0).map((x, i) => [i, Object.keys(this.getUserProgress.collection).filter(word => this.getUserProgress.collection[word].level == i).length])
+      let arr = new Array(11).fill(0)
+      arr = arr.map((x, i) => [i + ' (' + timingsInHours[i] + ')', this.getUserProgress.getNumWordsInLevel(i)])
       console.log(arr)
       return arr
+    },
+    dueChartData() {
+      let data = {}
+      for (const level in timingsInHours) {
+        const label = `${level} (${timingsInHours[level]})`
+        data[label] = this.getUserProgress.getNumWordsInLevelDue(level)
+      }
+      console.log('data', data)
+      return data
+    },
+    waitingChartData() {
+      let data = {}
+      for (const level in timingsInHours) {
+        const label = `${level} (${timingsInHours[level]})`
+        data[label] = this.getUserProgress.getNumWordsInLevelWaiting(level)
+      }
+      return data
     }
   },
   methods: {
@@ -283,6 +319,10 @@ export default {
       });
     }
   },
+  mounted() {
+    this.setGlobalSelectMode(false)
+    console.log('mounted')
+  }
 }
 </script>
 
@@ -292,4 +332,8 @@ export default {
  @apply bg-white bg-opacity-20;
 }
 
+
+#sidebar::-webkit-scrollbar {
+  display: none;
+}
 </style>

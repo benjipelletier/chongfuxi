@@ -376,7 +376,7 @@ Date.prototype.roundDownHour = function(h) {
     return this;
 }
 
-timingsInHours = {
+const timingsInHours = {
     0: 0,
     1: 4,
     2: 8,
@@ -391,8 +391,10 @@ timingsInHours = {
 function getReviewDateForLevel(level) {
     if (level === 10) return Infinity
     let date = new Date()
+    console.log('level ',level)
     date.addHours(timingsInHours[level])
     date.roundDownHour()
+    console.log('date ',date)
     return admin.firestore.Timestamp.fromDate(date)
 }
 
