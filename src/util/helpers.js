@@ -10,22 +10,26 @@ class StyleCalc {
         hsk_4: ["red", 500],
         hsk_5: ["indigo", 500],
         hsk_6: ["purple", 600],
+        new_hsk_1: ["yellow", 400],
+        new_hsk_2: ["blue", 400],
+        new_hsk_3: ["orange", 500],
+        new_hsk_4: ["red", 500],
+        new_hsk_5: ["indigo", 500],
+        new_hsk_6: ["purple", 600],
+        'new_hsk_7-9': ["green", 600],
     }
     static cardStyle(sectionIdx, level, word) {
         if (level === undefined) {
             const hsk_id = StyleCalc.getSectionIdFromWord(word)
-            console.log(hsk_id)
             let border = 'border-white'
             if (this.colors[hsk_id] && !this.colors[sectionIdx]) {
                 border = `border-${this.colors[hsk_id][0]}-${this.colors[hsk_id][1]}`
-                console.log('HAS ', hsk_id, word)
             } 
             return `text-white ${border} border-4 bg-opacity-0 opacity-30`
         }
         return "text-white textShadow"
     }
     static cardBgStyle(sectionIdx, level, word) {
-        console.log(word)
         if (level === undefined) {
             return "not-reviewed"
         }

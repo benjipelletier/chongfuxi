@@ -38,11 +38,14 @@ const state = {
         mode: false,
         vocab: []
     },
-    definitions: {}
+    definitions: {},
+    isNewHsk: false,
 }
 
 const getters = {
-    getSections: state => state.sections,
+    getSections: state => {
+        return state.sections.filter(section => !section.base_section || (state.isNewHsk && section.new_hsk) || (!state.isNewHsk && !section.new_hsk))
+    },
     getReviewLevel: state => (char) => {
       return state.user.data.progress.collection[char]?.level
     },
@@ -56,6 +59,7 @@ const getters = {
     getModals: state => state.modals,
     getEditSectionId: state => state.editSectionId,
     getGlobalSelect: state => state.globalSelect,
+    getIsNewHsk: state => state.isNewHsk
 }
 
 
@@ -153,6 +157,9 @@ const actions = {
     },
     async updateUserProgress({ commit }, updatedProgress) {
         commit('updateUserProgress', updatedProgress)
+    },
+    setIsNewHsk({ commit }, bool) {
+        commit('setIsNewHsk', bool)
     }
 }
 
@@ -227,6 +234,9 @@ const mutations = {
                 photo: user.photoURL
             })
         }
+    },
+    setIsNewHsk(state, bool) {
+        state.isNewHsk = bool
     }
 }
 

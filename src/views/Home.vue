@@ -3,6 +3,19 @@
       <div class="flex items-start">
         <div id="sidebar" class="w-72 pt-16 h-screen overflow-y-scroll fixed hidden md:block dark:bg-gray-800">
           <div class="w-auto h-auto flex flex-col space-y-4 p-4">
+            <!-- old/new -->
+            <div class="flex flex-row h-14 rounded">
+              <button class="flex justify-center items-center w-1/2 bg-white hover:bg-opacity-20 focus:outline-none first:rounded-l last:rounded-r"
+                :class="{ 'bg-opacity-20 text-white hover:bg-opacity-20ring-inset text-2xl': !getIsNewHsk, 'bg-opacity-10 text-gray-400 text-2xl': getIsNewHsk }"
+                @click="setIsNewHsk(false)">
+                <span class="font-light">Old HSK</span>
+              </button>
+              <button class="flex justify-center items-center w-1/2 bg-white hover:bg-opacity-20 focus:outline-none first:rounded-l last:rounded-r"
+                :class="{ 'bg-opacity-20 text-white hover:bg-opacity-20ring-inset text-2xl': getIsNewHsk, 'bg-opacity-10 text-gray-400 text-2xl': !getIsNewHsk }"
+                @click="setIsNewHsk(true)">
+                <span class="font-light">New HSK</span>
+              </button>
+            </div>
             <!-- Words/Chars -->
             <div class="flex flex-row h-14 rounded">
               <button class="flex justify-center items-center w-2/5 bg-white hover:bg-opacity-20 focus:outline-none first:rounded-l last:rounded-r"
@@ -208,7 +221,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['getSections', 'getReviewLevel', 'getSize', 'getShowType', 'getModals', 'getGlobalSelect', 'getUser', 'getUserProgress']),
+    ...mapGetters(['getSections', 'getReviewLevel', 'getSize', 'getShowType', 'getModals', 'getGlobalSelect', 'getUser', 'getUserProgress', 'getIsNewHsk']),
     calendarAttrs() {
     return [...this.defaultCalendarAttrs,
     ...this.getUserProgress.groupByDueDatesExludingToday().map(entry => {
@@ -250,7 +263,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['setReviewDeck', 'addSection', 'removeSection', 'editSection', 'setSize', 'setShowType', 'setGlobalSelectMode', 'setReviewSession']),
+    ...mapActions(['setReviewDeck', 'addSection', 'removeSection', 'editSection', 'setSize', 'setShowType', 'setGlobalSelectMode', 'setReviewSession', 'setIsNewHsk']),
     progressClass(section, level) {
       return StyleCalc.cardBgStyle(section.id, level)
     },
